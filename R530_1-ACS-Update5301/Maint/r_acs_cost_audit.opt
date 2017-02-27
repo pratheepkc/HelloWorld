@@ -1,0 +1,212 @@
+<Application type="Application" name="r_acs_cost_audit" ID="1" Directory="Maint" grid_width="4" grid_height="4" lastCheckin="2002-08-19 14:44:29Z" lastID="74" modified="2003-04-28 22:57:18Z" user="davsnyder" command="spe acscostaudit" environment="">
+  <Widget type="Template" ID="2" handle="1" name="StandardTitleForm">
+    <Output name="params" ref="3" />
+    <Input name="below" ref="5" />
+  </Widget>
+  <Widget type="Connector" ID="3" handle="2" name="params">
+    <Attribute name="description" value="Template input/output connector" />
+    <Input name="params" ref="2" />
+    <Output name="titlename:value" ref="4" />
+  </Widget>
+  <Widget type="Template" ID="4" handle="3" name="REPORTTITLE">
+    <Input name="titlename:value" ref="3" />
+  </Widget>
+  <Widget type="GroupForm" ID="5" handle="4" name="SelectLog" grid_width="6" grid_height="6" modified="2009-06-22 14:54:15Z" user="michel">
+    <Widget type="Template" ID="6" handle="1" name="SearchFieldText" />
+    <Widget type="Calculation" ID="66" handle="2" name="ProdCodeWhereCalc" created="2009-06-18 08:19:13Z" user="michel" modified="2009-06-18 08:20:28Z">
+      <Attribute name="calculation" value="TruthToArg(ProductCodeIDEntry = &quot; &quot;,&quot;=&quot;,&quot;all&quot;)" modified="2009-06-18 08:20:04Z" user="michel" />
+      <Output name="whereOperator" ref="65" created="2009-06-18 08:20:28Z" user="michel" />
+      <Input name="input" ref="63" created="2009-06-18 08:20:14Z" user="michel" />
+    </Widget>
+    <Widget type="Template" name="ProductCodeIDEntry" ID="63" created="2009-06-18 07:52:59Z" user="michel" modified="2009-06-18 08:20:14Z" handle="3">
+      <Attribute name="required" value="FALSE" created="2009-06-18 07:55:37Z" user="michel" />
+      <Attribute name="suffix" value="&quot; **&quot;" created="2009-06-18 07:55:48Z" user="michel" />
+      <Output name="input" ref="66" created="2009-06-18 08:20:14Z" user="michel" />
+      <Output name="validation" ref="64" created="2009-06-18 08:10:45Z" user="michel" />
+      <Output name="value" ref="65" created="2009-06-18 08:19:03Z" user="michel" />
+    </Widget>
+    <Widget type="Template" name="ACSProdCodeDMenu" ID="64" created="2009-06-18 07:56:13Z" user="michel" modified="2009-06-22 14:53:46Z" handle="4">
+      <Input name="validation" ref="63" created="2009-06-18 08:10:45Z" user="michel" />
+    </Widget>
+    <Widget type="Template" name="ProductCodeIDColumn" ID="65" created="2009-06-18 08:18:10Z" user="michel" handle="5" modified="2009-06-18 08:20:53Z">
+      <Attribute name="required" value="FALSE" created="2009-06-18 07:55:37Z" user="michel" />
+      <Attribute name="suffix" value="&quot; **&quot;" created="2009-06-18 07:55:48Z" user="michel" />
+      <Input name="whereOperator" ref="66" created="2009-06-18 08:20:28Z" user="michel" />
+      <Input name="value" ref="63" created="2009-06-18 08:19:03Z" user="michel" />
+      <Output name="where" ref="42" created="2009-06-18 08:20:53Z" user="michel" />
+    </Widget>
+    <Widget type="Calculation" ID="17" handle="6" name="GetDate">
+      <Attribute name="calculation" value="Now(0)" />
+      <Output name="default" ref="18" />
+      <Output name="default" ref="21" />
+    </Widget>
+    <Widget type="Template" ID="18" handle="7" name="TimeBeginEntry">
+      <Attribute name="calendarType" value="&quot;production&quot;" />
+      <Attribute name="name" value="ts_adj" />
+      <Input name="default" ref="17" />
+      <Output name="input" ref="19" />
+      <Output name="value" ref="20" />
+      <Output name="input" ref="36" />
+    </Widget>
+    <Widget type="Calculation" ID="19" handle="8" name="CheckDate">
+      <Attribute name="calculation" value="TruthToArg(TimeEndEntry&lt;TimeBeginEntry,0,3)" />
+      <Input name="input" ref="18" />
+      <Output name="state" ref="21" />
+      <Input name="input" ref="21" />
+    </Widget>
+    <Widget type="InternalField" ID="20" handle="9" name="StartOfDay" modified="2009-06-18 08:39:53Z" user="michel">
+      <Attribute name="name" value="&quot;mx_timestamp&quot;" modified="2009-06-18 08:39:53Z" user="michel" />
+      <Attribute name="whereOperator" value="&quot;&gt;=&quot;" />
+      <Input name="value" ref="18" />
+      <Output name="where" ref="42" created="2002-08-19 14:45:04Z" user="UmaS" />
+    </Widget>
+    <Widget type="Template" ID="21" handle="10" name="TimeEndEntry">
+      <Attribute name="calendarType" value="production" />
+      <Attribute name="name" value="ts_adj" />
+      <Input name="default" ref="17" />
+      <Input name="state" ref="19" />
+      <Output name="input" ref="19" />
+      <Output name="input" ref="22" />
+      <Output name="input" ref="36" />
+    </Widget>
+    <Widget type="Calculation" ID="22" handle="11" name="SetEndofDay">
+      <Attribute name="calculation" value="&quot;MxTime ('end of production day',TimeEndEntry)&quot;" />
+      <Input name="input" ref="21" />
+      <Output name="value" ref="23" />
+    </Widget>
+    <Widget type="InternalField" ID="23" handle="12" name="EndOfDay" modified="2009-06-18 08:40:11Z" user="michel">
+      <Attribute name="name" value="&quot;mx_timestamp&quot;" modified="2009-06-18 08:40:11Z" user="michel" />
+      <Attribute name="whereOperator" value="&quot;&lt;=&quot;" />
+      <Input name="value" ref="22" />
+      <Output name="where" ref="42" created="2002-08-19 14:45:04Z" user="UmaS" />
+    </Widget>
+    <Widget type="Template" ID="25" handle="13" name="RPTDATEFORMAT">
+      <Output name="input" ref="36" />
+    </Widget>
+    <Widget type="Diagram" ID="26" handle="14" name="GetPrefix" grid_width="6" grid_height="2" modified="2002-08-19 14:45:04Z" user="UmaS">
+      <Widget type="Template" ID="27" handle="1" name="MXLANG">
+        <Output name="value" ref="28" />
+      </Widget>
+      <Widget type="Template" ID="28" handle="2" name="LanguageIDColumn">
+        <Input name="value" ref="27" />
+        <Output name="where" ref="30" />
+        <Output name="where" ref="33" />
+      </Widget>
+      <Widget type="Template" ID="29" handle="3" name="ColumnNameColumn">
+        <Attribute name="default" value="ts_begin" />
+        <Output name="where" ref="30" />
+      </Widget>
+      <Widget type="Cursor" ID="30" handle="4" name="dict_columns">
+        <Input name="where" ref="28" />
+        <Input name="where" ref="29" />
+        <Output name="select" ref="31" />
+      </Widget>
+      <Widget type="Template" ID="31" handle="5" name="Begin:PrefixColumn" modified="2002-08-19 14:45:04Z" user="UmaS">
+        <Input name="select" ref="30" />
+        <Output name="input" ref="36" created="2002-08-19 14:45:04Z" user="UmaS" />
+      </Widget>
+      <Widget type="Template" ID="32" handle="6" name="ColumnNameColumn">
+        <Attribute name="default" value="ts_end" />
+        <Output name="where" ref="33" />
+      </Widget>
+      <Widget type="Cursor" ID="33" handle="7" name="dict_columns">
+        <Input name="where" ref="28" />
+        <Input name="where" ref="32" />
+        <Output name="select" ref="34" />
+      </Widget>
+      <Widget type="Template" ID="34" handle="8" name="End:PrefixColumn" modified="2002-08-19 14:45:04Z" user="UmaS">
+        <Input name="select" ref="33" />
+        <Output name="input" ref="36" created="2002-08-19 14:45:04Z" user="UmaS" />
+      </Widget>
+    </Widget>
+    <Widget type="Calculation" ID="36" handle="15" name="ReportSubTilte" modified="2002-08-19 14:45:04Z" user="UmaS">
+      <Attribute name="calculation" value="Concat(Clip(Begin),TimeBeginEntry:RPTDATEFORMAT,&quot;  &quot;,Clip(End),TimeEndEntry:RPTDATEFORMAT)" />
+      <Input name="input" ref="18" />
+      <Input name="input" ref="21" />
+      <Input name="input" ref="25" />
+      <Input name="input" ref="31" created="2002-08-19 14:45:04Z" user="UmaS" />
+      <Input name="input" ref="34" created="2002-08-19 14:45:04Z" user="UmaS" />
+      <Output name="value" ref="41" created="2002-08-19 14:45:04Z" user="UmaS" />
+    </Widget>
+    <Attribute name="orientation" value="Vertical" />
+    <Output name="below" ref="2" />
+  </Widget>
+  <Widget type="Template" ID="38" handle="5" name="DisplayButton">
+    <Output name="displayed" ref="42" />
+  </Widget>
+  <Widget type="Template" ID="39" handle="6" name="PrintButton">
+    <Output name="print" ref="43" />
+  </Widget>
+  <Widget type="Template" ID="41" handle="7" name="REPORTSUBTITLE1" modified="2002-08-19 14:45:04Z" user="UmaS">
+    <Input name="value" ref="36" created="2002-08-19 14:45:04Z" user="UmaS" />
+  </Widget>
+  <Widget type="Cursor" ID="42" handle="8" name="acs_product_mill_a" modified="2009-06-22 14:54:07Z" user="michel">
+    <Attribute name="cacheRows" value="2000" />
+    <Input name="where" ref="65" created="2009-06-18 08:20:53Z" user="michel" />
+    <Input name="where" ref="20" created="2002-08-19 14:45:04Z" user="UmaS" />
+    <Input name="where" ref="23" created="2002-08-19 14:45:04Z" user="UmaS" />
+    <Input name="displayed" ref="38" />
+    <Output name="dataCursor" ref="43" />
+    <Output name="select" ref="59" created="2009-05-15 07:12:10Z" user="njn" />
+    <Output name="select" ref="56" created="2009-05-15 07:10:37Z" user="njn" />
+    <Output name="select" ref="67" created="2009-06-18 08:32:42Z" user="michel" />
+    <Output name="select" ref="74" created="2009-06-18 08:50:53Z" user="michel" />
+    <Output name="select" ref="71" created="2009-06-18 08:48:47Z" user="michel" />
+    <Output name="select" ref="72" created="2009-06-18 08:49:10Z" user="michel" />
+    <Output name="select" ref="51" created="2002-08-19 14:45:04Z" user="UmaS" />
+    <Output name="select" ref="70" created="2009-06-18 08:47:50Z" user="michel" />
+    <Output name="select" ref="73" created="2009-06-18 08:50:03Z" user="michel" />
+    <Output name="select" ref="69" created="2009-06-18 08:47:28Z" user="michel" />
+    <Input name="order" ref="59" created="2009-06-18 08:36:36Z" user="michel" />
+    <Input name="order" ref="56" created="2009-06-18 08:36:43Z" user="michel" />
+    <Input name="order" ref="67" created="2009-06-18 08:34:32Z" user="michel" />
+  </Widget>
+  <Widget type="Template" ID="43" handle="9" name="ReportCursor">
+    <Input name="print" ref="39" />
+    <Input name="dataCursor" ref="42" />
+  </Widget>
+  <Widget type="Diagram" ID="44" handle="10" name="SelectList" grid_width="6" grid_height="2" modified="2009-06-18 08:50:53Z" user="michel">
+    <Widget type="Template" ID="59" handle="1" name="MillIDColumn" user="michel" created="2009-05-15 07:12:10Z" modified="2009-06-18 08:36:36Z">
+      <Input name="select" ref="42" created="2009-05-15 07:12:10Z" user="njn" />
+      <Output name="order" ref="42" created="2009-06-18 08:36:36Z" user="michel" />
+    </Widget>
+    <Widget type="Template" ID="56" handle="2" name="ProductCodeIDColumn" user="michel" created="2009-05-14 14:35:04Z" modified="2009-06-18 08:36:43Z">
+      <Input name="select" ref="42" created="2009-05-15 07:10:37Z" user="njn" />
+      <Output name="order" ref="42" created="2009-06-18 08:36:43Z" user="michel" />
+    </Widget>
+    <Widget type="Template" ID="67" handle="3" name="TimestampColumn" user="michel" created="2009-06-18 08:32:42Z" modified="2009-06-18 08:34:32Z">
+      <Input name="select" ref="42" created="2009-06-18 08:32:42Z" user="michel" />
+      <Output name="order" ref="42" created="2009-06-18 08:34:32Z" user="michel" />
+    </Widget>
+    <Widget type="Template" ID="74" handle="4" name="TypeCodeColumn" user="michel" created="2009-06-18 08:50:53Z" modified="2009-06-18 08:51:07Z">
+      <Input name="select" ref="42" created="2009-06-18 08:50:53Z" user="michel" />
+    </Widget>
+    <Widget type="Template" ID="71" handle="5" name="CostColumn" user="michel" created="2009-06-18 08:48:47Z" modified="2009-06-18 08:49:03Z">
+      <Input name="select" ref="42" created="2009-06-18 08:48:47Z" user="michel" />
+    </Widget>
+    <Widget type="Template" ID="72" handle="6" name="CostTotalColumn" user="michel" created="2009-06-18 08:49:10Z" modified="2009-06-18 08:49:29Z">
+      <Input name="select" ref="42" created="2009-06-18 08:49:10Z" user="michel" />
+    </Widget>
+    <Widget type="Template" ID="51" handle="7" name="QuantityActiveColumn" modified="2009-06-18 08:37:48Z" user="michel">
+      <Input name="select" ref="42" created="2002-08-19 14:45:04Z" user="UmaS" />
+    </Widget>
+    <Widget type="Template" ID="70" handle="8" name="QuantityActTotColumn" user="michel" created="2009-06-18 08:47:50Z" modified="2009-06-18 08:48:14Z">
+      <Input name="select" ref="42" created="2009-06-18 08:47:50Z" user="michel" />
+    </Widget>
+    <Widget type="Template" name="MktCostPerUnitColumn" ID="73" created="2009-06-18 08:50:03Z" user="michel" modified="2009-06-18 08:50:18Z" handle="9">
+      <Input name="select" ref="42" created="2009-06-18 08:50:03Z" user="michel" />
+    </Widget>
+    <Widget type="Template" name="AvgCostPerUnitColumn" ID="69" created="2009-06-18 08:47:11Z" user="michel" modified="2009-06-18 08:47:28Z" handle="10">
+      <Input name="select" ref="42" created="2009-06-18 08:47:28Z" user="michel" />
+    </Widget>
+  </Widget>
+  <History>(C) Copyright 1990-94, Measurex Corporation. This document contains proprietary
+  information and trade secrets which are the property of Measurex Corporation.
+
+  Date     Who   Description of change
+--------   ----  --------------------------------------------------------------
+11/05/96   GLP   Add UnitMeasCons to report.
+03/28/05   ESP   1-1AG0RG:Removed name attribute of RawMatlGrpColumn (12) and RawMatlIDColumn (16)
+05/15/09   NJN   ACS: Added additional columns to report also changed rm_trans_view
+</History>
+</Application>

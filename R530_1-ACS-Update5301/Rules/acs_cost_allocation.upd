@@ -1,0 +1,1141 @@
+#============================================================================
+# MxUpdate rules for cost allocation
+#
+# NOTE: This rules file is for allocating the acs_cost record
+#
+#============================================================================
+# Rev.  Date:     Who   Description
+# ---  --------   ----  -----------------------------------------------------
+# 01   12/12/08   BRN   Initial release
+# 02   08/14/09   BRN	Replace MMMprod with MMMplan for acs_unit_route, acs_cost
+# 03   08/26/09   BRN	Use of the sec_lead_time for the cost driver TIME
+# 04   09/10/09   BRN	Use the new table acs_unit_wh_time to allocate user driver with machine WH
+# 05   10/22/09   BRN	Add the TRANSLOG entry
+# 06   10/21/10   BRN	Don't check FIN MATL since it's a cost per article
+# 07   10/26/10   PHH   check the cost driver have at least one record 
+# 08   03/17/11   PHH   in AddDirectCost() check if the cost is <> 0 instaead of > 0
+#============================================================================
+DEFINE  ACS       	ENV;
+DEFINE  USEMETRIC		ENV;
+DEFINE  unit_quantity	DOUBLE;
+DEFINE  unit_cost		DOUBLE;
+DEFINE  get_curr_time	LONG;
+DEFINE  cnt			LONG;
+DEFINE  tot_unit_cnt	LONG;
+DEFINE  tot_wgt_net	DOUBLE;
+DEFINE  tot_area_net	DOUBLE;
+DEFINE  tot_sec_on_mach	DOUBLE;
+DEFINE  cost_driver_type STRING;
+DEFINE  cost_driver_class STRING;
+DEFINE  tmp_string	 STRING;
+DEFINE  allocation_type	 STRING;
+DEFINE  tot_cost		DOUBLE;
+DEFINE  tot_quantity	DOUBLE;
+DEFINE  first_unit_id	 STRING;
+DEFINE  first_mill_id	 STRING;
+DEFINE  first_machine_type	 STRING;
+DEFINE  first_machine_id	 STRING;
+DEFINE  adj_ts_begin	LONG;
+DEFINE  adj_ts_end	LONG;
+DEFINE  adj_sec_lead_time	LONG;
+DEFINE  adj_coef		DOUBLE;
+
+NO * EXECUTE
+#       Run selects in this rule to prepare the variables only
+        select * from act_cost;
+        select * from invent;
+        select * from jumbo;
+        select * from acs_unit_route;
+        select * from acs_direct_cost;
+        select * from acs_cost_trans_log;
+        select * from acs_raw_matl_mach;
+
+MX * ST
+	echo Startup rule;
+	LET mode = "Single";
+#	LET type = "ONCE";
+
+#################################### Called from the ACSCostAllocation schedule ###################################################
+#################################### Select the acs_cost records to allocate    ###################################################
+* * *
+
+      LET get_curr_time   = {time of day};
+
+# Set the metric and imperial factor
+	if  ($USEMETRIC = "Y") then
+		let LengthToWidthFactor = 100;
+	else
+		let LengthToWidthFactor = 12;
+	end if
+
+	if ($mx_station <> "MANUAL") then
+		foreach select * 
+		        	from acs_cost
+	      	  	where allocated_flag = 'N'
+				and reason_id = ' '
+				and closure_flag <> 'Y';
+
+# Delete the allocation if already done
+			call ReinitAllocation();
+
+			call AllocateCost();
+		end foreach
+	end if
+
+#################################### Re-insert in acs_cost_translog  ###################################################
+MANUAL * TRANSLOG
+
+	echo $unit_id, $type_code, $mill_id  ;
+	let acs_type_code = $type_code;
+	Call ACSInsertTransLog();
+
+#################################### Called from Manual Cost Management Appl    ###################################################
+#################################### Select the acs_cost records to allocate    ###################################################
+MANUAL * REALLOC
+
+# Delete the allocation if already done
+	call ReinitAllocation();
+
+      LET get_curr_time   = {time of day};
+
+	select * 
+	    	from acs_cost
+      	where cost_id = $cost_id;
+	
+		call AllocateCost();
+
+####################################### Allocation of the cost selected
+SUBROUTINE AllocateCost();
+
+		echo Allocate cost : $cost_id;
+		let lv_go_on = 1;
+
+########### Check data consistency
+		if ($lv_go_on = 1) then
+			call CheckDataConsistency();
+		end if
+
+########### Get the key cost data
+		if ($lv_go_on = 1) then
+			call SetKeyCostData();
+		end if
+
+########### Check the allocation criteria
+		if ($lv_go_on = 1) then
+			call CheckAllocationCriteria();
+		end if
+
+########### Distribute Cost to Inventory
+		if ($lv_go_on = 1) then
+			call DistributeCost();
+		end if
+
+########### Set the allocated flag to Y
+		if ($lv_go_on = 1) then
+			call SetAllocatedFlag();
+		end if
+
+END SUBROUTINE
+
+####################################### Check data consistency for the allocation
+SUBROUTINE CheckDataConsistency();
+
+######## Check that cost is not closed
+	if ($lv_go_on = 1) then
+		if ($closure_flag = "Y") then
+			let lv_go_on = 0;
+			let reason_id = "COST CL";
+		end if
+	end if
+
+######## Check that cost has not been already allocated
+	if ($lv_go_on = 1) then
+		select count(*) cnt
+			from acs_direct_cost
+			where cost_id = $cost_id;
+		if ($cnt > 0) then
+			let lv_go_on = 0;
+			let reason_id = "DUPLICATE";
+		end if
+	end if
+
+######## Check cost type
+	if ($lv_go_on = 1) then
+		select code_desc
+			from type_codes
+			where type_code = $cost_type
+			and table_name = 'acs_cost';
+		if ($success = 0) then
+			let lv_go_on = 0;
+			let reason_id = "COST TYPE";
+		end if
+	end if
+
+######## Check cost amount
+	if ($lv_go_on = 1) then
+		if ($cost = 0) then
+			let lv_go_on = 0;
+			let reason_id = "COST_0";
+		else
+			select currency_id
+				from currency
+				where currency_id = $currency_id;
+			if ($success = 0) then
+				let lv_go_on = 0;
+				let reason_id = "CURRENCY";
+			end if
+		end if
+	end if
+
+######## Check Mill/MachineType/MachineID
+	if ($lv_go_on = 1) then
+		if ($cost_type = "R" or $cost_type = "F") then
+			select machine_id
+				from machine
+				where mill_id = $mill_id
+				and machine_type = $machine_type
+				and machine_id = $machine_id;
+			if ($success = 0) then
+				let lv_go_on = 0;
+				let reason_id = "MACHINE";
+			end if
+		end if
+	end if
+
+######## Check RunNum
+	if ($lv_go_on = 1) then
+		if ($run_num > 0) then
+			select run_num
+				from run_mast
+				where mill_id = $mill_id_plan
+				and machine_type = $mach_type_plan
+				and machine_id = $mach_id_plan
+				and run_num = $run_num;
+			if ($success = 0) then
+				let lv_go_on = 0;
+				let reason_id = "RUN";
+			end if
+		end if
+	end if
+
+######## Check PatNum
+	if ($lv_go_on = 1) then
+		if ($pat_num > 0) then
+			select pat_num
+				from run_pat
+				where mill_id = $mill_id_plan
+				and machine_type = $mach_type_plan
+				and machine_id = $mach_id_plan
+				and run_num = $run_num
+				and pat_num = $pat_num;
+			if ($success = 0) then
+				let lv_go_on = 0;
+				let reason_id = "PATTERN";
+			end if
+		end if
+	end if
+
+######## Check Raw material
+	if ($lv_go_on = 1) then
+		if ($cost_type = "R") then
+			select raw_matl_id
+				from raw_matl_mill
+				where mill_id = $mill_id
+				and raw_matl_grp_id = $raw_matl_grp_id
+				and raw_matl_id = $raw_matl_id;
+			if ($success = 0) then
+				let lv_go_on = 0;
+				let reason_id = "RAW MATL";
+			end if
+		end if
+	end if
+
+######## Check Finish material
+	if ($lv_go_on = 1) then
+		if ($cost_type = "F") then
+			select fin_matl_id
+				from finish_matl_mill
+				where mill_id = $mill_id
+				and fin_matl_grp_id = $fin_matl_grp_id
+				and fin_matl_id = $fin_matl_id;
+# 06 Comment out the check since it's not valid in case of cost per article
+#			if ($success = 0) then
+#				let lv_go_on = 0;
+#				let reason_id = "FIN MATL";
+#			end if
+		end if
+	end if
+
+######## Check unit and type_code of the unit
+	if ($lv_go_on = 1) then
+		if ($unit_id <> " ") then
+# Check type_code
+			select type_code
+				from type_codes
+				where type_code = $type_code
+				and table_name = 'acs_cost_closure';
+			if ($success = 0) then
+				let lv_go_on = 0;
+				let reason_id = "TYPE CODE";
+			else
+				if ($type_code = "J") then
+					select jumbo_id
+						from jumbo
+						where jumbo_id = $unit_id;
+					if ($success = 0) then
+						let lv_go_on = 0;
+						let reason_id = "UNIT";
+					end if
+				else
+					select unit_id
+						from invent
+						where unit_id = $unit_id;
+					if ($success = 0) then
+						let lv_go_on = 0;
+						let reason_id = "UNIT";
+					end if
+				end if
+			end if
+		end if
+	end if
+
+	if ($lv_go_on = 0) then
+		call UpdateReason();
+	end if
+
+END SUBROUTINE
+
+######################################### Check and Get Cost Type, Cost Driver and AcctSegID
+SUBROUTINE SetKeyCostData();
+
+######## Check Cost Driver Raw Material and Finishing Material
+	if ($lv_go_on = 1) then
+		if ($cost_type = "R" or $cost_type = "F") then
+# the cost driver has to be defined
+			select cost_driver_id
+				from acs_cost_driver
+				where cost_driver_id = $cost_driver_id;
+			if ($success = 0) then
+				let lv_go_on = 0;
+				let reason_id = "COST DV";
+			else
+# For Raw Material and Finishing Material, set the cost type and acct_seg_id
+				if ($cost_type = "R") then
+					select acct_seg_id
+						from raw_matl_mill
+						where mill_id = $mill_id
+						and raw_matl_grp_id = $raw_matl_grp_id
+						and raw_matl_id = $raw_matl_id;
+				else
+# 06 Commented out for now
+#					select acct_seg_id
+#						from finish_matl_mill
+#						where mill_id = $mill_id
+#						and fin_matl_grp_id = $fin_matl_grp_id
+#						and fin_matl_id = $fin_matl_id;
+				end if
+				select cost_type_id
+					from acs_acct_seg
+					where acct_seg_id = $acct_seg_id;
+				if ($success = 0) then
+					let lv_go_on = 0;
+					let reason_id = "ACCT SEG";
+				else
+					select cost_type_id
+						from acs_cost_type
+						where cost_type_id = $cost_type_id;
+					if ($success = 0) then
+						let lv_go_on = 0;
+						let reason_id = "CT ID";
+					else
+						update acs_cost
+							set cost_type_id = $cost_type_id, acct_seg_id = $acct_seg_id
+							where cost_id = $cost_id;
+					end if
+				end if
+			end if
+		end if
+		
+		if ($cost_type = "O") then
+# the cost driver has to be determined based upon the acct_seg_id
+			select cost_driver_id, cost_type_id
+				from acs_acct_seg
+				where acct_seg_id = $acct_seg_id;
+			if ($success = 0) then
+				let lv_go_on = 0;
+				let reason_id = "ACCT SEG";
+			else
+				select cost_driver_id
+					from acs_cost_driver
+					where cost_driver_id = $cost_driver_id;
+				if ($success = 0) then
+					let lv_go_on = 0;
+					let reason_id = "COST DV";
+				else
+					select cost_type_id
+						from acs_cost_type
+						where cost_type_id = $cost_type_id;
+					if ($success = 0) then
+						let lv_go_on = 0;
+						let reason_id = "CT ID";
+					else
+						update acs_cost
+							set cost_type_id = $cost_type_id, cost_driver_id = $cost_driver_id
+							where cost_id = $cost_id;
+					end if
+				end if
+			end if
+		end if
+
+		if ($cost_type = "T") then
+# the cost driver has to be defined, and the acct_seg_id and cost_type_id are determined the costing configuration.
+			select cost_driver_id
+				from acs_cost_driver
+				where cost_driver_id = $cost_driver_id;
+			if ($success = 0) then
+				let lv_go_on = 0;
+				let reason_id = "COST DV";
+			else
+# Get the origin of the load
+				select origin_id
+					from load_mast
+					where load_id = $load_id;		
+# Set the machine based upon the origin_id
+				select mill_id, machine_type, machine_id, acct_seg_id
+					from acs_warehouse_view
+					where warehouse_id = $origin_id;
+				if ($machine_id = " " or $machine_id = "" or $acct_seg_id = " " or $acct_seg_id = "") then
+					let lv_go_on = 0;
+					let reason_id = "ACCT MACH";
+				else
+					select cost_type_id
+						from acs_acct_seg
+						where acct_seg_id = $acct_seg_id;
+					if ($success = 0) then
+						let lv_go_on = 0;
+						let reason_id = "ACCT SEG";
+					else
+						update acs_cost
+							set cost_type_id = $cost_type_id, acct_seg_id = $acct_seg_id
+							where cost_id = $cost_id;
+					end if
+				end if
+			end if			
+
+		end if
+
+	end if
+
+######## Check Cost Driver Type and Cost Driver Class
+	if ($lv_go_on = 1) then
+		select type_code cost_driver_type, class cost_driver_class
+			from acs_cost_driver
+			where cost_driver_id = $cost_driver_id;
+		if ($cost_driver_class = "S") then
+			select type_code tmp_string
+				from type_codes
+				where table_name = 'acs_cost_driver'
+				and type_code = $cost_driver_type;
+			if ($success = 0) then
+				let lv_go_on = 0;
+				let reason_id = "COST DV TY";
+			end if
+		else
+			if ($cost_driver_class = "U") then
+# Rev 7
+				select type_code cost_alloc_type
+					from acs_cost_alloc
+					where cost_driver_id = $cost_driver_id;
+				if ($success = 0) then
+					let lv_go_on = 0;
+					let reason_id = "COST DV";
+
+				else 
+
+					foreach select type_code cost_alloc_type
+						from acs_cost_alloc
+						where cost_driver_id = $cost_driver_id;
+							select type_code tmp_string
+								from type_codes
+								where table_name = 'acs_cost_driver'
+								and type_code = $cost_alloc_type;
+							if ($success = 0) then
+								let lv_go_on = 0;
+								let reason_id = "COST DV TY";
+								exit foreach;
+							end if
+					end foreach
+				end if					
+			else
+				let lv_go_on = 0;
+				let reason_id = "COST DV CL";
+			end if
+		end if
+	end if
+
+	if ($lv_go_on = 0) then
+		call UpdateReason();
+	end if
+
+END SUBROUTINE
+
+######################################### Update acs_cost reason
+SUBROUTINE UpdateReason();
+
+	update acs_cost
+		set reason_id = $reason_id
+		where cost_id = $cost_id;
+
+END SUBROUTINE
+
+######################################### Check that all the inventory requirements are available
+SUBROUTINE CheckAllocationCriteria();
+
+################################################# SYSTEM DRIVER
+	if ($cost_driver_class = "S") then
+######## Cost Driver UNIT
+		if ($cost_driver_id = "UNIT") then
+# Check that the inventory is not closed.
+			select closure_flag
+				from acs_cost_closure
+				where unit_id = $unit_id
+				and closure_flag = 'Y';
+				if ($success = 1) then
+					let lv_go_on = 0;
+					let reason_id = "UNIT CL";
+				end if
+		end if
+
+######## Cost Driver RUN
+		if ($cost_driver_id = "RUN") then
+# Run has to be completed
+				select run_num
+					from run_mast
+					where mill_id = $mill_id_plan
+					and machine_type = $mach_type_plan
+					and machine_id = $mach_id_plan
+					and run_num = $run_num
+					and stat in ('C','K');
+				if ($success = 0) then
+					let lv_go_on = 0;
+					let reason_id = "CRIT RUN";
+				end if
+		end if
+
+######## Cost Driver RUN&TIME
+		if ($cost_driver_id = "RUN&TIME") then
+# Time frame has to be over
+			if ($ts_begin = $ts_end or $ts_begin > $ts_end) then 
+				let lv_go_on = 0;
+				let reason_id = "DATES";
+			else
+				if ($ts_begin  > $get_curr_time or $ts_end  > $get_curr_time) then 
+					let lv_go_on = 0;
+					let reason_id = "DATES";
+# Run has to be valid
+				else
+					select run_num
+						from run_mast
+						where mill_id = $mill_id_plan
+						and machine_type = $mach_type_plan
+						and machine_id = $mach_id_plan
+						and run_num = $run_num;
+					if ($success = 0) then
+						let lv_go_on = 0;
+						let reason_id = "RUN";
+					end if
+				end if 
+			end if
+		end if
+
+######## Cost Driver TIME
+		if ($cost_driver_id = "TIME") then
+
+# Set the time frame with the lead time
+			let ts_begin = $ts_begin + $sec_lead_time;
+			let ts_end = $ts_end + $sec_lead_time;
+# Time frame has to be over
+			if ($ts_begin = $ts_end or $ts_begin > $ts_end) then 
+				let lv_go_on = 0;
+				let reason_id = "DATES";
+			else
+				if ($ts_begin  > $get_curr_time or $ts_end  > $get_curr_time) then 
+					let lv_go_on = 0;
+					let reason_id = "DATES";
+				end if 
+			end if
+		end if
+
+######## Cost Driver LOAD
+		if ($cost_driver_id = "LOAD") then
+# Check Load number is shipped
+			select load_id
+				from load_mast
+				where load_id = $load_id
+				and stat = 'S';
+			if ($success = 0) then
+				let lv_go_on = 0;
+				let reason_id = "LOAD";
+			end if
+		end if
+
+	else
+################################################# USER DEFINED DRIVER
+# Time Frame needs to be over
+		if ($lv_go_on = 1) then
+			if ($ts_begin = $ts_end or $ts_begin > $ts_end) then 
+				let lv_go_on = 0;
+				let reason_id = "DATES";
+			else
+				if ($ts_begin  > $get_curr_time or $ts_end  > $get_curr_time) then 
+					let lv_go_on = 0;
+					let reason_id = "DATES";
+				end if 
+			end if
+		end if
+	
+# There must be inventory found for each allocation machine defined
+		if ($lv_go_on = 1) then
+			foreach select mill_id, machine_type, machine_id, type_code  cost_alloc_type
+				from acs_cost_alloc
+				where	cost_driver_id = $cost_driver_id;
+
+# Check the inventory count for each line of allocation defined
+				if ($machine_type = "WH" and $cost_alloc_type = "T") then
+# 04 Get the count from the acs_unit_wh_time table
+					select count(*) cnt
+						from acs_unit_wh_time at, acs_warehouse aw, warehouse w
+						where at.warehouse_id = aw.warehouse_id
+						and at.warehouse_id = w.warehouse_id
+						and w.mill_id = $mill_id
+						and aw.machine_type = $machine_type
+						and aw.machine_id = $machine_id
+						and (at.ts_begin < $ts_end)
+						and (at.ts_end > $ts_begin or at.ts_end = 0);
+				else
+# Get the count from the acs_uroutencl_view
+					select count(*) cnt
+						from acs_uroutencl_view
+						where	mill_id = $mill_id
+						and machine_type = $machine_type
+						and machine_id = $machine_id
+						and ts_transaction > $ts_begin
+						and ts_transaction < $ts_end;
+				end if
+		
+				if ($cnt = 0) then
+					let lv_go_on = 0;
+					let reason_id = "NO INVENT";
+				end if
+
+			end foreach
+		end if
+
+	end if
+
+	if ($lv_go_on = 0) then
+		call UpdateReason();
+	end if
+
+END SUBROUTINE
+
+######################################### Distribute the cost to the inventory
+SUBROUTINE DistributeCost();
+
+################################################# SYSTEM DRIVER
+	if ($cost_driver_class = "S") then
+######## Cost Driver UNIT
+		if ($cost_driver_id = "UNIT") then
+
+# Get the total values
+			select count(*) tot_unit_cnt, sum(wgt_net) tot_wgt_net, sum(area_net) tot_area_net, sum(seconds_on_machine) tot_sec_on_mach
+				from acs_uroutencl_view
+				where	mill_id = $mill_id
+				and machine_type = $machine_type
+				and machine_id = $machine_id
+				and unit_id = $unit_id;
+
+# Check the total allocation values
+			let allocation_type = $cost_driver_type;
+			call CheckTotAllocValues();
+
+			if ($lv_go_on = 1) then
+# Set total cost and total quantity
+				let tot_cost = $cost;
+				let tot_quantity = $quantity;
+# Allocate the cost to each unit route identified 
+				foreach select ts_transaction, wgt_net, area_net, seconds_on_machine
+					from acs_uroutencl_view
+					where	mill_id = $mill_id
+					and machine_type = $machine_type
+					and machine_id = $machine_id
+					and unit_id = $unit_id;
+
+					call GetAllocPerUnit();
+					call AddDirectCost();
+				end foreach
+			end if
+		end if
+
+######## Cost Driver RUN
+		if ($cost_driver_id = "RUN") then
+
+# Get the total values
+			select count(*) tot_unit_cnt, sum(wgt_net) tot_wgt_net, sum(area_net) tot_area_net, sum(seconds_on_machine) tot_sec_on_mach
+				from acs_uroutencl_view
+				where	mill_id = $mill_id
+				and machine_type = $machine_type
+				and machine_id = $machine_id
+				and mill_id_plan = $mill_id_plan
+				and mach_type_plan = $mach_type_plan
+				and mach_id_plan = $mach_id_plan
+				and run_num = $run_num;
+
+# Check the total allocation values
+			let allocation_type = $cost_driver_type;
+			call CheckTotAllocValues();
+
+			if ($lv_go_on = 1) then
+# Set total cost and total quantity
+				let tot_cost = $cost;
+				let tot_quantity = $quantity;
+# Allocate the cost to each unit identified produced against the run
+				foreach select unit_id, type_code, ts_transaction, wgt_net, area_net, seconds_on_machine
+					from acs_uroutencl_view
+					where	mill_id = $mill_id
+					and machine_type = $machine_type
+					and machine_id = $machine_id
+					and mill_id_plan = $mill_id_plan
+					and mach_type_plan = $mach_type_plan
+					and mach_id_plan = $mach_id_plan
+					and run_num = $run_num;
+
+					call GetAllocPerUnit();
+					call AddDirectCost();
+				end foreach
+			end if
+		end if	
+
+######## Cost Driver RUN&TIME
+		if ($cost_driver_id = "RUN&TIME") then
+
+# Get the total values
+			select count(*) tot_unit_cnt, sum(wgt_net) tot_wgt_net, sum(area_net) tot_area_net, sum(seconds_on_machine) tot_sec_on_mach
+				from acs_uroutencl_view
+				where	mill_id = $mill_id
+				and machine_type = $machine_type
+				and machine_id = $machine_id
+				and mill_id_plan = $mill_id_plan
+				and mach_type_plan = $mach_type_plan
+				and mach_id_plan = $mach_id_plan
+				and run_num = $run_num
+				and ts_transaction > $ts_begin
+				and ts_transaction < $ts_end;
+
+# Check the total allocation values
+			let allocation_type = $cost_driver_type;
+			call CheckTotAllocValues();
+
+			if ($lv_go_on = 1) then
+# Set total cost and total quantity
+				let tot_cost = $cost;
+				let tot_quantity = $quantity;
+# Allocate the cost to each unit identified produced against the run
+				foreach select unit_id, type_code, ts_transaction, wgt_net, area_net, seconds_on_machine
+					from acs_uroutencl_view
+					where	mill_id = $mill_id
+					and machine_type = $machine_type
+					and machine_id = $machine_id
+					and mill_id_plan = $mill_id_plan
+					and mach_type_plan = $mach_type_plan
+					and mach_id_plan = $mach_id_plan
+					and run_num = $run_num
+					and ts_transaction > $ts_begin
+					and ts_transaction < $ts_end;
+
+					call GetAllocPerUnit();
+					call AddDirectCost();
+				end foreach
+			end if
+		end if
+
+######## Cost Driver TIME
+		if ($cost_driver_id = "TIME") then
+
+# Get the total values for the later weighted average calculation
+			let tot_unit_cnt = 0;
+			let tot_wgt_net = 0;
+			let tot_area_net = 0;
+			let tot_sec_on_mach = 0;
+			foreach select wgt_net, area_net, ts_transaction, seconds_on_machine
+				from acs_uroutencl_view
+				where	mill_id = $mill_id
+				and machine_type = $machine_type
+				and machine_id = $machine_id
+				and ts_transaction > $ts_begin
+				and ( (ts_transaction - seconds_on_machine) < $ts_end );
+# Set the time involved for the unit
+				let ts_begin_unit = $ts_transaction - $seconds_on_machine;
+				let ts_end_unit = $ts_transaction;
+				if ($ts_begin_unit < $ts_begin) then
+					let ts_begin_util = $ts_begin;
+				else 
+					let ts_begin_util = $ts_begin_unit;
+				end if
+				if ($ts_end_unit > $ts_end) then
+					let ts_end_util = $ts_end;
+				else
+					let ts_end_util = $ts_end_unit;
+				end if
+
+				let percent_util = ($ts_end_util - $ts_begin_util) / ($ts_end_unit - $ts_begin_unit);
+				let tot_unit_cnt = $tot_unit_cnt + 1;
+				let tot_wgt_net = $tot_wgt_net + $wgt_net * $percent_util;
+				let tot_area_net = $tot_area_net + $area_net * $percent_util;
+				let tot_sec_on_mach = $tot_sec_on_mach + $seconds_on_machine * $percent_util;
+
+			end foreach
+
+# Check the total allocation values
+			let allocation_type = $cost_driver_type;
+			call CheckTotAllocValues();
+
+			if ($lv_go_on = 1) then
+# Set total cost and total quantity
+				let tot_cost = $cost;
+				let tot_quantity = $quantity;
+# Allocate the cost to each unit identified produced during the time frame
+				foreach select unit_id, type_code, wgt_net, area_net, ts_transaction, seconds_on_machine
+					from acs_uroutencl_view
+					where	mill_id = $mill_id
+					and machine_type = $machine_type
+					and machine_id = $machine_id
+					and ts_transaction > $ts_begin
+					and ( (ts_transaction - seconds_on_machine) < $ts_end );
+# Set the time involved for the unit
+					let ts_begin_unit = $ts_transaction - $seconds_on_machine;
+					let ts_end_unit = $ts_transaction;
+					if ($ts_begin_unit < $ts_begin) then
+						let ts_begin_util = $ts_begin;
+					else 
+						let ts_begin_util = $ts_begin_unit;
+					end if
+					if ($ts_end_unit > $ts_end) then
+						let ts_end_util = $ts_end;
+					else
+						let ts_end_util = $ts_end_unit;
+					end if
+
+					let percent_util = ($ts_end_util - $ts_begin_util) / ($ts_end_unit - $ts_begin_unit);
+					let wgt_net = $wgt_net * $percent_util;
+					let area_net = $area_net * $percent_util;
+					let seconds_on_machine = $seconds_on_machine * $percent_util;
+
+					call GetAllocPerUnit();
+					call AddDirectCost();
+				end foreach
+
+			end if
+		end if
+
+######## Cost Driver LOAD
+		if ($cost_driver_id = "LOAD") then
+# Get the load mast values
+			select ts_ship_act, origin_id
+				from load_mast
+				where load_id = $load_id;
+			
+		
+# Get the total values from the load_item
+			select sum(units_loaded) tot_unit_cnt, sum(wgt_loaded) tot_wgt_net, sum(msf_loaded) tot_area_net
+				from load_item
+				where load_id = $load_id;
+			let tot_sec_on_mach = 0;
+
+# Check the total allocation values
+			let allocation_type = $cost_driver_type;
+			call CheckTotAllocValues();
+
+			if ($lv_go_on = 1) then
+# Set total cost and total quantity
+				let tot_cost = $cost;
+				let tot_quantity = $quantity;
+# Allocate the cost to unit attached to the load
+				foreach select unit_id, type_code, wgt_scaled, width_act, length_lineal
+					from invent_audit
+					where load_id = $load_id
+					and ts_shipped = $ts_ship_act
+					and mx_action_code = 'SHIPPED';
+
+					let ts_transaction = ts_shipped;
+					let wgt_net = $wgt_scaled;
+					let area_net = (($width_act / $LengthToWidthFactor) * $length_lineal ) / 1000 ;
+					let seconds_on_machine = 0;
+
+					call GetAllocPerUnit();
+					call AddDirectCost();
+
+				end foreach
+			end if
+		end if
+
+	else
+################################################# USER DEFINED DRIVER
+		select sum(factor) sum_factor
+			from acs_cost_alloc
+			where	cost_driver_id = $cost_driver_id;
+
+		foreach select mill_id, machine_type, machine_id, type_code cost_alloc_type, factor
+			from acs_cost_alloc
+			where	cost_driver_id = $cost_driver_id;
+
+# Get the total values
+			if ($machine_type = "WH" and $cost_alloc_type = "T") then
+# 04 Get the total from the acs_unit_wh_time table
+				let tot_sec_on_mach  = 0;
+				foreach select unit_id, ts_begin ts_begin_unit, ts_end ts_end_unit
+					from acs_unit_wh_time at, acs_warehouse aw, warehouse w
+					where at.warehouse_id = aw.warehouse_id
+					and at.warehouse_id = w.warehouse_id
+					and w.mill_id = $mill_id
+					and aw.machine_type = $machine_type
+					and aw.machine_id = $machine_id
+					and (at.ts_begin < $ts_end)
+					and (at.ts_end > $ts_begin or at.ts_end = 0);
+
+					if ($ts_begin_unit <  $ts_begin) then 
+						let ts_begin_unit =  $ts_begin;
+					end if
+					if ($ts_end_unit >  $ts_end or $ts_end_unit = 0) then 
+						let ts_end_unit =  $ts_end;
+					end if
+					let tot_sec_on_mach = $tot_sec_on_mach + ($ts_end_unit - $ts_begin_unit );
+
+				end foreach
+
+			else
+# Get the total from acs_uroutencl_view
+				select count(*) tot_unit_cnt, sum(wgt_net) tot_wgt_net, sum(area_net) tot_area_net, sum(seconds_on_machine) tot_sec_on_mach
+					from acs_uroutencl_view
+					where	mill_id = $mill_id
+					and machine_type = $machine_type
+					and machine_id = $machine_id
+					and ts_transaction > $ts_begin
+					and ts_transaction < $ts_end;
+			end if
+
+# Check the total allocation values
+			let allocation_type = $cost_alloc_type;
+			call CheckTotAllocValues();
+
+# Set total cost and total quantity
+			let tot_cost = $cost * ($factor / $sum_factor);
+			let tot_quantity = 0;
+# Allocate the cost to each unit identified produced against the criteria
+			if ($machine_type = "WH" and $cost_alloc_type = "T") then
+# 04 Allocate base upon the acs_unit_wh_time table
+				foreach select unit_id, ts_begin ts_begin_unit, ts_end ts_end_unit
+					from acs_unit_wh_time at, acs_warehouse aw, warehouse w
+					where at.warehouse_id = aw.warehouse_id
+					and at.warehouse_id = w.warehouse_id
+					and w.mill_id = $mill_id
+					and aw.machine_type = $machine_type
+					and aw.machine_id = $machine_id
+					and (at.ts_begin < $ts_end)
+					and (at.ts_end > $ts_begin or at.ts_end = 0);
+
+					select type_code
+						from invent
+						where unit_id = $unit_id;
+					if ($ts_begin_unit <  $ts_begin) then 
+						let ts_begin_unit =  $ts_begin;
+					end if
+					if ($ts_end_unit >  $ts_end or $ts_end_unit = 0) then 
+						let ts_end_unit =  $ts_end;
+					end if
+					let seconds_on_machine = $ts_end_unit - $ts_begin_unit;
+					let ts_transaction = $ts_end;
+
+					call GetAllocPerUnit();
+					call AddDirectCost();
+				end foreach
+			else
+# Allocate base upon acs_uroutencl_view
+				foreach select unit_id, type_code, ts_transaction, wgt_net, area_net, seconds_on_machine
+					from acs_uroutencl_view
+					where	mill_id = $mill_id
+					and machine_type = $machine_type
+					and machine_id = $machine_id
+					and ts_transaction > $ts_begin
+					and ts_transaction < $ts_end;
+			
+					call GetAllocPerUnit();
+					call AddDirectCost();
+				end foreach
+			end if
+		end foreach
+	end if
+
+# Adjust the rounding issue
+	if ($lv_go_on = 1) then
+		call RoundDirectCost();
+	end if
+
+END SUBROUTINE
+
+######################################### Insert  direct cost
+SUBROUTINE AddDirectCost();
+
+	if ($unit_cost <> 0) then
+		select count(*) cnt
+			from acs_direct_cost
+			where unit_id = $unit_id
+			and cost_id = $cost_id
+			and mill_id = $mill_id
+			and machine_type = $machine_type
+			and machine_id = $machine_id;
+		if ($cnt > 0) then
+# The update support the case when a unit is going more than once through a machine
+# Exemple: a unit is going 2 times through the wrapper making two records into the acs_unit_route with 2 diff ts_transaction
+			update acs_direct_cost
+				set cost = cost + $unit_cost, quantity = quantity + $unit_quantity, ts_transaction = $ts_transaction
+				where unit_id = $unit_id
+				and cost_id = $cost_id
+				and mill_id = $mill_id
+				and machine_type = $machine_type
+				and machine_id = $machine_id;
+		else
+
+# Get the cost_group_id into the acs_direct_cost
+			select cost_group_id
+				from acs_cost_type
+				where cost_type_id = $cost_type_id;
+
+			insert into acs_direct_cost
+					(unit_id, type_code, cost_id, cost_group_id, cost_type_id, mill_id, machine_type, 
+					machine_id, quantity, unit_meas, cost, currency_id, ts_modified, ts_create, ts_transaction)
+			 values	($unit_id, $type_code, $cost_id, $cost_group_id, $cost_type_id, $mill_id, $machine_type, 
+					$machine_id, $unit_quantity, $unit_meas, $unit_cost, $currency_id, 0, $get_curr_time, $ts_transaction);
+		end if
+	end if
+
+# Create an acs_cost_trans_log record for each unit of the Load
+	let save_acs_type_code = $acs_type_code;
+	let acs_type_code = $type_code;
+	call ACSInsertTransLog();
+	let acs_type_code = $save_acs_type_code;
+
+END SUBROUTINE
+
+######################################### Insert  direct cost
+SUBROUTINE SetAllocatedFlag();
+
+	update acs_cost
+		set allocated_flag = 'Y', ts_allocated = $get_curr_time
+		where cost_id = $cost_id;
+
+END SUBROUTINE
+
+######################################### Reinit the allocation of the cost to redo it
+SUBROUTINE ReinitAllocation();
+
+# Delete allocation already done
+ 	Delete from acs_direct_cost
+		where cost_id = $cost_id;
+
+# Update the acs_cost record
+	update acs_cost
+		set allocated_flag = 'N', ts_allocated = 0, reason_id = ' '
+		where cost_id = $cost_id;
+
+
+END SUBROUTINE
+
+######################################### Check the total values for the allocation
+SUBROUTINE CheckTotAllocValues();
+
+	if ($allocation_type = "U") then
+		if ($tot_unit_cnt = 0) then
+			let lv_go_on = 0;
+			let reason_id = "NO UNIT";
+		end if
+	end if
+
+	if ($allocation_type = "W") then
+		if ($tot_wgt_net = 0) then
+			let lv_go_on = 0;
+			let reason_id = "NO WGT";
+		end if
+	end if
+
+	if ($allocation_type = "A") then
+		if ($tot_area_net = 0) then
+			let lv_go_on = 0;
+			let reason_id = "NO AREA";
+		end if
+	end if
+
+	if ($allocation_type = "T") then
+		if ($tot_sec_on_mach = 0) then
+			let lv_go_on = 0;
+			let reason_id = "NO TIME";
+		end if
+	end if
+
+	if ($lv_go_on = 0) then
+		call UpdateReason();
+	end if
+
+END SUBROUTINE
+
+######################################### Get the values to allocate to the individual unit
+SUBROUTINE GetAllocPerUnit();
+
+	if ($allocation_type = "U") then
+		let unit_cost = $tot_cost / $tot_unit_cnt;
+		let unit_quantity = $tot_quantity / $tot_unit_cnt;
+	end if
+
+	if ($allocation_type = "W") then
+		let unit_cost = ($tot_cost * $wgt_net) / $tot_wgt_net;
+		let unit_quantity = ($tot_quantity * $wgt_net) / $tot_wgt_net;
+	end if
+
+	if ($allocation_type = "A") then
+		let unit_cost = ($tot_cost * $area_net) / $tot_area_net ;
+		let unit_quantity = ($tot_quantity * $area_net) / $tot_area_net ;
+	end if
+
+	if ($allocation_type = "T") then
+		let unit_cost = ($tot_cost * $seconds_on_machine) / $tot_sec_on_mach;
+		let unit_quantity = ($tot_quantity  * $seconds_on_machine) / $tot_sec_on_mach ;
+	end if
+
+END SUBROUTINE
+
+######################################### Manually correct the rounding issue so that figures are aligned
+SUBROUTINE RoundDirectCost();
+
+	select sum(cost) tot_cost, sum(quantity) tot_quantity
+		from acs_direct_cost
+		where cost_id = $cost_id;
+
+# Add the diff to the first record
+	select unit_id first_unit_id, mill_id first_mill_id, machine_type first_machine_type, machine_id first_machine_id
+		from acs_direct_cost
+		where cost_id = $cost_id;
+
+	update acs_direct_cost
+		set cost = cost + ($cost - $tot_cost), quantity = quantity + ($quantity - $tot_quantity)
+		where unit_id = $first_unit_id
+		and mill_id = $first_mill_id
+		and machine_type = $first_machine_type
+		and machine_id = $first_machine_id
+		and cost_id = $cost_id;
+
+END SUBROUTINE
+
+#===============================================================================
+# Included Routines
+#===============================================================================
+	INCLUDE "acs_subroutines";

@@ -1,0 +1,90 @@
+#=============================================================================
+#                                                                             
+#	Purpose  : manual cost closure                                          
+#	Name     : manual_close_cost.upd                                       
+#	Programmer: George von Gostomski                                        
+#	Date     : 12/09/09                                                     
+#=============================================================================
+# Rev.  Date:     Who    Description
+# ---  --------   ----  -----------------------------------------------------
+# 01   12/09/09   GVG     Initial release
+# 02   01/26/10   GVG     Insert into acs_cost_trans_log to update summary tables when closure_flag changes
+#=============================================================================
+DEFINE curr_time long;
+#
+* * CLOSE
+
+	let curr_time = {time};
+	select cost_id
+		from acs_cost
+		where unit_id = $unit_id;
+
+	select unit_id x
+		from acs_cost_closure
+		where unit_id = $unit_id;
+
+	IF ($success = 1) THEN
+
+	update acs_cost_closure
+		set ts_modified = $curr_time,
+		ts_closed = $curr_time,
+		closure_flag = 'Y'
+		where unit_id = $unit_id;
+	
+	END IF
+
+	select cost_id x
+		from acs_cost
+		where cost_id = $cost_id;
+
+	IF ($success =1) THEN
+
+	update acs_cost
+		set closure_flag = 'Y',
+		ts_modified = $curr_time,
+		ts_closed = $curr_time
+		where cost_id = $cost_id;
+
+	END IF
+
+	call ACSInsertTransLog();
+
+
+* * OPEN
+
+	let curr_time = {time};
+	select cost_id
+		from acs_cost
+		where unit_id = $unit_id;
+
+	select unit_id x
+		from acs_cost_closure
+		where unit_id = $unit_id;
+
+	IF ($success = 1) THEN
+
+	update acs_cost_closure
+		set ts_modified = $curr_time,
+		ts_closed = 0,
+		closure_flag = 'N'
+		where unit_id = $unit_id;
+	END IF
+
+	select cost_id x
+		from acs_cost
+		where cost_id = $cost_id;
+
+	IF ($success =1) THEN
+
+
+	update acs_cost
+		set closure_flag = 'N',
+		ts_modified = $curr_time,
+		ts_closed = 0
+		where cost_id = $cost_id;
+	END IF
+
+	call ACSInsertTransLog();
+
+
+	INCLUDE "acs_subroutines";

@@ -1,0 +1,246 @@
+#============================================================================
+# MxUpdate rules for creating the complete view of a recipe
+#
+#============================================================================
+# Rev.  Date:     Who   Description
+# ---  --------   ----  -----------------------------------------------------
+# 01   20/01/09   BRN   Initial release
+# 02   08/07/09   BRN   Include the new columns factor and flow_seq into acs_recact_all
+# 03   17/02/09   BRN   Delete the tempory for all user_id 
+#============================================================================
+DEFINE continue_search		long;
+DEFINE p_mill_id			string;
+DEFINE p_machine_type		string;
+DEFINE p_machine_id		string;
+DEFINE p_grade_spec_made	string;
+DEFINE p_recipe_prod_id		string;
+DEFINE p_flowseq_desc		string;
+DEFINE p_ts_begin 		long;
+DEFINE p_quantity			long;
+DEFINE p_flow_seq			long;
+DEFINE USEMETRIC 			env;
+DEFINE USER 			env;
+DEFINE tmp_flow_seq 		long;
+
+NO * EXECUTE
+#       Run selects in this rule to prepare the variables only
+        select * from acs_recipe_act;
+        select * from acs_recipe_act_det;
+        select * from acs_prod_route;
+        select * from acs_recact_all;
+
+MX * ST
+	echo Startup rule;
+	LET mode = "Single";
+	LET type = "STD";
+
+* * *
+
+# Set the metric and imperial factor
+	if  ($USEMETRIC = "Y") then
+		let LengthToWidthFactor = 100;
+	else
+		let LengthToWidthFactor = 12;
+	end if
+
+ACT * BUILD
+
+	echo $mill_id, $machine_type, $machine_id, $grade_spec_made, $ts_transaction;
+	call ACSBuildRecipeActView();
+
+SUBROUTINE ACSBuildRecipeActView()
+## Input: mill_id, machine_type, machine_id, grade_spec_made, ts_transaction
+## Output: table acs_recipeact_all  						
+
+	let save_prod_mill_id 	= $prod_mill_id;
+	let save_prod_mach_type = $prod_mach_type; 
+	let save_prod_mach_id 	= $prod_mach_id;
+	let save_type_code = $type_code;
+
+	let user_id   	      = $USER;
+	call DelRecipeActView();
+
+
+# Set the values for the key
+	let prod_mill_id	    	= $mill_id;
+	let prod_mach_type	= $machine_type;
+	let prod_mach_id	    	= $machine_id;
+	let grade_spec    	= $grade_spec_made;
+	let ts_transaction      = $ts_transaction;
+
+	let continue_seq = 1;
+	call InsertFirstRecord();
+
+	while ($continue_seq = 1) do
+## Go on the while only if an Intermediate RM is found.
+		let continue_seq = 0;
+		let p_flow_seq = $flow_seq;
+		let flow_seq = $flow_seq +1;
+## Get the Intermediate RM of level i to create records of level i+1		
+		Foreach select mill_id p_mill_id, machine_type p_machine_type, machine_id p_machine_id, grade_spec_made p_grade_spec_made,
+					 recipe_prod_id p_recipe_prod_id, ts_begin p_ts_begin, quantity p_quantity, flowseq_desc p_flowseq_desc
+			from acs_recact_all
+			where user_id = $user_id
+			and prod_mill_id = $prod_mill_id
+			and prod_mach_type = $prod_mach_type
+			and prod_mach_id = prod_mach_id
+			and grade_spec = $grade_spec
+			and ts_transaction = $ts_transaction
+			and flow_seq = $p_flow_seq
+			and class = 'I';
+
+			let tmp_flow_seq = 0;
+## Get the list of RM
+			Foreach select raw_matl_grp_id, raw_matl_id, seq_num, factor, quantity, prod_route_id, product_code_id, warehouse_id, whse_zone_id, bay_id
+					from acs_recipe_act_det
+					where mill_id = $p_mill_id
+					and machine_type = $p_machine_type
+					and machine_id = $p_machine_id
+					and grade_spec_made = $p_grade_spec_made
+					and recipe_prod_id = $p_recipe_prod_id
+					and ts_begin = $p_ts_begin
+					order by raw_matl_grp_id, raw_matl_id, seq_num;
+
+				let tmp_flow_seq = $tmp_flow_seq + 1;
+				let flowseq_desc = $p_flowseq_desc,"-",$tmp_flow_seq;
+
+## Adjust quantity based upon the parent
+					let quantity = ($quantity * $p_quantity ) / 1000;
+## Get the RM info
+				select type_code, department_id 
+					from acs_raw_matl_mach
+					where mill_id = $p_mill_id
+					and machine_type = $p_machine_type
+					and machine_id = $p_machine_id
+					and raw_matl_grp_id = $raw_matl_grp_id
+ 					and raw_matl_id = $raw_matl_id;
+				select class from raw_matl
+					where raw_matl_grp_id = $raw_matl_grp_id
+ 					and raw_matl_id = $raw_matl_id;
+
+## Create the record of level i+1
+				if ($class = "I") then
+## Intermediate RM, need an other round
+					let continue_seq = 1;
+## Find the recipe
+					Call ACSGetIntActiveRecipe();
+
+					let grade_spec_parent   = $p_grade_spec_made;
+					let mill_id		    	= $mill_id;
+					let machine_type	    	= $machine_type;
+					let machine_id	    	= $machine_id;
+					let grade_spec_made    	= $grade_spec_made;
+					let recipe_prod_id    	= $act_recipe_prod_id;
+					let ts_begin          	= $act_ts_begin;
+
+					call InsertACSRecActAllRecord();
+				else
+					let grade_spec_parent   = $p_grade_spec_made;
+					let mill_id		    	= $p_mill_id;
+					let machine_type	    	= $p_machine_type;
+					let machine_id	    	= $p_machine_id;
+					let grade_spec_made    	= $p_grade_spec_made;
+					let recipe_prod_id    	= $p_recipe_prod_id;
+					let ts_begin          	= $p_ts_begin;
+
+					call InsertACSRecActAllRecord();
+				end if
+
+			End foreach
+			
+		End foreach
+
+	end while
+
+# Set back the values
+	let mill_id	    	= $prod_mill_id;
+	let machine_type	= $prod_mach_type;
+	let machine_id	= $prod_mach_id;
+	let grade_spec_made = $grade_spec;
+	let type_code = $save_type_code;
+	let prod_mill_id 	= $save_prod_mill_id;
+	let prod_mach_type = $save_prod_mach_type; 
+	let prod_mach_id 	= $save_prod_mach_id;
+
+END SUBROUTINE
+
+SUBROUTINE InsertFirstRecord()
+
+	call ACSGetActiveRecipe();
+#Output : act_recipe_prod_id, act_ts_begin, act_ts_end, act_class, act_sim_id, act_recipe_found = 0 or 1
+
+	let flow_seq = 1;
+	let flowseq_desc = "1";
+	let grade_spec_parent   = " ";
+	let raw_matl_grp_id	= " ";
+	let raw_matl_id        	= " ";
+	let seq_num 		= 1;
+	let type_code           = " ";
+	let department_id		= " ";
+	let class               = "I";
+	let mill_id		    	= $mill_id;
+	let machine_type	    	= $machine_type;
+	let machine_id	    	= $machine_id;
+	let grade_spec_made    	= $grade_spec_made;
+	let recipe_prod_id    	= $act_recipe_prod_id;
+	let ts_begin          	= $act_ts_begin;
+	let factor			= 1;
+	let quantity    		= 1000;
+	let prod_route_id		= 0;
+	let product_code_id	= " ";	
+	let warehouse_id		= " ";	
+	let whse_zone_id		= " ";	
+	let bay_id			= " ";	
+
+	call InsertACSRecActAllRecord();
+
+END SUBROUTINE
+
+SUBROUTINE InsertACSRecActAllRecord()
+	Insert into acs_recact_all
+		(user_id, prod_mill_id, prod_mach_type, prod_mach_id, grade_spec, ts_transaction, flow_seq, flowseq_desc, grade_spec_parent,
+		 raw_matl_grp_id, raw_matl_id, seq_num, type_code, department_id,  class, mill_id, machine_type, machine_id, grade_spec_made, recipe_prod_id, ts_begin, factor, quantity,
+		prod_route_id, product_code_id, warehouse_id, whse_zone_id, bay_id)
+		values ($user_id, $prod_mill_id, $prod_mach_type, $prod_mach_id, $grade_spec, $ts_transaction, $flow_seq, $flowseq_desc, $grade_spec_parent,
+		 $raw_matl_grp_id, $raw_matl_id, $seq_num, $type_code, $department_id, $class, $mill_id, $machine_type, $machine_id, $grade_spec_made, $recipe_prod_id, $ts_begin, $factor, $quantity,
+		 $prod_route_id, $product_code_id, $warehouse_id, $whse_zone_id, $bay_id);
+END SUBROUTINE
+
+
+SUBROUTINE ACSGetIntActiveRecipe()
+
+# Get the related grade_spec
+	select grade_spec grade_spec_made
+		from raw_matl
+		where raw_matl_grp_id = $raw_matl_grp_id
+		and raw_matl_id = $raw_matl_id;
+
+# Get the machine
+	select machine_type, machine_id
+		from acs_prod_route
+		where mill_id = $p_mill_id
+		and	mach_type_dest = $p_machine_type
+		and	mach_id_dest = $p_machine_id
+		and	prod_route_id = $prod_route_id;
+
+	let mill_id = $p_mill_id;
+	call ACSGetActiveRecipe();
+#Output : act_recipe_prod_id, act_ts_begin, act_ts_end, act_class, act_sim_id, act_recipe_found = 0 or 1
+
+END SUBROUTINE
+
+SUBROUTINE 	DelRecipeActView()
+	delete from acs_recact_all
+		where 
+# 03 user_id = $user_id	and
+		prod_mill_id = $mill_id
+		and prod_mach_type = $machine_type
+		and prod_mach_id = $machine_id
+		and grade_spec = $grade_spec_made
+		and ts_transaction = $ts_transaction;
+END SUBROUTINE
+
+#===============================================================================
+# Included Routines
+#===============================================================================
+	INCLUDE "acs_subroutines";

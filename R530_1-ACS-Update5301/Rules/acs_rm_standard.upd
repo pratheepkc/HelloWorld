@@ -1,0 +1,396 @@
+#  MxUpdate Rules for the standard consumptions at the jumbo turnup time
+#
+#  REV     DATE     WHO      DESCRIPTION
+# -----  --------  -----    ------------------------------------------------
+#   1.0  22/04/09  BRN      Update the Raw Matl Inventory
+#   2.0  08/07/09  BRN      Include the new columns factor and flow_seq into acs_recact_all
+#   3.0  08/14/09  BRN	    Replace MMMprod with MMMplan for acs_unit_route, acs_cost
+#   4.0  08/24/09  BRN	    Add the LeadTime to the table acs_cost
+#   5.0  10/06/09  BRN	    Remove include of raw_matl_invent_update.upd since obsolete
+#   6.0  01/21/10  BRN	    Add cons_mmm into acs_cost
+#   7.0  09-Feb-10 PHH      Added call to AuditProductAvgCost
+#   8.0  03/05/10  PHH      Set negative cost and weight if Consumption
+#   9.0  23-Mar-10 BRN      Implement the AvgCostPerTon
+#  10.0  29-Apr-10 BRN      Change typde code for pump audit and implement fmm_log_stock
+#  11.0  16-Jun-10 PHH      Check in conv_rate is found in GetProductCodeQuantity()
+#  12.0  23-Jul-10 PHH      logic rounding of the units_act 
+#  13.0  20-Sep-10 BRN      To be consistent with the other consumptions, do the insert into acs_cost even if cost = 0
+#==============================================================================================
+DEFINE p_flow_seq			long;
+DEFINE USER				ENV;
+DEFINE ts_end			long;
+define f_units_act 		double;
+
+SUBROUTINE ACSInsertStdRMCons()
+
+	echo in ACSInsertStdRMCons;
+
+	select ts_transaction
+		from acs_unit_route
+		where unit_id = $unit_id
+			and mx_action_code = 'TURNUP';
+
+
+	echo ts_transaction from acs_unit_route:$ts_transaction;
+
+	let user_id = $USER;
+
+# Create the active recipe view complete
+	call ACSBuildRecipeActView();
+
+# Store the Jumbo recipe used
+	call ACSStoreJumboRecipe();
+
+# Get the dry weight of the jumbo
+	call ACSGetJumboDryWeight();
+
+
+
+		echo select product_code_id, quantity, raw_matl_grp_id, raw_matl_id,
+				warehouse_id act_warehouse_id, whse_zone_id act_whse_zone_id, bay_id act_bay_id,
+				flow_seq, grade_spec_parent, seq_num, factor,
+# rev 6.0
+				mill_id cons_mill_id, machine_type cons_mach_type, machine_id cons_mach_id
+			from acs_recact_all
+			where user_id = $user_id
+				and prod_mill_id = $mill_id
+				and prod_mach_type = $machine_type
+				and prod_mach_id = $machine_id
+				and grade_spec = $grade_spec_made
+				and ts_transaction = $ts_transaction
+				and type_code = 'S'
+				and class = 'P';
+
+		foreach
+			select product_code_id, quantity, raw_matl_grp_id, raw_matl_id,
+				warehouse_id act_warehouse_id, whse_zone_id act_whse_zone_id, bay_id act_bay_id,
+				flow_seq, grade_spec_parent, seq_num, factor,
+# rev 6.0
+				mill_id cons_mill_id, machine_type cons_mach_type, machine_id cons_mach_id
+			from acs_recact_all
+			where user_id = $user_id
+				and prod_mill_id = $mill_id
+				and prod_mach_type = $machine_type
+				and prod_mach_id = $machine_id
+				and grade_spec = $grade_spec_made
+				and ts_transaction = $ts_transaction
+				and type_code = 'S'
+				and class = 'P';
+
+
+				echo found product_code_id: $product_code_id  quantity : $quantity;
+# Register the consumption if the parent is an intermediate Standard consumption mode as well.
+			let p_flow_seq = $flow_seq - 1 ;
+			select type_code p_type_code
+				from acs_recact_all
+				where user_id = $user_id
+					and prod_mill_id = $mill_id
+					and prod_mach_type = $machine_type
+					and prod_mach_id = $machine_id
+					and grade_spec = $grade_spec_made
+					and ts_transaction = $ts_transaction
+					and grade_spec_made = $grade_spec_parent
+					and type_code = 'S'
+					and flow_seq = $p_flow_seq;
+
+			echo if ($p_type_code = "S" or $flow_seq = 2) then;
+
+			if ($p_type_code = "S" or $flow_seq = 2) then
+
+				let warehouse_id 	= $act_warehouse_id;
+				let whse_zone_id 	= $act_whse_zone_id;
+				let bay_id 		= $act_bay_id;
+				call ACSGetRMActiveQuantity();
+				let quantity_active = $quantity_active;
+				Call GetProductCodeAvgCost();
+
+				let remarks = "Turnup: ",$unit_id;
+				
+######################## Update the raw material inventory
+				let active_wgt = $quantity_active;
+
+				echo let $active_wgt = $quantity_active;
+				
+# Get Product Code data
+				select unit_meas, percent_active, wgt_net
+					from acs_product_code
+					where product_code_id = $product_code_id;
+				Call GetProductCodeQuantity();
+
+				let get_curr_time = $ts_transaction;
+
+#Rev 7.0 PHH Add Audit 
+	      		let new_active_wgt = $active_wgt ;
+	     			let save_type_code = $type_code;
+	     			let type_code = "G";
+      
+            		select sum(active_wgt) sum_active_wgt
+					from  raw_matl_invent
+					where mill_id = $mill_id
+					and product_code_id = $product_code_id;
+
+				call GetTotalCostBefore();
+				call GetNewCost();
+
+# Put negative since it's a decrease
+				let new_cost = $new_cost * (-1);
+				let new_active_wgt = $new_active_wgt * (-1);
+
+				call AuditProductAvgCost();
+				let type_code = $save_type_code ;
+#Rev 7.0 PHH end Audit
+
+				let ts_adj = $ts_transaction;
+				Call SubRawMatlInvent();
+				let ts_create = $get_curr_time;
+				let units_act = $units_act * (-1);
+				let quantity = $quantity * (-1);
+				let active_wgt = $new_active_wgt;
+				let cost = $new_cost;
+				Call InsertRawMatlTrans();
+
+# 10
+				call SubFMMLogStock();
+				
+######################## Insert the acs_cost record
+				let serial_key_id = "RAWMATL";
+				let serial_mill_id = $mill_id;
+				let serial_informat = "&&&&&&&&";
+				let serial_prefix = "RM-S-";
+				call GET_COST_ID();
+				let serial_cost_id = $serial_cost_id;
+				let serial_found = $serial_found;
+
+## Set values for insert into acs_cost
+		
+				let cost_id = $serial_cost_id;
+				let cost_id_group = $jumbo_id;
+				let cost_type = "R";
+				let mill_id = $mill_id;
+				let machine_type 	= $machine_type;
+				let machine_id = $machine_id;
+				let warehouse_id 	= $act_warehouse_id;
+				let whse_zone_id 	= $act_whse_zone_id;
+				let bay_id = $act_bay_id;
+				
+				let quantity = $quantity_active;
+				let cost = $cost * (-1); 
+
+				let ts_begin = 0;
+				let ts_end = 0;
+
+				let mill_id_plan 	= $mill_id_plan;
+				let mach_type_plan = $mach_type_plan; 
+				let mach_id_plan 	= $mach_id_plan;
+				let run_num = $run_num; 
+				let pat_num = 0;
+
+				let type_code = $type_code;
+
+				let product_code_id = $product_code_id;
+				let raw_matl_grp_id = $raw_matl_grp_id; 
+				let raw_matl_id = $raw_matl_id;
+	  
+				let fin_matl_grp_id 	= " ";
+				let fin_matl_id 		= " "; 	
+
+				let unit_meas 		= "KGS";
+				select string_value 
+					from constants
+					where key_value ='MILL_CURRENCY';
+				let currency_id = $string_value;
+				let acct_seg_id 		= " ";
+				let order_id 		= " ";
+				let item_num 		= 0;
+				let load_id 		= " ";
+				let cost_driver_id	= "UNIT";
+				let cost_type_id 		= " ";
+				let allocated_flag 	= "N";
+				let ts_allocated 		= 0;
+				let reason_id 		= " ";
+				let user_id 		= $USER;
+				let appl_name 		= "ACS_LOG_JUMBO  STD RM";
+				let closure_flag 		= "N";
+				let ts_closed 		= 0;
+				let ts_modified 		= 0;
+				let ts_create 		= {time of day};
+				let sec_lead_time		= 0;
+
+				let cons_mill_id 	= $cons_mill_id;
+				let cons_mach_type = $cons_mach_type; 
+				let cons_mach_id 	= $cons_mach_id;
+
+# 13 comment out the condition
+#				if ($cost > 0) then
+					call INSERT_ACS_COST();
+#				end if
+			end if
+		end foreach
+
+	call DelRecipeActView();
+
+END SUBROUTINE
+
+
+SUBROUTINE ACSDeleteStdRMCons()
+
+	let user_id = $USER;
+
+######################## Undo the raw material invent
+# Get all the raw matl transactions and undo them
+	select ts_transaction
+		from acs_unit_route
+		where unit_id = $unit_id
+			and mx_action_code = 'TURNUP';
+	let get_curr_time   = {time of day};
+	let key_remarks = "Turnup: ",$unit_id;
+
+	foreach	select product_code_id, quantity, units_act, active_wgt,
+				mill_id, warehouse_id, whse_zone_id, bay_id, cost,
+				raw_matl_id, raw_matl_grp_id
+				from raw_matl_trans
+				where remarks = $key_remarks
+					and ts_adj = $ts_transaction;
+
+			select unit_meas
+				from acs_product_code
+				where product_code_id = $product_code_id;
+
+		let quantity   = $quantity * (-1);	
+		let units_act  = $units_act* (-1);	
+		let active_wgt = $active_wgt * (-1);	
+		let cost = $cost * (-1);	
+
+## Recalc the ProductCode Average cost since it can have changed in between
+		let new_cost = $cost;
+		let new_active_wgt = $active_wgt;
+
+#Rev 7.0 PHH Add Audit --> set the type code for the audit transaction and restore it 
+	     	let save_type_code = $type_code;
+	     	let type_code = "H";
+
+		let remarks = "Unturnup: ",$unit_id;
+		Call UpdateProductAvgCost();
+
+		let type_code = $save_type_code ;
+
+## Update the raw_matl_inventory
+		Call AddRawMatlInvent();		
+
+# 10
+				call AddFMMLogStock();
+
+	end foreach
+
+## Delete the transactions
+	delete from raw_matl_trans
+		where remarks = $key_remarks
+		and ts_adj = $ts_transaction;
+
+######################## Delete the acs_cost records
+
+	foreach
+		select cost_id, closure_flag
+		from acs_cost
+		where unit_id = $jumbo_id
+			and cost_driver_id = 'UNIT'
+			and cost_id_group = $jumbo_id;
+
+		if ($closure_flag = "N") then
+			Delete from acs_cost
+				where cost_id = $cost_id;
+		 	Delete from acs_direct_cost
+				where cost_id = $cost_id;
+		else
+# Abnormal case - set the reason			
+			Update acs_cost
+				set reason_id = 'ABN_RM'
+				where cost_id = $cost_id;
+		end if
+
+	end foreach
+
+# Delete the recipe used
+	Delete from acs_jumbo_recipe
+		where jumbo_id = $jumbo_id;
+
+END SUBROUTINE
+
+
+# Store the std recipe used for producing a jumbo
+SUBROUTINE ACSStoreJumboRecipe()
+
+# Set back the values
+	let save_type_code = $type_code;
+	let save_prod_mill_id 	= $prod_mill_id;
+	let save_prod_mach_type = $prod_mach_type; 
+	let save_prod_mach_id 	= $prod_mach_id;
+	let save_mill_id = $mill_id;
+	let save_machine_type = $machine_type;
+	let save_machine_id = $machine_id;
+	let save_grade_spec_made = $grade_spec_made;
+
+	foreach
+		select prod_mill_id, prod_mach_type, prod_mach_id, grade_spec, flow_seq, flowseq_desc,
+			raw_matl_grp_id, raw_matl_id, type_code, department_id, class, grade_spec_parent, 
+			mill_id, machine_type, machine_id, grade_spec_made, recipe_prod_id, ts_begin, quantity, prod_route_id, product_code_id, seq_num, factor
+		from acs_recact_all
+		where user_id = $user_id
+			and prod_mill_id = $mill_id
+			and prod_mach_type = $machine_type
+			and prod_mach_id = $machine_id
+			and grade_spec = $grade_spec_made
+			and ts_transaction = $ts_transaction;
+
+		Insert into acs_jumbo_recipe
+			(jumbo_id, prod_mill_id, prod_mach_type, prod_mach_id, grade_spec, ts_transaction, flow_seq, flowseq_desc,
+			raw_matl_grp_id, raw_matl_id, type_code, department_id, class, grade_spec_parent, 
+			mill_id, machine_type, machine_id, grade_spec_made, recipe_prod_id, ts_begin, quantity, prod_route_id, product_code_id, seq_num, factor)
+			values ($jumbo_id, $prod_mill_id, $prod_mach_type, $prod_mach_id, $grade_spec, $ts_transaction, $flow_seq, $flowseq_desc,
+			$raw_matl_grp_id, $raw_matl_id, $type_code, $department_id, $class, $grade_spec_parent, 
+			$mill_id, $machine_type, $machine_id, $grade_spec_made, $recipe_prod_id, $ts_begin, $quantity, $prod_route_id, $product_code_id, $seq_num, $factor);
+				
+	end foreach
+
+# Set back the values
+	let type_code = $save_type_code;
+	let prod_mill_id 	= $save_prod_mill_id;
+	let prod_mach_type = $save_prod_mach_type; 
+	let prod_mach_id 	= $save_prod_mach_id;
+	let mill_id = $save_mill_id;
+	let machine_type = $save_machine_type;
+	let machine_id = $save_machine_id;
+	let grade_spec_made = $save_grade_spec_made;
+
+END SUBROUTINE
+
+# Return quantity, units_act - inputs active_wgt, wgt_net, percent_active, unit_meas
+SUBROUTINE GetProductCodeQuantity()
+	select conv_rate
+		from unit_convert
+		where unit_meas = $unit_meas;
+	if ( $success = 1  ) then 
+	
+		if ($USEMETRIC = "Y") then
+			let quantity = ($active_wgt * $conv_rate) / ($wgt_net * $percent_active / 100);
+			let f_units_act = $active_wgt / ($wgt_net * $percent_active / 100);
+                  let units_act = $f_units_act:"#####&" ;
+		else
+			let quantity = ($active_wgt * $conv_rate) / ($wgt_net * $percent_active / 100);
+			let units_act = $active_wgt / ($wgt_net * $percent_active / 100);
+		end if 
+	else 
+		let quantity = 0 ; 
+		let units_act = 0;
+	
+	end if
+END SUBROUTINE
+
+
+#===============================================================================
+# Included Routines
+#===============================================================================
+	INCLUDE "acs_viewrecipe_all";
+	INCLUDE "raw_matl_inv_audit";
+	INCLUDE "fmm_log_stock_sub";
+

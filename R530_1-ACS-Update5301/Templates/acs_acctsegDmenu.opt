@@ -1,0 +1,51 @@
+<Application type="Application" name="acs_acctsegDmenu" ID="1" Directory="Templates" grid_width="5" grid_height="4" lastCheckin="2002-08-19 13:05:29Z" lastID="12" modified="2010-10-27 13:01:24Z" user="Philippe">
+  <Widget type="Diagram" ID="2" handle="1" name="This document contains proprietary information and trade secrets which are the property of Measurex Corporation." />
+  <Widget type="Connector" ID="3" handle="2" name="INPUT" modified="2010-10-27 12:58:00Z" user="Philippe">
+    <Attribute name="description" value="Template input/output connector" />
+    <Output name="INPUT" ref="5" />
+  </Widget>
+  <Widget type="Cursor" ID="5" handle="3" name="acs_acct_seg" modified="2008-12-15 09:53:32Z" user="msdmgr">
+    <Attribute name="verify" value="False" />
+    <Attribute name="from" value="acs_acct_seg" modified="2008-12-15 09:52:34Z" user="msdmgr" />
+    <Input name="INPUT" ref="3" />
+    <Output name="select" ref="6" />
+    <Output name="select" ref="12" created="2008-12-15 09:53:04Z" user="msdmgr" />
+    <Output name="select" ref="11" created="2008-12-04 16:58:23Z" user="msdmgr" />
+    <Output name="OUTPUT" ref="8" />
+    <Input name="order" ref="6" />
+    <Input name="order" ref="12" />
+  </Widget>
+  <Widget type="Template" ID="6" handle="4" name="AcctSegIDColumn" modified="2010-10-27 12:58:00Z" user="Philippe">
+    <Input name="select" ref="5" />
+    <Output name="order" ref="5" />
+    <Output name="AcctSegID:value" ref="9" created="2009-01-07 13:57:17Z" user="msdmgr" />
+    <Input name="AcctSegIDIn:value" ref="9" created="2010-10-27 12:39:25Z" user="Philippe" />
+  </Widget>
+  <Widget type="Template" ID="12" handle="5" name="AcctGrpIDColumn" user="msdmgr" created="2008-12-15 09:53:04Z" modified="2009-01-07 13:57:31Z">
+    <Input name="select" ref="5" created="2008-12-15 09:53:04Z" user="msdmgr" />
+    <Output name="order" ref="5" />
+    <Output name="AcctGrpID:value" ref="9" created="2009-01-07 13:57:31Z" user="msdmgr" />
+  </Widget>
+  <Widget type="Template" ID="11" handle="6" name="AcctSegNameColumn" user="msdmgr" created="2008-12-04 16:58:23Z" modified="2008-12-15 09:54:50Z">
+    <Input name="select" ref="5" created="2008-12-04 16:58:23Z" user="msdmgr" />
+    <Output name="AcctSegName:value" ref="9" created="2008-12-15 09:54:50Z" user="msdmgr" />
+  </Widget>
+  <Widget type="Connector" ID="8" handle="7" name="OUTPUT">
+    <Attribute name="description" value="Template input/output connector" />
+    <Input name="OUTPUT" ref="5" />
+  </Widget>
+  <Widget type="Connector" ID="9" handle="8" name="value" modified="2010-10-27 12:39:25Z" user="Philippe">
+    <Attribute name="description" value="Template input/output connector" />
+    <Input name="AcctSegID:value" ref="6" created="2009-01-07 13:57:17Z" user="msdmgr" />
+    <Input name="AcctGrpID:value" ref="12" created="2009-01-07 13:57:31Z" user="msdmgr" />
+    <Input name="AcctSegName:value" ref="11" created="2008-12-15 09:54:50Z" user="msdmgr" />
+    <Output name="AcctSegIDIn:value" ref="6" created="2010-10-27 12:39:25Z" user="Philippe" />
+  </Widget>
+  <History>(C) Copyright 1990-94, Measurex Corporation. This document contains proprietary
+  information and trade secrets which are the property of Measurex Corporation.
+
+  Date     Who   Description of change
+--------   ----  --------------------------------------------------------------
+</History>
+  <Revisions created="2010-10-27 13:01:24Z" user="Philippe">10/27/10 PHH  Reset the AcctSegIDColumn when resting form th eapplication </Revisions>
+</Application>

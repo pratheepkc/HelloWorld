@@ -1,0 +1,95 @@
+#  MxUpdate Rules for acs_acct_expense.
+#
+#  REV     DATE     WHO      DESCRIPTION
+# -----  --------  -----    ------------------------------------------------
+#   1.0  17/04/09  GVG      Initial release
+#==============================================================================================
+# ERROR RULE, DO EVERY TIME AN ERROR OCCURS
+#==============================================================================================
+#
+SUBROUTINE InsertAcsAcctExpense()
+
+	let serial_key_id = "ACSEXPENSE";
+	let serial_mill_id = $mill_id;
+
+	if ($RecvInv = 1) then
+		let acct_expense_name = "RM Transaction receive";
+		let serial_prefix = "RMT-";
+	else
+		if ($ConsumeInv = 1) then
+			let acct_expense_name = "RM Transaction consume";
+			let serial_prefix = "RMT-";
+		else
+			if ($AdjustInv = 1) then
+				let acct_expense_name = "RM Transaction adjustment";
+				let serial_prefix = "RMT-";
+			else
+				let acct_expense_name = "RM Cycle Count";
+				let serial_prefix = "RMBCC-";
+			end if
+		end if
+	end if
+
+	let serial_informat = "&&&&&&&&";
+	call GET_EXPENSE_ID();
+	
+
+	select acct_seg_id
+		from acs_warehouse
+		where warehouse_id = $warehouse_id;
+
+	let year_num = $get_curr_time:"yyyy";
+	let acct_period = {accounting period};
+	let acct_period = $acct_period:"&&";
+
+	select string_value
+		from constants
+		where key_value = 'MILL_CURRENCY';
+
+	let currency_id = $string_value;
+	let cost = $cost;
+	let cost_id = " ";
+	let stat = "N";
+	let ts_acct = $get_curr_time;
+	let reason_id = " ";
+	let ts_modified = 0;
+	let ts_create = $get_curr_time;
+
+	select acct_expense_id x
+		from acs_acct_expense
+		where acct_expense_id = $serial_expense_id;
+
+	IF ($success = 0) THEN
+
+		insert into acs_acct_expense (acct_expense_id, acct_expense_name, acct_seg_id, year_num, 
+			acct_period, cost, currency_id, cost_id, stat, ts_acct, reason_id, ts_modified, ts_create)
+		values ($serial_expense_id, $acct_expense_name, $acct_seg_id, $year_num, $acct_period, 
+			$cost, $currency_id, $cost_id, $stat, $ts_acct, $reason_id, $ts_modified, $ts_create);
+
+	END IF
+
+	select mill_id x
+		from raw_matl_trans
+		where mill_id = $mill_id
+		and warehouse_id = $warehouse_id
+		and whse_zone_id = $whse_zone_id
+		and bay_id = $bay_id
+		and product_code_id = $product_code_id
+		and ts_create = $get_curr_time;
+
+	IF ($success = 1) THEN
+
+		update raw_matl_trans
+			set remarks = $serial_expense_id + ': ' + remarks
+			where mill_id = $mill_id
+			and warehouse_id = $warehouse_id
+			and whse_zone_id = $whse_zone_id
+			and bay_id = $bay_id
+			and product_code_id = $product_code_id
+			and ts_create = $get_curr_time;
+
+	END IF
+
+END SUBROUTINE
+
+	INCLUDE "acs_subroutines";

@@ -1,0 +1,585 @@
+<Application type="Application" name="acs_opc_simulator" ID="1" Directory="Maint" grid_width="1" grid_height="3" lastCheckin="2003-04-29 13:28:56Z" lastID="5981" command="acs acsopcsim" environment="ACS=Y;MILL=OPI;MACHTYPE=PM;SECURITYLEVEL=9;FIBERMGT=Y" modified="2009-11-05 10:20:34Z" user="msdmgr">
+  <Widget type="Template" ID="2" handle="1" name="StandardTitleForm" modified="2009-11-05 10:17:21Z" user="msdmgr">
+    <Input name="below" ref="6" created="2009-11-05 10:17:21Z" user="msdmgr" />
+  </Widget>
+  <Widget type="Diagram" ID="3" handle="2" name="Constants" modified="2009-11-05 10:28:39Z" user="msdmgr">
+    <Widget type="Template" name="USEMETRIC" ID="697" created="2003-10-08 19:13:20Z" user="msdmgr" modified="2009-11-05 07:16:31Z" handle="1">
+    </Widget>
+    <Widget type="Template" ID="4" handle="2" name="SECURITYLEVEL" modified="2009-12-21 09:35:15Z" user="msdmgr">
+      <Output name="input" ref="5" />
+      <Output name="input" ref="5884" created="2009-11-06 13:34:30Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Calculation" ID="5" handle="3" name="ApprovedSecurity" modified="2009-11-05 07:16:28Z" user="msdmgr">
+      <Attribute name="calculation" value="SECURITYLEVEL &gt;= 5" />
+      <Input name="input" ref="4" />
+      <Output name="input" ref="750" created="2004-03-08 16:01:58Z" user="E159647" />
+    </Widget>
+    <Widget type="Template" name="LOCATIONTYPE" ID="698" created="2003-10-20 15:09:46Z" user="E159647" modified="2004-03-08 16:02:04Z" handle="4">
+      <Output name="input" ref="700" created="2003-10-20 15:10:07Z" user="E731650" />
+      <Output name="input" ref="733" created="2003-12-13 13:12:20Z" user="msdmgr" />
+      <Output name="input" ref="750" created="2004-03-08 16:02:04Z" user="E159647" />
+    </Widget>
+    <Widget type="Template" name="ENTERPRISE" ID="699" created="2003-10-20 15:09:52Z" user="E159647" modified="2004-03-08 16:02:08Z" handle="5">
+      <Output name="input" ref="700" created="2003-10-20 15:10:07Z" user="E731650" />
+      <Output name="input" ref="733" created="2003-12-13 13:12:20Z" user="msdmgr" />
+      <Output name="input" ref="750" created="2004-03-08 16:02:08Z" user="E159647" />
+    </Widget>
+    <Widget type="Template" ID="4445" handle="6" name="MILL" created="2009-02-02 14:56:19Z" user="msdmgr" modified="2009-11-16 04:18:15Z">
+    </Widget>
+    <Widget type="Template" name="MACHTYPE" ID="1548" created="2008-12-31 07:08:30Z" user="msdmgr" handle="7" modified="2009-11-16 04:18:15Z">
+    </Widget>
+    <Widget type="Template" name="MACHINE" ID="4425" created="2009-02-02 14:42:58Z" user="msdmgr" handle="8" modified="2009-11-16 04:18:15Z">
+    </Widget>
+    <Widget type="Calculation" name="AtMill" ID="700" created="2003-10-20 15:10:00Z" user="msdmgr" modified="2009-11-05 07:16:25Z" handle="9">
+      <Attribute name="calculation" value="LOCATIONTYPE = &quot;MILL&quot; or ENTERPRISE &lt;&gt; &quot;Y&quot;" created="2003-10-20 15:10:35Z" user="E731650" />
+      <Input name="input" ref="698" created="2003-10-20 15:10:07Z" user="E731650" />
+      <Input name="input" ref="699" created="2003-10-20 15:10:07Z" user="E731650" />
+    </Widget>
+    <Widget type="Calculation" name="NotAtMill" ID="733" created="2003-12-13 13:11:55Z" user="msdmgr" modified="2009-11-05 07:16:21Z" handle="10">
+      <Attribute name="calculation" value="LOCATIONTYPE = &quot;CORP&quot; or ENTERPRISE = &quot;N&quot;" created="2003-12-13 13:12:12Z" user="msdmgr" modified="2003-12-16 17:43:28Z" />
+      <Input name="input" ref="698" created="2003-12-13 13:12:20Z" user="msdmgr" />
+      <Input name="input" ref="699" created="2003-12-13 13:12:20Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Calculation" name="StippleMills" ID="750" created="2004-03-08 16:01:49Z" user="msdmgr" modified="2009-11-05 07:16:50Z" handle="11">
+      <Attribute name="calculation" value="ApprovedSecurity and (LOCATIONTYPE=&quot;CORP&quot; or ENTERPRISE=&quot;N&quot;)" created="2004-03-08 16:03:06Z" user="E731650" modified="2004-03-11 16:16:15Z" />
+      <Input name="input" ref="5" created="2004-03-08 16:01:58Z" user="E159647" />
+      <Input name="input" ref="698" created="2004-03-08 16:02:04Z" user="E159647" />
+      <Input name="input" ref="699" created="2004-03-08 16:02:08Z" user="E159647" />
+    </Widget>
+  </Widget>
+  <Widget type="TabForm" ID="6" handle="3" name="Automatic RawMaterials Consumption Tabs" grid_width="8" grid_height="2" modified="2009-11-06 07:51:38Z" user="msdmgr">
+    <Widget type="Option" name="ACS" ID="5438" created="2009-08-24 05:10:11Z" user="msdmgr" modified="2009-08-24 05:10:31Z" handle="1">
+      <Widget type="Diagram" name="Y" ID="5439" created="2009-08-24 05:10:20Z" user="msdmgr" modified="2009-11-16 04:18:15Z" handle="1">
+        <Widget type="Form" ID="5792" handle="1" name="Simulate Auto Cons Entries Tab" user="msdmgr" created="2009-11-06 07:52:08Z" modified="2009-11-06 07:53:13Z">
+          <Widget type="Template" name="KeyFieldText" ID="5793" created="2009-11-06 07:52:08Z" user="msdmgr" handle="1">
+            <Attribute name="prefix" value="&quot;AUTO CONSUMPTION LIST&quot;" created="2009-02-04 11:04:23Z" user="msdmgr" modified="2009-08-25 12:46:17Z" />
+            <Input name="below" ref="5794" created="2009-02-04 11:04:07Z" user="msdmgr" />
+          </Widget>
+          <Widget type="Form" ID="5794" handle="2" name="KeyForm" grid_width="6" grid_height="4" user="msdmgr" created="2009-11-06 07:52:08Z" modified="2009-11-06 13:32:30Z">
+            <Widget type="RaisedForm" name="MMM" ID="5795" created="2009-11-06 07:52:08Z" user="msdmgr" handle="1" modified="2009-12-21 09:21:20Z">
+              <Widget type="Diagram" name="Mill" ID="5796" created="2009-11-06 07:52:08Z" user="msdmgr" handle="1">
+                <Widget type="Template" ID="5797" handle="1" name="MillIDButton" user="msdmgr" created="2009-11-06 07:52:08Z" modified="2009-12-21 09:21:58Z">
+                  <Attribute name="suffix" value="&quot; **&quot;" />
+                  <Attribute name="required" value="0" created="2009-01-22 07:10:05Z" user="njn" />
+                  <Output name="input" ref="5798" created="2009-01-30 15:34:35Z" user="msdmgr" />
+                  <Output name="validation" ref="5799" created="2009-01-30 15:50:27Z" user="msdmgr" />
+                  <Output name="MillID:activate" ref="5809" created="2009-02-25 14:13:52Z" user="kbhatia" />
+                  <Output name="where" ref="5821" created="2009-09-23 14:12:21Z" user="msdmgr" />
+                  <Output name="where" ref="5853" created="2009-11-06 13:02:37Z" user="msdmgr" />
+                  <Output name="where" ref="5882" created="2009-11-06 13:20:31Z" user="msdmgr" />
+                  <Input name="whereOperator" ref="5798" created="2009-02-02 15:06:03Z" user="msdmgr" />
+                  <Input name="right" ref="5801" created="2009-09-24 05:56:39Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Calculation" ID="5798" handle="2" name="WhereCalc" created="2009-11-06 07:52:08Z" user="msdmgr">
+                  <Attribute name="calculation" value="TruthToArg (MillIDButton = &quot; &quot; or MillIDButton = &quot;&quot;, &quot;=&quot;, &quot;all&quot;)" modified="2009-02-02 15:03:53Z" user="msdmgr" />
+                  <Input name="input" ref="5797" created="2009-01-30 15:34:35Z" user="msdmgr" />
+                  <Output name="whereOperator" ref="5797" created="2009-02-02 15:06:03Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" ID="5799" handle="3" name="MillDMenu" user="msdmgr" created="2009-11-06 07:52:08Z">
+                  <Input name="validation" ref="5797" created="2009-01-30 15:50:27Z" user="msdmgr" />
+                </Widget>
+              </Widget>
+              <Widget type="Diagram" ID="5800" handle="2" name="MachTypeKey" grid_width="5" grid_height="2" user="msdmgr" created="2009-11-06 07:52:08Z">
+                <Widget type="Template" ID="5801" handle="1" name="MachTypeButton" user="msdmgr" created="2009-11-06 07:52:08Z">
+                  <Attribute name="suffix" value="&quot; **&quot;" created="2009-02-17 14:29:15Z" user="richard" />
+                  <Attribute name="required" value="false" created="2009-02-25 14:19:49Z" user="kbhatia" />
+                  <Output name="right" ref="5797" created="2009-09-24 05:56:39Z" user="msdmgr" />
+                  <Output name="value" ref="5803" created="2009-02-20 05:31:11Z" user="njn" />
+                  <Output name="validation" ref="5804" created="2009-02-17 14:27:57Z" user="richard" />
+                  <Output name="MachType:activate" ref="5809" created="2009-02-25 14:08:16Z" user="kbhatia" />
+                  <Input name="right" ref="5806" created="2009-09-24 05:56:57Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Calculation" name="WhereCalc" ID="5802" created="2009-11-06 07:52:08Z" user="msdmgr" handle="2">
+                  <Attribute name="calculation" value="TruthToArg (MachTypeColumn = &quot; &quot;, &quot;=&quot;, &quot;all&quot;)" created="2009-02-20 05:33:09Z" user="njn" modified="2009-02-20 05:33:43Z" />
+                  <Output name="whereOperator" ref="5803" created="2009-02-20 05:32:16Z" user="njn" />
+                  <Input name="input" ref="5803" created="2009-02-20 05:32:07Z" user="njn" />
+                </Widget>
+                <Widget type="Template" name="MachTypeColumn" ID="5803" created="2009-11-06 07:52:08Z" user="msdmgr" handle="3" modified="2009-11-06 13:32:27Z">
+                  <Input name="value" ref="5801" created="2009-02-20 05:31:11Z" user="njn" />
+                  <Input name="whereOperator" ref="5802" created="2009-02-20 05:32:16Z" user="njn" />
+                  <Output name="input" ref="5802" created="2009-02-20 05:32:07Z" user="njn" />
+                  <Output name="where" ref="5809" created="2009-02-25 14:08:16Z" user="kbhatia" />
+                  <Output name="where" ref="5821" created="2009-09-24 06:15:08Z" user="msdmgr" />
+                  <Output name="where" ref="5853" created="2009-11-06 13:02:56Z" user="msdmgr" />
+                  <Output name="where" ref="5882" created="2009-11-06 13:20:31Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" ID="5804" handle="4" name="MachTypeDMenu" user="msdmgr" created="2009-11-06 07:52:08Z">
+                  <Input name="validation" ref="5801" created="2009-02-17 14:27:57Z" user="richard" />
+                </Widget>
+              </Widget>
+              <Widget type="Diagram" ID="5805" handle="3" name="MachineKey" grid_width="5" grid_height="2" created="2009-11-06 07:52:08Z" user="msdmgr">
+                <Widget type="Template" ID="5806" handle="1" name="MachIDButton" user="msdmgr" created="2009-11-06 07:52:08Z" modified="2009-12-21 09:19:35Z">
+                  <Attribute name="suffix" value="&quot; **&quot;" created="2009-02-17 14:33:15Z" user="richard" />
+                  <Attribute name="required" value="false" created="2009-02-25 14:19:59Z" user="kbhatia" />
+                  <Output name="right" ref="5801" created="2009-09-24 05:56:57Z" user="msdmgr" />
+                  <Output name="value" ref="5807" created="2009-02-25 14:40:24Z" user="kbhatia" />
+                  <Output name="validation" ref="5809" created="2009-02-17 14:30:29Z" user="richard" />
+                  <Input name="topAlign" ref="5819" created="2009-12-21 09:18:55Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="MachIDColumn" ID="5807" created="2009-11-06 07:52:08Z" user="msdmgr" handle="2" modified="2009-11-06 13:32:27Z">
+                  <Input name="value" ref="5806" created="2009-02-25 14:40:24Z" user="kbhatia" />
+                  <Output name="input" ref="5808" created="2009-02-25 14:40:52Z" user="kbhatia" />
+                  <Output name="where" ref="5821" created="2009-09-24 06:15:08Z" user="msdmgr" />
+                  <Output name="where" ref="5853" created="2009-11-06 13:03:04Z" user="msdmgr" />
+                  <Output name="where" ref="5882" created="2009-11-06 13:20:31Z" user="msdmgr" />
+                  <Input name="whereOperator" ref="5808" created="2009-02-25 14:41:33Z" user="kbhatia" />
+                </Widget>
+                <Widget type="Calculation" name="WhereCalc" ID="5808" created="2009-11-06 07:52:08Z" user="msdmgr" handle="3">
+                  <Attribute name="calculation" value="TruthToArg (MachIDColumn = &quot; &quot;, &quot;=&quot;, &quot;all&quot;)" created="2009-02-20 05:33:09Z" user="kbhatia" modified="2009-02-25 14:40:45Z" />
+                  <Input name="input" ref="5807" created="2009-02-25 14:40:52Z" user="kbhatia" />
+                  <Output name="whereOperator" ref="5807" created="2009-02-25 14:41:33Z" user="kbhatia" />
+                </Widget>
+                <Widget type="Template" ID="5809" handle="4" name="MachineDMenu" user="msdmgr" created="2009-11-06 07:52:08Z">
+                  <Input name="MillID:activate" ref="5797" created="2009-02-25 14:13:52Z" user="kbhatia" />
+                  <Input name="MachType:activate" ref="5801" created="2009-02-25 14:08:16Z" user="kbhatia" />
+                  <Input name="where" ref="5803" created="2009-02-25 14:08:16Z" user="kbhatia" />
+                  <Input name="validation" ref="5806" created="2009-02-17 14:30:29Z" user="richard" />
+                </Widget>
+              </Widget>
+              <Widget type="Diagram" name="Reel" ID="5816" created="2009-11-06 07:52:08Z" user="msdmgr" handle="4" modified="2009-12-18 04:39:22Z">
+                <Widget type="Template" name="StatusColumn" ID="5817" created="2009-11-06 07:52:08Z" user="msdmgr" handle="1" modified="2009-12-18 04:19:43Z">
+                  <Attribute name="default" value="&quot;P&quot;" created="2009-09-23 12:48:05Z" user="msdmgr" modified="2009-12-18 04:19:24Z" />
+                  <Attribute name="whereOperator" value="NOT IN" created="2009-12-18 04:19:43Z" user="msdmgr" />
+                  <Output name="where" ref="5821" created="2009-09-23 14:12:30Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="UnitIDColumn" ID="5818" created="2009-11-06 07:52:08Z" user="msdmgr" handle="2" modified="2009-12-18 04:17:43Z">
+                  <Output name="order" ref="5821" created="2009-09-23 12:48:30Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="UnitIDEntry" ID="5819" created="2009-11-06 07:52:08Z" user="msdmgr" handle="3" modified="2009-12-21 09:21:58Z">
+                  <Attribute name="required" value="False" created="2009-09-23 14:01:43Z" user="msdmgr" />
+                  <Output name="topAlign" ref="5806" created="2009-12-21 09:18:55Z" user="msdmgr" />
+                  <Output name="value" ref="5823" created="2009-09-23 14:14:54Z" user="msdmgr" />
+                  <Output name="input" ref="5825" created="2009-11-05 12:52:33Z" user="msdmgr" />
+                  <Input name="value" ref="5822" created="2009-09-23 14:14:36Z" user="msdmgr" />
+                  <Input name="below" ref="5973" created="2009-12-21 09:21:58Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="PopupMenu" ID="5820" created="2009-11-06 07:52:08Z" user="msdmgr" handle="4">
+                  <Output name="validation" ref="5821" created="2009-09-23 14:12:06Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Cursor" name="acs_opti_opc" ID="5821" created="2009-11-06 07:52:08Z" user="msdmgr" handle="5" modified="2009-12-18 04:22:33Z">
+                  <Attribute name="joinWhere" value="acs_opti_opc_intf.tag_name = acs_opc_tag_mast.tag_name" created="2009-12-18 04:20:31Z" user="msdmgr" />
+                  <Attribute name="table" value="acs_opti_opc_intf, acs_opc_tag_mast" created="2009-12-18 04:20:47Z" user="msdmgr" />
+                  <Input name="where" ref="5797" created="2009-09-23 14:12:21Z" user="msdmgr" />
+                  <Input name="where" ref="5803" created="2009-09-24 06:15:08Z" user="msdmgr" />
+                  <Input name="where" ref="5807" created="2009-09-24 06:15:08Z" user="msdmgr" />
+                  <Input name="where" ref="5817" created="2009-09-23 14:12:30Z" user="msdmgr" />
+                  <Input name="order" ref="5818" created="2009-09-23 12:48:30Z" user="msdmgr" />
+                  <Input name="validation" ref="5820" created="2009-09-23 14:12:06Z" user="msdmgr" />
+                  <Output name="select" ref="5822" created="2009-09-23 12:51:29Z" user="msdmgr" />
+                  <Output name="status" ref="5824" created="2009-09-23 12:52:04Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="UnitIDColumn" ID="5822" created="2009-11-06 07:52:08Z" user="msdmgr" handle="6" modified="2009-12-18 04:26:56Z">
+                  <Attribute name="selectOperator" value="distinct" created="2009-12-18 04:26:56Z" user="msdmgr" />
+                  <Input name="select" ref="5821" created="2009-09-23 12:51:29Z" user="msdmgr" />
+                  <Output name="value" ref="5819" created="2009-09-23 14:14:36Z" user="msdmgr" />
+                  <Output name="input" ref="5825" created="2009-09-23 12:52:27Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Calculation" name="Now" ID="5972" created="2009-12-18 04:35:07Z" user="msdmgr" modified="2009-12-18 04:41:17Z" handle="7">
+                  <Attribute name="calculation" value="Now(0)" created="2009-12-18 04:35:31Z" user="msdmgr" />
+                  <Output name="value" ref="5973" created="2009-12-18 04:39:28Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="TimeTurnedUpEntry" ID="5973" created="2009-12-18 04:39:22Z" user="msdmgr" modified="2009-12-21 09:21:58Z" handle="8">
+                  <Input name="value" ref="5972" created="2009-12-18 04:39:28Z" user="msdmgr" />
+                  <Output name="below" ref="5819" created="2009-12-21 09:21:58Z" user="msdmgr" />
+                  <Output name="value" ref="5862" created="2009-12-18 04:40:29Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="UnitIDColumn" ID="5823" created="2009-11-06 07:52:08Z" user="msdmgr" handle="9" modified="2009-11-06 13:20:09Z">
+                  <Input name="value" ref="5819" created="2009-09-23 14:14:54Z" user="msdmgr" />
+                  <Output name="value" ref="5860" created="2009-11-06 13:10:07Z" user="msdmgr" />
+                  <Input name="whereOperator" ref="5825" created="2009-09-23 13:14:39Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="SuccessColumn" ID="5824" created="2009-11-06 07:52:08Z" user="msdmgr" handle="10">
+                  <Input name="status" ref="5821" created="2009-09-23 12:52:04Z" user="msdmgr" />
+                  <Output name="input" ref="5825" created="2009-09-23 12:52:33Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Calculation" name="WhereCalc" ID="5825" created="2009-11-06 07:52:08Z" user="msdmgr" handle="11" modified="2009-12-18 04:23:43Z">
+                  <Attribute name="calculation" value="TruthToArg (UnitIDEntry=&quot; &quot;, &quot;=&quot;,&quot;all&quot;)" created="2009-09-23 12:53:38Z" user="msdmgr" modified="2009-12-18 04:23:43Z" />
+                  <Input name="input" ref="5819" created="2009-11-05 12:52:33Z" user="msdmgr" />
+                  <Input name="input" ref="5822" created="2009-09-23 12:52:27Z" user="msdmgr" />
+                  <Input name="input" ref="5824" created="2009-09-23 12:52:33Z" user="msdmgr" />
+                  <Output name="whereOperator" ref="5823" created="2009-09-23 13:14:39Z" user="msdmgr" />
+                </Widget>
+              </Widget>
+              <Widget type="Diagram" name="GradeSpec" ID="5810" created="2009-11-06 07:52:08Z" user="msdmgr" handle="5">
+                <Widget type="Template" ID="5811" handle="1" name="GradeSpecColumn" user="msdmgr" created="2009-11-06 07:52:08Z" modified="2009-12-18 11:38:54Z">
+                  <Attribute name="suffix" value="&quot; **&quot;" />
+                  <Attribute name="required" value="0" created="2009-01-22 07:10:05Z" user="njn" />
+                  <Output name="input" ref="5812" created="2009-01-30 15:34:35Z" user="msdmgr" />
+                  <Output name="validation" ref="5813" created="2009-01-30 15:50:27Z" user="msdmgr" />
+                  <Output name="value" ref="5815" created="2009-01-30 15:35:22Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Calculation" ID="5812" handle="2" name="WhereCalc" created="2009-11-06 07:52:08Z" user="msdmgr" modified="2009-12-18 11:39:03Z">
+                  <Attribute name="calculation" value="TruthToArg (GradeSpecColumn = &quot; &quot;, &quot;=&quot;, &quot;all&quot;)" modified="2009-12-18 11:39:03Z" user="msdmgr" />
+                  <Input name="input" ref="5811" created="2009-01-30 15:34:35Z" user="msdmgr" />
+                  <Output name="whereOperator" ref="5815" created="2009-01-30 15:34:41Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" ID="5813" handle="3" name="GradeSpecDMenu" user="msdmgr" created="2009-11-06 07:52:08Z">
+                  <Input name="validation" ref="5811" created="2009-01-30 15:50:27Z" user="msdmgr" />
+                  <Output name="ShortName:select" ref="5814" created="2009-02-05 15:14:12Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" ID="5814" handle="4" name="SpecNameField" created="2009-11-06 07:52:08Z" user="msdmgr">
+                  <Attribute name="prefix" value="&quot;&quot;" />
+                  <Input name="ShortName:select" ref="5813" created="2009-02-05 15:14:12Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" ID="5815" handle="5" name="GradeSpecColumn" user="msdmgr" created="2009-11-06 07:52:08Z">
+                  <Attribute name="suffix" value="&quot; **&quot;" />
+                  <Attribute name="required" value="0" created="2009-01-22 07:10:05Z" user="njn" />
+                  <Input name="value" ref="5811" created="2009-01-30 15:35:22Z" user="msdmgr" />
+                  <Input name="whereOperator" ref="5812" created="2009-01-30 15:34:41Z" user="msdmgr" />
+                </Widget>
+              </Widget>
+              <Input name="right" ref="5845" created="2009-11-06 12:58:47Z" user="msdmgr" />
+            </Widget>
+            <Widget type="DisplayField" name="DummyField" ID="5845" created="2009-11-06 07:52:08Z" user="msdmgr" handle="2" modified="2009-11-06 12:58:47Z">
+              <Attribute name="format" value="5A" created="2009-09-24 06:13:45Z" user="msdmgr" modified="2009-10-03 09:09:03Z" />
+              <Output name="right" ref="5795" created="2009-11-06 12:58:47Z" user="msdmgr" />
+              <Input name="right" ref="5846" created="2009-09-24 06:14:02Z" user="msdmgr" />
+            </Widget>
+            <Widget type="Form" ID="5846" handle="3" name="ButtonMenu" grid_width="3" grid_height="3" user="msdmgr" created="2009-11-06 07:52:08Z" modified="2009-11-06 12:57:11Z">
+              <Widget type="Template" ID="5847" handle="1" name="UpdateButton" created="2009-11-06 07:52:08Z" user="msdmgr" modified="2009-11-06 12:57:23Z">
+                <Output name="start" ref="5885" created="2009-09-25 15:01:03Z" user="msdmgr" />
+              </Widget>
+              <Output name="right" ref="5845" created="2009-09-24 06:14:02Z" user="msdmgr" />
+            </Widget>
+            <Output name="below" ref="5793" created="2009-02-04 11:04:07Z" user="msdmgr" />
+            <Input name="below" ref="5850" created="2009-09-23 14:24:45Z" user="msdmgr" />
+          </Widget>
+          <Widget type="Template" name="SelectAllToggle" ID="5850" created="2009-11-06 07:52:08Z" user="msdmgr" handle="3" modified="2009-12-18 11:11:02Z">
+            <Output name="below" ref="5794" created="2009-09-23 14:24:45Z" user="msdmgr" />
+            <Output name="value" ref="5856" created="2009-09-23 12:34:19Z" user="msdmgr" />
+            <Input name="reset" ref="5920" created="2009-12-18 11:11:02Z" user="msdmgr" />
+          </Widget>
+          <Widget type="AutoHeader" ID="5851" handle="4" name="HeaderForm" created="2009-11-06 07:52:08Z" user="msdmgr">
+            <Input name="headerForm" ref="5855" />
+            <Input name="below" ref="5854" created="2005-09-20 12:36:48Z" user="e662168" />
+          </Widget>
+          <Widget type="Template" name="StatusColumn" ID="5852" created="2009-11-06 07:52:08Z" user="msdmgr" handle="5">
+            <Attribute name="value" value="&quot;U&quot;" created="2009-09-25 09:46:35Z" user="msdmgr" />
+          </Widget>
+          <Widget type="Cursor" ID="5853" handle="6" name="acs_opc_tag_mast" created="2009-11-06 07:52:08Z" user="msdmgr" modified="2009-11-06 13:38:21Z">
+            <Input name="where" ref="5797" created="2009-11-06 13:02:37Z" user="msdmgr" />
+            <Input name="where" ref="5803" created="2009-11-06 13:02:56Z" user="msdmgr" />
+            <Input name="where" ref="5807" created="2009-11-06 13:03:04Z" user="msdmgr" />
+            <Output name="select" ref="5865" created="2008-12-23 15:53:50Z" user="msdmgr" />
+            <Output name="select" ref="5864" created="2009-08-25 12:28:48Z" user="msdmgr" />
+            <Output name="select" ref="5863" created="2009-08-25 12:29:10Z" user="msdmgr" />
+            <Output name="doneFlag" ref="5854" />
+            <Output name="fetchFlag" ref="5854" />
+            <Output name="resetFlag" ref="5854" />
+            <Input name="order" ref="5865" created="2009-02-13 15:46:48Z" user="richard" />
+            <Input name="order" ref="5864" created="2009-02-13 15:46:48Z" user="richard" />
+            <Input name="order" ref="5863" created="2009-02-13 15:46:48Z" user="richard" />
+            <Input name="fetchPage" ref="5882" created="2005-09-19 15:17:17Z" user="e662168" />
+            <Input name="fetchRows" ref="5882" created="2005-09-19 15:17:23Z" user="e662168" />
+            <Input name="out:syncTime" ref="5882" created="2005-09-19 15:17:35Z" user="e662168" />
+          </Widget>
+          <Widget type="Form" ID="5854" handle="7" name="ItemArray" grid_width="6" grid_height="1" created="2009-11-06 07:52:08Z" user="msdmgr">
+            <Widget type="Form" ID="5855" handle="1" name="ItemLine" grid_width="8" grid_height="2" created="2009-11-06 07:52:08Z" user="msdmgr" modified="2009-12-18 04:40:11Z">
+              <Widget type="Template" name="SelectToggle" ID="5856" created="2009-11-06 07:52:08Z" user="msdmgr" handle="1" modified="2009-12-21 09:35:15Z">
+                <Attribute name="prefix" value="&quot;&quot;" created="2009-09-23 12:54:42Z" user="msdmgr" />
+                <Attribute name="suffix" value="&quot;&quot;" created="2009-09-23 12:54:52Z" user="msdmgr" />
+                <Attribute name="name" value="select_toggle" created="2009-09-25 12:10:47Z" user="msdmgr" />
+                <Input name="value" ref="5850" created="2009-09-23 12:34:19Z" user="msdmgr" />
+                <Output name="input" ref="5884" created="2009-09-25 15:13:36Z" user="msdmgr" />
+                <Output name="from" ref="5887" created="2009-09-25 09:40:39Z" user="msdmgr" />
+              </Widget>
+              <Widget type="Template" name="UnitIDField" ID="5860" created="2009-11-06 07:52:08Z" user="msdmgr" handle="2" modified="2009-12-21 09:34:13Z">
+                <Attribute name="prefix" value="&quot;&quot;" created="2008-12-23 16:01:21Z" user="msdmgr" />
+                <Input name="value" ref="5823" created="2009-11-06 13:10:07Z" user="msdmgr" />
+                <Output name="from" ref="5887" created="2009-09-25 09:43:24Z" user="msdmgr" />
+              </Widget>
+              <Widget type="Template" name="TagNameField" ID="5865" created="2009-11-06 07:52:08Z" user="msdmgr" handle="3" modified="2009-12-21 09:34:13Z">
+                <Attribute name="prefix" value="&quot;&quot;" created="2008-12-23 16:01:39Z" user="msdmgr" />
+                <Input name="select" ref="5853" created="2008-12-23 15:53:50Z" user="msdmgr" />
+                <Output name="order" ref="5853" created="2009-02-13 15:46:48Z" user="richard" />
+                <Output name="from" ref="5887" created="2009-09-25 09:43:39Z" user="msdmgr" />
+              </Widget>
+              <Widget type="Template" name="TimeTurnedUpColumn" ID="5862" created="2009-11-06 07:52:08Z" user="msdmgr" handle="4" modified="2009-12-18 04:41:07Z">
+                <Attribute name="prefix" value="&quot;&quot;" created="2009-02-25 12:16:40Z" user="kbhatia" />
+                <Input name="value" ref="5973" created="2009-12-18 04:40:29Z" user="msdmgr" />
+                <Output name="input" ref="5974" created="2009-12-18 04:41:07Z" user="msdmgr" />
+                <Output name="value" ref="5928" created="2009-12-18 04:36:45Z" user="msdmgr" />
+                <Output name="from" ref="5887" created="2009-11-06 13:21:10Z" user="msdmgr" />
+              </Widget>
+              <Widget type="Calculation" name="TimeBegin" ID="5974" created="2009-12-18 04:40:11Z" user="msdmgr" modified="2009-12-18 04:41:37Z" handle="5">
+                <Attribute name="calculation" value="TimeTurnedUpColumn-250" created="2009-12-18 04:41:37Z" user="msdmgr" />
+                <Input name="input" ref="5862" created="2009-12-18 04:41:07Z" user="msdmgr" />
+                <Output name="value" ref="5927" created="2009-12-18 04:41:17Z" user="msdmgr" />
+              </Widget>
+              <Widget type="Template" name="TimeBeginColumn" ID="5927" created="2009-11-06 13:14:02Z" user="msdmgr" handle="6" modified="2009-12-18 04:41:17Z">
+                <Attribute name="prefix" value="&quot;&quot;" created="2009-02-25 12:16:40Z" user="kbhatia" />
+                <Input name="value" ref="5974" created="2009-12-18 04:41:17Z" user="msdmgr" />
+                <Output name="from" ref="5887" created="2009-11-06 13:21:10Z" user="msdmgr" />
+              </Widget>
+              <Widget type="Template" name="StatusField" ID="5875" created="2009-11-06 07:52:08Z" user="msdmgr" handle="7" modified="2009-11-06 13:44:05Z">
+                <Attribute name="default" value="U" created="2009-11-06 13:13:27Z" user="msdmgr" />
+                <Attribute name="prefix" value="&quot;&quot;" created="2009-11-06 13:44:05Z" user="msdmgr" />
+                <Output name="from" ref="5887" created="2009-11-06 13:13:44Z" user="msdmgr" />
+              </Widget>
+              <Widget type="Template" name="TimeEndColumn" ID="5928" created="2009-11-06 13:17:09Z" user="msdmgr" handle="8" modified="2009-12-18 04:36:45Z">
+                <Attribute name="prefix" value="&quot;&quot;" created="2009-02-25 12:16:40Z" user="kbhatia" />
+                <Input name="value" ref="5862" created="2009-12-18 04:36:45Z" user="msdmgr" />
+                <Output name="from" ref="5887" created="2009-11-06 13:21:10Z" user="msdmgr" />
+              </Widget>
+              <Widget type="Template" name="ProgIDColumn" ID="5864" created="2009-11-06 07:52:08Z" user="msdmgr" handle="9" modified="2009-11-06 13:43:58Z">
+                <Attribute name="prefix" value="&quot;&quot;" created="2008-12-23 16:01:39Z" user="msdmgr" />
+                <Input name="select" ref="5853" created="2009-08-25 12:28:48Z" user="msdmgr" />
+                <Output name="order" ref="5853" created="2009-02-13 15:46:48Z" user="richard" />
+                <Output name="from" ref="5887" created="2009-11-06 13:21:10Z" user="msdmgr" />
+              </Widget>
+              <Widget type="Template" name="IDSServerNameColumn" ID="5863" created="2009-11-06 07:52:08Z" user="msdmgr" handle="10" modified="2009-11-06 13:43:46Z">
+                <Attribute name="prefix" value="&quot;&quot;" created="2008-12-23 16:01:39Z" user="msdmgr" />
+                <Input name="select" ref="5853" created="2009-08-25 12:29:10Z" user="msdmgr" />
+                <Output name="order" ref="5853" created="2009-02-13 15:46:48Z" user="richard" />
+                <Output name="from" ref="5887" created="2009-11-06 13:21:10Z" user="msdmgr" />
+              </Widget>
+              <Widget type="Template" name="QualityField" ID="5876" created="2009-11-06 07:52:08Z" user="msdmgr" handle="11" modified="2009-11-06 13:31:20Z">
+                <Attribute name="prefix" value="&quot;&quot;" created="2009-01-20 09:12:36Z" user="msdmgr" />
+                <Attribute name="default" value="good" created="2009-11-06 13:17:36Z" user="msdmgr" />
+                <Output name="from" ref="5887" created="2009-11-06 13:21:10Z" user="msdmgr" />
+              </Widget>
+              <Widget type="Template" name="ValueActEntry" ID="5874" created="2009-11-06 07:52:08Z" user="msdmgr" handle="12" modified="2009-11-06 13:31:01Z">
+                <Attribute name="prefix" value="&quot;&quot;" created="2009-01-20 09:12:36Z" user="msdmgr" />
+                <Output name="from" ref="5887" created="2009-09-25 09:44:49Z" user="msdmgr" />
+              </Widget>
+              <Attribute name="orientation" value="Horizontal" />
+              <Output name="headerForm" ref="5851" />
+            </Widget>
+            <Attribute name="defaultDistance" value="0" />
+            <Attribute name="orientation" value="Vertical" />
+            <Attribute name="displayElements" value="10" created="2004-12-16 14:13:16Z" user="e662168" modified="2004-12-16 14:24:05Z" />
+            <Input name="doneFlag" ref="5853" />
+            <Input name="fetchFlag" ref="5853" />
+            <Input name="resetFlag" ref="5853" />
+            <Output name="below" ref="5851" created="2005-09-20 12:36:48Z" user="e662168" />
+            <Input name="below" ref="5882" created="2005-09-19 15:17:00Z" user="e662168" />
+          </Widget>
+          <Widget type="Diagram" name="ArrayControl" ID="5880" created="2009-11-06 07:52:08Z" user="msdmgr" handle="8">
+            <Widget type="InternalField" name="TableName" ID="5881" created="2009-11-06 07:52:08Z" user="msdmgr" handle="1" modified="2009-11-06 13:01:30Z">
+              <Attribute name="default" value="acs_opc_tag_mast" created="2005-09-19 15:16:36Z" user="msdmgr" modified="2009-11-06 13:01:30Z" />
+              <Output name="table" ref="5882" created="2005-09-19 15:16:45Z" user="e662168" />
+            </Widget>
+            <Widget type="Template" name="ArrayControl()" ID="5882" created="2009-11-06 07:52:08Z" user="msdmgr" handle="2" modified="2009-11-06 13:20:31Z">
+              <Input name="where" ref="5797" created="2009-11-06 13:20:31Z" user="msdmgr" />
+              <Input name="where" ref="5803" created="2009-11-06 13:20:31Z" user="msdmgr" />
+              <Input name="where" ref="5807" created="2009-11-06 13:20:31Z" user="msdmgr" />
+              <Input name="table" ref="5881" created="2005-09-19 15:16:45Z" user="e662168" />
+              <Output name="fetchPage" ref="5853" created="2005-09-19 15:17:17Z" user="e662168" />
+              <Output name="fetchRows" ref="5853" created="2005-09-19 15:17:23Z" user="e662168" />
+              <Output name="out:syncTime" ref="5853" created="2005-09-19 15:17:35Z" user="e662168" />
+              <Output name="below" ref="5854" created="2005-09-19 15:17:00Z" user="e662168" />
+              <Input name="in:syncTime" ref="5920" created="2009-09-23 12:39:31Z" user="msdmgr" />
+            </Widget>
+          </Widget>
+          <Widget type="Diagram" name="Transactions" ID="5883" created="2009-11-06 07:52:08Z" user="msdmgr" handle="9" modified="2009-12-21 09:35:15Z">
+            <Widget type="Calculation" ID="5884" handle="1" name="RecordNotFound" user="msdmgr" created="2009-11-06 07:52:08Z" modified="2009-12-21 09:25:19Z">
+              <Attribute name="calculation" value="sum('SelectToggle') and SECURITYLEVEL &gt;= 5" modified="2009-11-06 13:29:58Z" user="msdmgr" />
+              <Input name="input" ref="4" created="2009-11-06 13:34:30Z" user="msdmgr" />
+              <Input name="input" ref="5856" created="2009-09-25 15:13:36Z" user="msdmgr" />
+              <Output name="activate" ref="5885" created="2009-09-25 15:05:24Z" user="msdmgr" />
+            </Widget>
+            <Widget type="Transaction" name="AcceptTransaction" ID="5885" created="2009-11-06 07:52:08Z" user="msdmgr" handle="2" modified="2009-12-21 09:35:15Z">
+              <Widget type="InternalField" name="SelectToggle" ID="5886" created="2009-11-06 07:52:08Z" user="msdmgr" handle="1">
+                <Attribute name="name" value="select_toggle" created="2009-09-25 09:41:14Z" user="msdmgr" />
+                <Attribute name="value" value="1" created="2009-09-25 09:41:33Z" user="msdmgr" />
+                <Output name="where" ref="5887" created="2009-09-25 09:42:29Z" user="msdmgr" />
+              </Widget>
+              <Widget type="FormCursor" name="EachTag" ID="5887" created="2009-11-06 07:52:08Z" user="msdmgr" handle="2" modified="2009-11-06 13:24:58Z">
+                <Input name="from" ref="5856" created="2009-09-25 09:40:39Z" user="msdmgr" />
+                <Input name="from" ref="5860" created="2009-09-25 09:43:24Z" user="msdmgr" />
+                <Input name="from" ref="5865" created="2009-09-25 09:43:39Z" user="msdmgr" />
+                <Input name="from" ref="5862" created="2009-11-06 13:21:10Z" user="msdmgr" />
+                <Input name="from" ref="5927" created="2009-11-06 13:21:10Z" user="msdmgr" />
+                <Input name="from" ref="5875" created="2009-11-06 13:13:44Z" user="msdmgr" />
+                <Input name="from" ref="5928" created="2009-11-06 13:21:10Z" user="msdmgr" />
+                <Input name="from" ref="5864" created="2009-11-06 13:21:10Z" user="msdmgr" />
+                <Input name="from" ref="5863" created="2009-11-06 13:21:10Z" user="msdmgr" />
+                <Input name="from" ref="5876" created="2009-11-06 13:21:10Z" user="msdmgr" />
+                <Input name="from" ref="5874" created="2009-09-25 09:44:49Z" user="msdmgr" />
+                <Input name="where" ref="5886" created="2009-09-25 09:42:29Z" user="msdmgr" />
+                <Output name="select" ref="5889" created="2009-09-25 09:44:19Z" user="msdmgr" />
+                <Output name="select" ref="5890" created="2009-09-25 09:44:16Z" user="msdmgr" />
+                <Output name="select" ref="5929" created="2009-11-06 13:22:09Z" user="msdmgr" />
+                <Output name="select" ref="5931" created="2009-11-06 13:22:18Z" user="msdmgr" />
+                <Output name="select" ref="5930" created="2009-11-06 13:22:15Z" user="msdmgr" />
+                <Output name="select" ref="5933" created="2009-11-06 13:23:58Z" user="msdmgr" />
+                <Output name="select" ref="5934" created="2009-11-06 13:24:34Z" user="msdmgr" />
+                <Output name="select" ref="5935" created="2009-11-06 13:24:58Z" user="msdmgr" />
+                <Output name="select" ref="5891" created="2009-09-25 09:45:00Z" user="msdmgr" />
+                <Output name="fetchFlag" ref="5888" created="2009-09-25 09:41:48Z" user="msdmgr" />
+              </Widget>
+              <Widget type="Transaction" ID="5888" handle="3" name="EachTag" grid_width="5" grid_height="1" user="msdmgr" created="2009-11-06 07:52:08Z" modified="2009-12-21 09:39:42Z">
+                <Widget type="Template" name="UnitIDColumn" ID="5889" created="2009-11-06 07:52:08Z" user="msdmgr" handle="1" modified="2009-12-21 09:40:49Z">
+                  <Input name="select" ref="5887" created="2009-09-25 09:44:19Z" user="msdmgr" />
+                  <Output name="where" ref="5976" created="2009-12-21 09:34:13Z" user="msdmgr" />
+                  <Output name="input" ref="5893" created="2009-11-02 11:39:06Z" user="msdmgr" />
+                  <Output name="insert" ref="5895" created="2009-11-06 13:25:22Z" user="msdmgr" />
+                  <Output name="where" ref="5981" created="2009-12-21 09:40:42Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="TagNameColumn" ID="5890" created="2009-11-06 07:52:08Z" user="msdmgr" handle="2" modified="2009-12-21 09:40:23Z">
+                  <Input name="select" ref="5887" created="2009-09-25 09:44:16Z" user="msdmgr" />
+                  <Output name="where" ref="5976" created="2009-12-21 09:34:13Z" user="msdmgr" />
+                  <Output name="input" ref="5893" created="2009-11-02 11:39:11Z" user="msdmgr" />
+                  <Output name="insert" ref="5895" created="2009-11-06 13:25:22Z" user="msdmgr" />
+                  <Output name="where" ref="5981" created="2009-12-21 09:40:23Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Cursor" name="acs_opti_opc_intf" ID="5976" created="2009-12-21 09:29:12Z" user="msdmgr" modified="2009-12-21 09:36:11Z" handle="3">
+                  <Input name="where" ref="5889" created="2009-12-21 09:34:13Z" user="msdmgr" />
+                  <Input name="where" ref="5890" created="2009-12-21 09:34:13Z" user="msdmgr" />
+                  <Output name="select" ref="5978" created="2009-12-21 09:36:11Z" user="msdmgr" />
+                  <Output name="status" ref="5977" created="2009-12-21 09:35:34Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="StatusColumn" ID="5978" created="2009-12-21 09:36:00Z" user="msdmgr" modified="2009-12-21 09:36:11Z" handle="4">
+                  <Input name="select" ref="5976" created="2009-12-21 09:36:11Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="SuccessColumn" ID="5977" created="2009-12-21 09:35:26Z" user="msdmgr" modified="2009-12-21 09:39:20Z" handle="5">
+                  <Input name="status" ref="5976" created="2009-12-21 09:35:34Z" user="msdmgr" />
+                  <Output name="input" ref="5979" created="2009-12-21 09:38:20Z" user="msdmgr" />
+                  <Output name="input" ref="5980" created="2009-12-21 09:39:20Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Calculation" name="RecordNotFound" ID="5979" created="2009-12-21 09:38:10Z" user="msdmgr" modified="2009-12-21 11:03:54Z" handle="6">
+                  <Attribute name="calculation" value="SuccessColumn = 0" created="2009-12-21 09:43:42Z" user="msdmgr" modified="2009-12-21 11:03:54Z" />
+                  <Input name="input" ref="5977" created="2009-12-21 09:38:20Z" user="msdmgr" />
+                  <Output name="activate" ref="5895" created="2009-12-21 09:44:49Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Calculation" name="RecordFound" ID="5980" created="2009-12-21 09:39:20Z" user="msdmgr" modified="2009-12-21 11:04:06Z" handle="7">
+                  <Attribute name="calculation" value="SuccessColumn = 1" created="2009-12-21 09:44:02Z" user="msdmgr" modified="2009-12-21 11:04:06Z" />
+                  <Input name="input" ref="5977" created="2009-12-21 09:39:20Z" user="msdmgr" />
+                  <Output name="activate" ref="5981" created="2009-12-21 09:44:19Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="TimeTurnedUpColumn" ID="5929" created="2009-11-06 13:22:09Z" user="msdmgr" handle="8" modified="2009-12-21 09:40:09Z">
+                  <Input name="select" ref="5887" created="2009-11-06 13:22:09Z" user="msdmgr" />
+                  <Output name="input" ref="5893" created="2009-11-02 11:39:11Z" user="msdmgr" />
+                  <Output name="insert" ref="5895" created="2009-11-06 13:25:22Z" user="msdmgr" />
+                  <Output name="update" ref="5981" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="TimeBeginColumn" ID="5931" created="2009-11-06 13:22:18Z" user="msdmgr" handle="9" modified="2009-12-21 09:40:09Z">
+                  <Input name="select" ref="5887" created="2009-11-06 13:22:18Z" user="msdmgr" />
+                  <Output name="input" ref="5893" created="2009-11-02 11:39:11Z" user="msdmgr" />
+                  <Output name="insert" ref="5895" created="2009-11-06 13:25:22Z" user="msdmgr" />
+                  <Output name="update" ref="5981" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="TimeEndColumn" ID="5930" created="2009-11-06 13:22:15Z" user="msdmgr" handle="10" modified="2009-12-21 09:40:09Z">
+                  <Input name="select" ref="5887" created="2009-11-06 13:22:15Z" user="msdmgr" />
+                  <Output name="input" ref="5893" created="2009-11-02 11:39:11Z" user="msdmgr" />
+                  <Output name="insert" ref="5895" created="2009-11-06 13:25:22Z" user="msdmgr" />
+                  <Output name="update" ref="5981" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="ProgIDColumn" ID="5933" created="2009-11-06 13:23:58Z" user="msdmgr" handle="11" modified="2009-12-21 09:40:09Z">
+                  <Input name="select" ref="5887" created="2009-11-06 13:23:58Z" user="msdmgr" />
+                  <Output name="input" ref="5893" created="2009-11-02 11:39:11Z" user="msdmgr" />
+                  <Output name="insert" ref="5895" created="2009-11-06 13:25:22Z" user="msdmgr" />
+                  <Output name="update" ref="5981" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="IDSServerNameColumn" ID="5934" created="2009-11-06 13:24:34Z" user="msdmgr" handle="12" modified="2009-12-21 09:40:09Z">
+                  <Input name="select" ref="5887" created="2009-11-06 13:24:34Z" user="msdmgr" />
+                  <Output name="input" ref="5893" created="2009-11-02 11:39:11Z" user="msdmgr" />
+                  <Output name="insert" ref="5895" created="2009-11-06 13:25:22Z" user="msdmgr" />
+                  <Output name="update" ref="5981" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="QualityColumn" ID="5935" created="2009-11-06 13:24:58Z" user="msdmgr" handle="13" modified="2009-12-21 09:40:09Z">
+                  <Input name="select" ref="5887" created="2009-11-06 13:24:58Z" user="msdmgr" />
+                  <Output name="input" ref="5893" created="2009-11-02 11:39:11Z" user="msdmgr" />
+                  <Output name="insert" ref="5895" created="2009-11-06 13:25:22Z" user="msdmgr" />
+                  <Output name="update" ref="5981" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="ValueActColumn" ID="5891" created="2009-11-06 07:52:08Z" user="msdmgr" handle="14" modified="2009-12-21 09:40:09Z">
+                  <Input name="select" ref="5887" created="2009-09-25 09:45:00Z" user="msdmgr" />
+                  <Output name="insert" ref="5895" created="2009-11-06 13:21:40Z" user="msdmgr" />
+                  <Output name="update" ref="5981" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" name="StatusColumn" ID="5892" created="2009-11-06 07:52:08Z" user="msdmgr" handle="15" modified="2009-12-21 09:40:09Z">
+                  <Attribute name="value" value="&quot;A&quot;" created="2009-09-25 09:45:53Z" user="msdmgr" />
+                  <Output name="insert" ref="5895" created="2009-11-06 13:21:40Z" user="msdmgr" />
+                  <Output name="update" ref="5981" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Calculation" ID="5893" handle="16" name="ExecuteSetTime" created="2009-11-06 07:52:08Z" user="msdmgr" modified="2009-11-06 13:24:58Z">
+                  <Attribute name="calculation" value="Now(0)" />
+                  <Input name="input" ref="5889" created="2009-11-02 11:39:06Z" user="msdmgr" />
+                  <Input name="input" ref="5890" created="2009-11-02 11:39:11Z" user="msdmgr" />
+                  <Input name="input" ref="5929" created="2009-11-02 11:39:11Z" user="msdmgr" />
+                  <Input name="input" ref="5931" created="2009-11-02 11:39:11Z" user="msdmgr" />
+                  <Input name="input" ref="5930" created="2009-11-02 11:39:11Z" user="msdmgr" />
+                  <Input name="input" ref="5933" created="2009-11-02 11:39:11Z" user="msdmgr" />
+                  <Input name="input" ref="5934" created="2009-11-02 11:39:11Z" user="msdmgr" />
+                  <Input name="input" ref="5935" created="2009-11-02 11:39:11Z" user="msdmgr" />
+                  <Output name="value" ref="5894" />
+                </Widget>
+                <Widget type="Template" ID="5932" handle="17" name="TimeModifiedColumn" user="msdmgr" created="2009-11-06 13:22:39Z" modified="2009-12-21 09:40:09Z">
+                  <Attribute name="default" value="0" created="2009-11-06 13:23:01Z" user="msdmgr" />
+                  <Output name="insert" ref="5895" created="2009-11-06 13:21:40Z" user="msdmgr" />
+                  <Output name="update" ref="5981" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Template" ID="5894" handle="18" name="TimeCreatedColumn" user="msdmgr" created="2009-11-06 07:52:08Z" modified="2009-12-21 09:40:09Z">
+                  <Input name="value" ref="5893" />
+                  <Output name="insert" ref="5895" created="2009-11-06 13:21:40Z" user="msdmgr" />
+                  <Output name="update" ref="5981" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Cursor" ID="5895" handle="19" name="Mod:acs_opti_opc_intf" user="msdmgr" created="2009-11-06 07:52:08Z" modified="2009-12-21 09:44:49Z">
+                  <Attribute name="to" value="acs_opti_opc_intf" modified="2009-12-18 04:30:41Z" user="msdmgr" />
+                  <Attribute name="autoInsert" value="True" created="2009-11-06 13:21:51Z" user="msdmgr" />
+                  <Attribute name="activate" value="False" created="2009-12-21 09:44:39Z" user="msdmgr" />
+                  <Input name="insert" ref="5889" created="2009-11-06 13:25:22Z" user="msdmgr" />
+                  <Input name="insert" ref="5890" created="2009-11-06 13:25:22Z" user="msdmgr" />
+                  <Input name="activate" ref="5979" created="2009-12-21 09:44:49Z" user="msdmgr" />
+                  <Input name="insert" ref="5929" created="2009-11-06 13:25:22Z" user="msdmgr" />
+                  <Input name="insert" ref="5931" created="2009-11-06 13:25:22Z" user="msdmgr" />
+                  <Input name="insert" ref="5930" created="2009-11-06 13:25:22Z" user="msdmgr" />
+                  <Input name="insert" ref="5933" created="2009-11-06 13:25:22Z" user="msdmgr" />
+                  <Input name="insert" ref="5934" created="2009-11-06 13:25:22Z" user="msdmgr" />
+                  <Input name="insert" ref="5935" created="2009-11-06 13:25:22Z" user="msdmgr" />
+                  <Input name="insert" ref="5891" created="2009-11-06 13:21:40Z" user="msdmgr" />
+                  <Input name="insert" ref="5892" created="2009-11-06 13:21:40Z" user="msdmgr" />
+                  <Input name="insert" ref="5932" created="2009-11-06 13:21:40Z" user="msdmgr" />
+                  <Input name="insert" ref="5894" created="2009-11-06 13:21:40Z" user="msdmgr" />
+                </Widget>
+                <Widget type="Cursor" ID="5981" handle="20" name="Mod:acs_opti_opc_intf" user="msdmgr" created="2009-12-21 09:39:40Z" modified="2009-12-21 09:44:31Z">
+                  <Attribute name="to" value="acs_opti_opc_intf" modified="2009-12-18 04:30:41Z" user="msdmgr" />
+                  <Attribute name="activate" value="False" created="2009-12-21 09:44:31Z" user="msdmgr" />
+                  <Input name="where" ref="5889" created="2009-12-21 09:40:42Z" user="msdmgr" />
+                  <Input name="where" ref="5890" created="2009-12-21 09:40:23Z" user="msdmgr" />
+                  <Input name="activate" ref="5980" created="2009-12-21 09:44:19Z" user="msdmgr" />
+                  <Input name="update" ref="5929" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                  <Input name="update" ref="5931" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                  <Input name="update" ref="5930" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                  <Input name="update" ref="5933" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                  <Input name="update" ref="5934" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                  <Input name="update" ref="5935" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                  <Input name="update" ref="5891" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                  <Input name="update" ref="5892" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                  <Input name="update" ref="5932" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                  <Input name="update" ref="5894" created="2009-12-21 09:40:09Z" user="msdmgr" />
+                </Widget>
+                <Input name="fetchFlag" ref="5887" created="2009-09-25 09:41:48Z" user="msdmgr" />
+              </Widget>
+              <Input name="start" ref="5847" created="2009-09-25 15:01:03Z" user="msdmgr" />
+              <Input name="activate" ref="5884" created="2009-09-25 15:05:24Z" user="msdmgr" />
+              <Output name="status" ref="5920" created="2009-09-25 15:14:44Z" user="msdmgr" />
+            </Widget>
+            <Widget type="Template" ID="5920" handle="3" name="DoneTimeColumn" user="msdmgr" created="2009-11-06 07:52:08Z" modified="2009-12-18 11:11:02Z">
+              <Input name="status" ref="5885" created="2009-09-25 15:14:44Z" user="msdmgr" />
+              <Output name="reset" ref="5850" created="2009-12-18 11:11:02Z" user="msdmgr" />
+              <Output name="in:syncTime" ref="5882" created="2009-09-23 12:39:31Z" user="msdmgr" />
+            </Widget>
+          </Widget>
+          <Attribute name="orientation" value="Vertical" />
+          <Attribute name="borderWidth" value="1" created="2004-12-16 16:18:20Z" user="e662168" modified="2005-09-19 15:19:55Z" />
+        </Widget>
+      </Widget>
+      <Widget type="Diagram" name="DEFAULT" ID="5440" created="2009-08-24 05:10:31Z" user="msdmgr" handle="2" />
+    </Widget>
+    <Attribute name="minWidth" value="800" />
+    <Output name="below" ref="2" created="2009-11-05 10:17:21Z" user="msdmgr" />
+  </Widget>
+  <History>(C) Copyright 1990-97, Honeywell-Measurex Corporation. This document contains
+    proprietary information and trade secrets which are the property of 
+    Honeywell-Measurex Corporation.
+
+  Date     Who   Description of change
+--------   ----  --------------------------------------------------------------
+11/04/09   NJN   OptiACS: Add records into acs_opti_opc_intf for OPC configurations
+</History>
+  <Revisions created="2005-05-20 18:45:03Z" user="E725010">
+  </Revisions>
+  <Attribute name="defaultDistance" value="0" created="2008-06-19 15:21:29Z" user="E731650" />
+</Application>

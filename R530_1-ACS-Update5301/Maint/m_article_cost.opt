@@ -1,0 +1,1695 @@
+<Application type="Application" name="m_article_cost" ID="1" Directory="Maint" grid_width="4" grid_height="4" lastCheckin="2003-01-29 16:31:58Z" lastID="818" command="acs acsarticle" environment="" modified="2010-09-30 15:31:04Z" user="Philippe">
+  <Widget type="Template" ID="2" handle="1" name="SECURITYLEVEL" modified="2009-10-28 19:21:39Z" user="gvg">
+  </Widget>
+  <Widget type="Template" ID="3" handle="2" name="StandardTitleForm" modified="2009-10-28 19:30:34Z" user="gvg">
+    <Input name="below" ref="4" />
+  </Widget>
+  <Widget type="Form" ID="4" handle="3" name="KeyForm" grid_width="7" grid_height="4" modified="2010-09-30 15:03:09Z" user="Philippe">
+    <Widget type="Template" ID="5" handle="1" name="KeyFieldText" />
+    <Widget type="Form" name="LeftForm" ID="817" created="2010-09-30 15:02:53Z" user="Philippe" modified="2010-09-30 15:09:31Z" handle="2">
+      <Widget type="Form" name="GradeSpecForm" ID="486" created="2010-09-29 13:32:53Z" user="Philippe" modified="2010-09-30 15:12:27Z" handle="1">
+        <Widget type="Template" ID="492" handle="1" name="GradeSpecEntry" user="Philippe" created="2010-09-29 13:42:40Z" modified="2010-09-30 15:03:40Z">
+          <Attribute name="required" value="0" created="2010-09-29 13:58:10Z" user="Philippe" />
+          <Output name="input" ref="509" created="2010-09-29 13:45:32Z" user="Philippe" />
+          <Output name="where" ref="636" created="2010-09-29 15:27:42Z" user="Philippe" />
+          <Output name="where" ref="464" created="2010-09-30 08:18:41Z" user="Philippe" />
+          <Input name="GradeSpec:value" ref="499" />
+          <Input name="GradeSpec:value" ref="503" />
+          <Input name="whereOperator" ref="509" created="2010-09-29 13:51:26Z" user="Philippe" />
+        </Widget>
+        <Widget type="Option" ID="493" handle="2" name="ADDSMENU" grid_width="3" grid_height="1" created="2010-09-29 13:42:40Z" user="Philippe">
+          <Widget type="Diagram" ID="494" handle="1" name="Y" grid_width="5" grid_height="1" created="2010-09-29 13:42:40Z" user="Philippe">
+            <Widget type="InternalField" ID="495" handle="1" name="ActivateOFF" created="2010-09-29 13:42:40Z" user="Philippe">
+              <Attribute name="default" value="0" />
+            </Widget>
+            <Widget type="InternalField" ID="496" handle="2" name="CallingProg" created="2010-09-29 13:42:40Z" user="Philippe">
+              <Attribute name="default" value="&quot;MAINT&quot;" />
+              <Output name="program" ref="498" />
+            </Widget>
+            <Widget type="Template" ID="497" handle="3" name="GradeSpecSMenuButton" created="2010-09-29 13:42:40Z" user="Philippe">
+              <Output name="displayed" ref="498" />
+              <Input name="done:value" ref="498" />
+            </Widget>
+            <Widget type="Template" ID="498" handle="4" name="GradeSpecSMenu()" created="2010-09-29 13:42:40Z" user="Philippe">
+              <Input name="program" ref="496" />
+              <Input name="displayed" ref="497" />
+              <Output name="done:value" ref="497" />
+              <Output name="value" ref="499" />
+            </Widget>
+            <Widget type="Connector" ID="499" handle="5" name="value" created="2010-09-29 13:42:40Z" user="Philippe">
+              <Input name="value" ref="498" />
+              <Output name="GradeSpec:value" ref="492" />
+            </Widget>
+          </Widget>
+          <Widget type="Diagram" ID="500" handle="2" name="DEFAULT" grid_width="7" grid_height="2" created="2010-09-29 13:42:40Z" user="Philippe">
+            <Widget type="Template" ID="501" handle="1" name="PopupMenu" created="2010-09-29 13:42:40Z" user="Philippe">
+              <Output name="validation" ref="502" />
+            </Widget>
+            <Widget type="Cursor" ID="502" handle="2" name="Key:gradespec" created="2010-09-29 13:42:40Z" user="Philippe">
+              <Attribute name="from" value="grade_spec" />
+              <Input name="validation" ref="501" />
+              <Output name="select" ref="503" />
+              <Output name="select" ref="504" />
+              <Output name="select" ref="505" />
+              <Output name="select" ref="506" />
+              <Output name="select" ref="507" />
+              <Output name="select" ref="508" />
+            </Widget>
+            <Widget type="Template" ID="503" handle="3" name="GradeSpecColumn" created="2010-09-29 13:42:40Z" user="Philippe">
+              <Input name="select" ref="502" />
+              <Output name="GradeSpec:value" ref="492" />
+            </Widget>
+            <Widget type="Template" ID="504" handle="4" name="SpecNameColumn" created="2010-09-29 13:42:40Z" user="Philippe">
+              <Input name="select" ref="502" />
+            </Widget>
+            <Widget type="Template" ID="505" handle="5" name="BwtNominalColumn" created="2010-09-29 13:42:40Z" user="Philippe">
+              <Input name="select" ref="502" />
+            </Widget>
+            <Widget type="Template" ID="506" handle="6" name="CaliperColumn" created="2010-09-29 13:42:40Z" user="Philippe">
+              <Input name="select" ref="502" />
+            </Widget>
+            <Widget type="Template" ID="507" handle="7" name="GradeIDColumn" created="2010-09-29 13:42:40Z" user="Philippe">
+              <Input name="select" ref="502" />
+            </Widget>
+            <Widget type="Template" ID="508" handle="8" name="ColorIDColumn" created="2010-09-29 13:42:40Z" user="Philippe">
+              <Input name="select" ref="502" />
+            </Widget>
+          </Widget>
+        </Widget>
+        <Widget type="Calculation" name="AllGradeSpec" ID="509" created="2010-09-29 13:45:09Z" user="Philippe" handle="3" modified="2010-09-29 13:51:26Z">
+          <Attribute name="calculation" value="TruthToArg(GradeSpecEntry = &quot; &quot;, &quot;like&quot;,&quot;ALL&quot;)" created="2009-10-28 20:37:32Z" user="Philippe" modified="2010-09-29 13:46:15Z" />
+          <Input name="input" ref="492" created="2010-09-29 13:45:32Z" user="Philippe" />
+          <Output name="whereOperator" ref="492" created="2010-09-29 13:51:26Z" user="Philippe" />
+        </Widget>
+        <Attribute name="orientation" value="horizontal" created="2010-09-30 15:00:47Z" user="Philippe" />
+      </Widget>
+      <Widget type="Form" ID="18" handle="2" name="TypeCodeSizeForm" grid_width="6" grid_height="5" modified="2010-09-30 15:12:31Z" user="Philippe">
+        <Widget type="Template" ID="19" handle="1" name="TableNameColumn">
+          <Attribute name="default" value="&quot;article&quot;" />
+          <Output name="where" ref="22" />
+        </Widget>
+        <Widget type="Template" ID="21" handle="2" name="TypeCodeEntry" modified="2010-09-30 15:03:40Z" user="Philippe">
+          <Attribute name="suffix" value="&quot; **&quot;" />
+          <Attribute name="required" value="0" created="2010-09-30 13:46:51Z" user="Philippe" />
+          <Output name="input" ref="454" created="2009-10-28 20:37:40Z" user="gvg" />
+          <Output name="validation" ref="22" />
+          <Output name="input" ref="786" created="2010-09-29 16:25:41Z" user="Philippe" />
+          <Output name="input" ref="787" created="2010-09-29 16:26:04Z" user="Philippe" />
+          <Output name="input" ref="788" created="2010-09-30 07:23:51Z" user="Philippe" />
+          <Output name="input" ref="789" created="2010-09-30 07:25:23Z" user="Philippe" />
+          <Output name="input" ref="790" created="2010-09-30 07:26:15Z" user="Philippe" />
+          <Output name="input" ref="791" created="2010-09-30 07:26:55Z" user="Philippe" />
+          <Output name="input" ref="792" created="2010-09-30 07:33:45Z" user="Philippe" />
+          <Output name="input" ref="793" created="2010-09-30 07:34:36Z" user="Philippe" />
+          <Output name="input" ref="794" created="2010-09-30 07:35:25Z" user="Philippe" />
+          <Output name="input" ref="795" created="2010-09-30 07:36:51Z" user="Philippe" />
+          <Output name="input" ref="804" created="2010-09-30 08:30:56Z" user="Philippe" />
+          <Output name="input" ref="805" created="2010-09-30 08:32:14Z" user="Philippe" />
+          <Output name="input" ref="796" created="2010-09-30 07:59:34Z" user="Philippe" />
+          <Output name="input" ref="797" created="2010-09-30 08:02:01Z" user="Philippe" />
+          <Output name="input" ref="798" created="2010-09-30 08:03:12Z" user="Philippe" />
+          <Output name="input" ref="799" created="2010-09-30 08:04:31Z" user="Philippe" />
+          <Output name="input" ref="800" created="2010-09-30 08:07:46Z" user="Philippe" />
+          <Output name="input" ref="801" created="2010-09-30 08:09:25Z" user="Philippe" />
+          <Output name="input" ref="802" created="2010-09-30 08:10:49Z" user="Philippe" />
+          <Output name="input" ref="803" created="2010-09-30 08:11:57Z" user="Philippe" />
+          <Output name="TypeCode:where" ref="150" />
+          <Output name="where" ref="636" created="2010-09-29 15:27:42Z" user="Philippe" />
+          <Output name="input" ref="480" created="2009-10-29 15:51:48Z" user="gvg" />
+          <Output name="input" ref="481" created="2009-10-29 15:43:38Z" user="gvg" />
+          <Output name="where" ref="464" created="2009-10-29 12:48:22Z" user="gvg" />
+        </Widget>
+        <Widget type="Calculation" name="AllTypeCodes" ID="454" created="2009-10-28 20:36:54Z" user="gvg" modified="2009-10-29 13:44:57Z" handle="3">
+          <Attribute name="calculation" value="TruthToArg(TypeCodeEntry = &quot; &quot;, &quot;=&quot;,&quot;ALL&quot;)" created="2009-10-28 20:37:32Z" user="gvg" />
+          <Input name="input" ref="21" created="2009-10-28 20:37:40Z" user="gvg" />
+        </Widget>
+        <Widget type="Template" ID="22" handle="4" name="TypeCodeDMenu">
+          <Input name="where" ref="19" />
+          <Input name="validation" ref="21" />
+          <Output name="CodeDesc:value" ref="24" />
+        </Widget>
+        <Widget type="Template" ID="24" handle="5" name="CodeDescField" modified="2010-09-30 15:02:30Z" user="Philippe">
+          <Attribute name="prefix" value="&quot; &quot;" />
+          <Input name="CodeDesc:value" ref="22" />
+        </Widget>
+        <Widget type="Template" ID="26" handle="6" name="TypeCodeColumn" modified="2009-10-28 19:21:49Z" user="gvg">
+        </Widget>
+        <Attribute name="orientation" value="horizontal" created="2010-09-30 15:00:32Z" user="Philippe" />
+      </Widget>
+      <Attribute name="orientation" value="vertical" created="2010-09-30 15:03:20Z" user="Philippe" />
+      <Input name="right" ref="525" created="2010-09-30 15:09:23Z" user="Philippe" />
+      <Input name="topAlign" ref="525" created="2010-09-30 15:09:31Z" user="Philippe" />
+    </Widget>
+    <Widget type="Form" name="MiddleSizeForm" ID="525" created="2010-09-29 15:09:01Z" user="Philippe" modified="2010-09-30 15:12:37Z" handle="3">
+      <Widget type="Calculation" name="DisplaySheetForm" ID="786" created="2010-09-29 16:24:36Z" user="Philippe" modified="2010-09-29 16:25:56Z" handle="1">
+        <Attribute name="calculation" value="TruthToArg( TypeCodeEntry = &quot;C&quot; or TypeCodeEntry = &quot;S&quot; ,0,1)" created="2010-09-29 16:25:04Z" user="Philippe" modified="2010-09-29 16:25:56Z" />
+        <Input name="input" ref="21" created="2010-09-29 16:25:41Z" user="Philippe" />
+        <Output name="displayed" ref="697" created="2010-09-29 16:25:12Z" user="Philippe" />
+      </Widget>
+      <Widget type="Calculation" name="DisplayRollForm" ID="787" created="2010-09-29 16:26:04Z" user="Philippe" modified="2010-09-29 16:31:34Z" handle="2">
+        <Attribute name="calculation" value="TruthToArg( TypeCodeEntry = &quot;C&quot; or TypeCodeEntry = &quot;S&quot; ,1,0)" created="2010-09-29 16:25:04Z" user="Philippe" modified="2010-09-29 16:26:26Z" />
+        <Input name="input" ref="21" created="2010-09-29 16:26:04Z" user="Philippe" />
+        <Output name="displayed" ref="530" created="2010-09-29 16:26:35Z" user="Philippe" />
+      </Widget>
+      <Widget type="Diagram" name="GetMillMetricFlag" ID="631" created="2010-09-29 15:19:13Z" user="Philippe" handle="3">
+        <Widget type="Template" name="MILL" ID="632" created="2010-09-29 15:19:13Z" user="Philippe" handle="1">
+          <Output name="value" ref="633" created="2003-01-21 16:30:52Z" user="bmishra" />
+        </Widget>
+        <Widget type="Template" name="MillIDColumn" ID="633" created="2010-09-29 15:19:13Z" user="Philippe" handle="2">
+          <Input name="value" ref="632" created="2003-01-21 16:30:52Z" user="bmishra" />
+          <Output name="where" ref="634" created="2003-01-21 16:31:10Z" user="bmishra" />
+        </Widget>
+        <Widget type="Cursor" name="mill" ID="634" created="2010-09-29 15:19:13Z" user="Philippe" handle="3">
+          <Attribute name="verify" value="False" created="2005-01-24 14:29:21Z" user="E159692" />
+          <Input name="where" ref="633" created="2003-01-21 16:31:10Z" user="bmishra" />
+          <Output name="select" ref="635" created="2003-01-21 16:31:34Z" user="bmishra" />
+          <Input name="order" ref="635" created="2003-08-08 18:47:25Z" user="davsnyder" />
+        </Widget>
+        <Widget type="Template" name="MillMetric:MetricFlagColumn" ID="635" created="2010-09-29 15:19:13Z" user="Philippe" handle="4" modified="2010-09-29 16:30:30Z">
+          <Input name="select" ref="634" created="2003-01-21 16:31:34Z" user="bmishra" />
+          <Output name="order" ref="634" created="2003-08-08 18:47:25Z" user="davsnyder" />
+          <Output name="input" ref="545" created="2010-09-29 15:19:26Z" user="Philippe" />
+          <Output name="input" ref="558" created="2010-09-29 15:20:30Z" user="Philippe" />
+          <Output name="input" ref="559" created="2010-09-29 15:21:22Z" user="Philippe" />
+          <Output name="input" ref="585" created="2010-09-29 15:19:56Z" user="Philippe" />
+          <Output name="input" ref="713" created="2010-09-29 16:29:19Z" user="Philippe" />
+          <Output name="input" ref="721" created="2010-09-29 16:30:22Z" user="Philippe" />
+          <Output name="input" ref="722" created="2010-09-29 16:30:30Z" user="Philippe" />
+          <Output name="input" ref="746" created="2010-09-29 16:29:38Z" user="Philippe" />
+        </Widget>
+      </Widget>
+      <Widget type="Form" ID="530" handle="4" name="RollSearchForm" grid_width="7" grid_height="7" user="Philippe" created="2010-09-29 15:15:04Z" modified="2010-09-30 15:10:53Z">
+        <Widget type="GroupForm" name="SpecMetricForm" ID="534" created="2010-09-29 15:15:04Z" user="Philippe" handle="1" modified="2010-09-29 15:15:38Z">
+          <Widget type="Template" ID="542" handle="1" name="USEMETRIC" user="Philippe" created="2010-09-29 15:15:04Z">
+            <Output name="input" ref="583" />
+            <Output name="input" ref="584" />
+            <Output name="input" ref="586" created="2003-01-21 20:30:44Z" user="bmishra" />
+            <Output name="input" ref="587" created="2003-01-21 20:31:40Z" user="bmishra" />
+            <Output name="input" ref="588" />
+            <Output name="input" ref="589" />
+            <Output name="input" ref="590" />
+            <Output name="input" ref="591" created="2003-01-21 20:36:14Z" user="bmishra" />
+            <Output name="input" ref="592" created="2003-01-21 20:36:51Z" user="bmishra" />
+            <Output name="input" ref="596" />
+          </Widget>
+          <Widget type="Template" name="MetricFlag:MetricFlagEntry" ID="544" created="2010-09-29 15:15:04Z" user="Philippe" handle="2" modified="2010-09-29 15:35:00Z">
+            <Output name="input" ref="545" created="2003-01-21 16:38:47Z" user="bmishra" />
+            <Output name="input" ref="557" created="2007-09-14 11:08:47Z" user="E319133" />
+            <Output name="input" ref="558" created="2007-09-14 11:15:38Z" user="E319133" />
+            <Output name="input" ref="559" created="2010-09-29 15:21:17Z" user="Philippe" />
+            <Output name="input" ref="585" created="2003-01-21 16:43:13Z" user="bmishra" />
+          </Widget>
+          <Input name="below" ref="573" created="2005-09-09 18:49:12Z" user="e150290" />
+        </Widget>
+        <Widget type="Calculation" name="EnableWidthDiam" ID="545" created="2010-09-29 15:15:04Z" user="Philippe" handle="2" modified="2010-09-30 07:42:39Z">
+          <Attribute name="calculation" value="TruthToArg( MetricFlag = MillMetric, 0, 1)" created="2003-01-21 16:42:54Z" user="bmishra" />
+          <Input name="input" ref="635" created="2010-09-29 15:19:26Z" user="Philippe" />
+          <Input name="input" ref="544" created="2003-01-21 16:38:47Z" user="bmishra" />
+          <Output name="input" ref="788" created="2010-09-30 07:28:47Z" user="Philippe" />
+          <Output name="sensitive" ref="574" created="2003-01-21 16:43:43Z" user="bmishra" />
+          <Output name="input" ref="789" created="2010-09-30 07:29:20Z" user="Philippe" />
+          <Output name="sensitive" ref="575" created="2003-01-21 16:43:43Z" user="bmishra" />
+          <Output name="input" ref="790" created="2010-09-30 07:29:25Z" user="Philippe" />
+          <Output name="sensitive" ref="576" created="2003-01-21 19:30:38Z" user="bmishra" />
+          <Output name="input" ref="791" created="2010-09-30 07:29:31Z" user="Philippe" />
+          <Output name="sensitive" ref="577" created="2003-01-21 19:30:38Z" user="bmishra" />
+          <Output name="input" ref="597" created="2003-01-21 21:30:57Z" user="bmishra" />
+        </Widget>
+        <Widget type="Diagram" name="DefaultMinMax" ID="546" created="2010-09-29 15:15:04Z" user="Philippe" handle="3" modified="2010-09-30 07:21:53Z">
+          <Widget type="Template" name="TypeCodeColumn" ID="547" created="2010-09-29 15:15:04Z" user="Philippe" handle="1">
+            <Attribute name="default" value="&quot;R&quot;" created="2006-07-13 12:30:37Z" user="e319133" />
+            <Output name="where" ref="548" created="2006-07-13 12:30:49Z" user="e319133" />
+          </Widget>
+          <Widget type="Cursor" name="article" ID="548" created="2010-09-29 15:15:04Z" user="Philippe" handle="2" modified="2010-09-30 08:47:09Z">
+            <Input name="where" ref="547" created="2006-07-13 12:30:49Z" user="e319133" />
+            <Output name="select" ref="549" created="2006-07-13 12:01:08Z" user="e319133" />
+            <Output name="select" ref="550" created="2006-07-13 12:02:52Z" user="e319133" />
+            <Output name="select" ref="551" created="2006-07-13 12:26:27Z" user="e319133" />
+            <Output name="select" ref="552" created="2006-07-13 12:26:30Z" user="e319133" />
+            <Input name="syncTime" ref="812" created="2010-09-30 08:47:09Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" name="MAX:DiameterColumn" ID="549" created="2010-09-29 15:15:04Z" user="Philippe" handle="3">
+            <Attribute name="selectOperator" value="Max" created="2006-07-13 12:14:28Z" user="e319133" />
+            <Input name="select" ref="548" created="2006-07-13 12:01:08Z" user="e319133" />
+            <Output name="default" ref="577" created="2006-07-13 13:54:16Z" user="e319133" />
+          </Widget>
+          <Widget type="Template" name="MAX:DiamExportColumn" ID="550" created="2010-09-29 15:15:04Z" user="Philippe" handle="4">
+            <Attribute name="selectOperator" value="Max" created="2006-07-13 12:14:51Z" user="e319133" />
+            <Input name="select" ref="548" created="2006-07-13 12:02:52Z" user="e319133" />
+            <Output name="default" ref="582" created="2006-07-13 13:55:30Z" user="e319133" />
+          </Widget>
+          <Widget type="Template" name="MIN:DiameterColumn" ID="551" created="2010-09-29 15:15:04Z" user="Philippe" handle="5">
+            <Attribute name="selectOperator" value="Min" created="2006-07-13 12:14:28Z" user="e319133" modified="2006-07-13 12:27:04Z" />
+            <Input name="select" ref="548" created="2006-07-13 12:26:27Z" user="e319133" />
+            <Output name="default" ref="576" created="2006-07-13 13:53:57Z" user="e319133" />
+          </Widget>
+          <Widget type="Template" name="MIN:DiamExportColumn" ID="552" created="2010-09-29 15:15:04Z" user="Philippe" handle="6">
+            <Attribute name="selectOperator" value="Min" created="2006-07-13 12:14:51Z" user="e319133" modified="2006-07-13 12:26:56Z" />
+            <Input name="select" ref="548" created="2006-07-13 12:26:30Z" user="e319133" />
+            <Output name="default" ref="581" created="2006-07-13 13:55:11Z" user="e319133" />
+          </Widget>
+        </Widget>
+        <Widget type="Diagram" name="ConvertValues" ID="553" created="2010-09-29 15:15:04Z" user="Philippe" handle="4" modified="2010-09-30 07:22:06Z">
+          <Widget type="Diagram" name="MetricConversionValues" ID="554" created="2010-09-29 15:15:04Z" user="Philippe" handle="1">
+            <Widget type="Calculation" name="MetricToImperialFactor" ID="555" created="2010-09-29 15:15:04Z" user="Philippe" handle="1">
+              <Attribute name="calculation" value="100/(254)" created="2007-09-14 11:06:51Z" user="E319133" />
+              <Output name="input" ref="557" created="2007-09-14 11:09:48Z" user="E319133" />
+            </Widget>
+            <Widget type="Calculation" name="ImperialToMetricFactor" ID="556" created="2010-09-29 15:15:04Z" user="Philippe" handle="2">
+              <Attribute name="calculation" value="254/100" created="2007-09-14 11:07:08Z" user="E319133" />
+              <Output name="input" ref="557" created="2007-09-14 11:09:52Z" user="E319133" />
+            </Widget>
+            <Widget type="Calculation" name="ConvFactor" ID="557" created="2010-09-29 15:15:04Z" user="Philippe" handle="3">
+              <Attribute name="calculation" value="TruthToArg( MetricFlag &lt;&gt; 'N',  ImperialToMetricFactor, MetricToImperialFactor)" created="2007-09-14 11:07:39Z" user="E319133" />
+              <Input name="input" ref="544" created="2007-09-14 11:08:47Z" user="E319133" />
+              <Input name="input" ref="555" created="2007-09-14 11:09:48Z" user="E319133" />
+              <Input name="input" ref="556" created="2007-09-14 11:09:52Z" user="E319133" />
+              <Output name="input" ref="560" created="2007-09-14 11:22:55Z" user="E319133" />
+              <Output name="input" ref="561" created="2007-09-14 11:23:05Z" user="E319133" />
+              <Output name="input" ref="562" created="2007-09-14 11:23:08Z" user="E319133" />
+              <Output name="input" ref="563" created="2007-09-14 11:23:13Z" user="E319133" />
+              <Output name="input" ref="564" created="2007-09-14 11:33:37Z" user="E319133" />
+              <Output name="input" ref="565" created="2007-09-14 11:33:42Z" user="E319133" />
+              <Output name="input" ref="566" created="2007-09-14 11:33:47Z" user="E319133" />
+              <Output name="input" ref="567" created="2007-09-14 11:33:52Z" user="E319133" />
+            </Widget>
+          </Widget>
+          <Widget type="Calculation" name="UseRegular" ID="558" created="2010-09-29 15:15:04Z" user="Philippe" handle="2" modified="2010-09-29 15:20:30Z">
+            <Attribute name="calculation" value="TruthToArg( MetricFlag = MillMetric, 0, 1)" created="2003-01-21 16:42:54Z" user="bmishra" />
+            <Input name="input" ref="635" created="2010-09-29 15:20:30Z" user="Philippe" />
+            <Input name="input" ref="544" created="2007-09-14 11:15:38Z" user="E319133" />
+            <Output name="input" ref="560" created="2007-09-14 11:22:05Z" user="E319133" />
+            <Output name="input" ref="561" created="2007-09-14 11:22:09Z" user="E319133" />
+            <Output name="input" ref="562" created="2007-09-14 11:22:13Z" user="E319133" />
+            <Output name="input" ref="563" created="2007-09-14 11:22:33Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="UseExportFields" ID="559" created="2010-09-29 15:15:04Z" user="Philippe" handle="3" modified="2010-09-29 15:21:22Z">
+            <Attribute name="calculation" value="TruthToArg( MetricFlag = MillMetric, 1, 0)" created="2003-01-21 16:42:54Z" user="bmishra" modified="2003-01-21 16:43:23Z" />
+            <Input name="input" ref="635" created="2010-09-29 15:21:22Z" user="Philippe" />
+            <Input name="input" ref="544" created="2010-09-29 15:21:17Z" user="Philippe" />
+            <Output name="input" ref="564" created="2007-09-14 11:35:07Z" user="E319133" />
+            <Output name="input" ref="565" created="2007-09-14 11:35:12Z" user="E319133" />
+            <Output name="input" ref="566" created="2007-09-14 11:35:16Z" user="E319133" />
+            <Output name="input" ref="567" created="2007-09-14 11:35:20Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="CalcMinWidthExport" ID="560" created="2010-09-29 15:15:04Z" user="Philippe" handle="4">
+            <Attribute name="calculation" value="TruthToArg( UseRegular, MinWidthExportEntry, MinWidthEntry * ConvFactor)" created="2007-09-14 11:25:44Z" user="E319133" modified="2007-09-14 11:26:12Z" />
+            <Input name="input" ref="557" created="2007-09-14 11:22:55Z" user="E319133" />
+            <Input name="input" ref="558" created="2007-09-14 11:22:05Z" user="E319133" />
+            <Output name="value" ref="579" created="2007-09-14 11:26:48Z" user="E319133" />
+            <Input name="input" ref="574" created="2007-09-14 11:21:28Z" user="E319133" />
+            <Input name="input" ref="579" created="2007-09-14 11:21:38Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="CalcMaxWidthExport" ID="561" created="2010-09-29 15:15:04Z" user="Philippe" handle="5">
+            <Attribute name="calculation" value="TruthToArg( UseRegular, MaxWidthExportEntry, MaximumWidEntry * ConvFactor)" created="2007-09-14 11:27:19Z" user="E319133" modified="2007-09-14 11:31:37Z" />
+            <Input name="input" ref="557" created="2007-09-14 11:23:05Z" user="E319133" />
+            <Input name="input" ref="558" created="2007-09-14 11:22:09Z" user="E319133" />
+            <Output name="value" ref="580" created="2007-09-14 11:27:37Z" user="E319133" />
+            <Input name="input" ref="575" created="2007-09-14 11:24:37Z" user="E319133" />
+            <Input name="input" ref="580" created="2007-09-14 11:24:42Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="CalcMinDiamExport" ID="562" created="2010-09-29 15:15:04Z" user="Philippe" handle="6">
+            <Attribute name="calculation" value="TruthToArg( UseRegular, MinDiamExportEntry, MinDiameterEntry * ConvFactor)" created="2007-09-14 11:28:07Z" user="E319133" modified="2007-09-14 11:28:47Z" />
+            <Input name="input" ref="557" created="2007-09-14 11:23:08Z" user="E319133" />
+            <Input name="input" ref="558" created="2007-09-14 11:22:13Z" user="E319133" />
+            <Output name="value" ref="581" created="2007-09-14 11:29:00Z" user="E319133" />
+            <Input name="input" ref="576" created="2007-09-14 11:24:53Z" user="E319133" />
+            <Input name="input" ref="581" created="2007-09-14 11:24:49Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="CalcMaxDiamExport" ID="563" created="2010-09-29 15:15:04Z" user="Philippe" handle="7">
+            <Attribute name="calculation" value="TruthToArg( UseRegular, MaxDiamExportEntry, MaxDiameterEntry * ConvFactor)" created="2007-09-14 11:29:19Z" user="E319133" modified="2007-09-14 11:29:33Z" />
+            <Input name="input" ref="557" created="2007-09-14 11:23:13Z" user="E319133" />
+            <Input name="input" ref="558" created="2007-09-14 11:22:33Z" user="E319133" />
+            <Output name="value" ref="582" created="2007-09-14 11:29:47Z" user="E319133" />
+            <Input name="input" ref="577" created="2007-09-14 11:25:02Z" user="E319133" />
+            <Input name="input" ref="582" created="2007-09-14 11:24:58Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="CalcMinWidth" ID="564" created="2010-09-29 15:15:04Z" user="Philippe" handle="8">
+            <Attribute name="calculation" value="TruthToArg( UseExportFields, MinWidthEntry,MinWidthExportEntry  * ConvFactor)" created="2007-09-14 11:25:44Z" user="E319133" modified="2007-09-14 11:37:19Z" />
+            <Input name="input" ref="557" created="2007-09-14 11:33:37Z" user="E319133" />
+            <Input name="input" ref="559" created="2007-09-14 11:35:07Z" user="E319133" />
+            <Output name="input" ref="569" created="2007-09-14 11:47:48Z" user="E319133" />
+            <Input name="input" ref="574" created="2007-09-14 11:33:37Z" user="E319133" />
+            <Input name="input" ref="579" created="2007-09-14 11:33:37Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="CalcMaxWidth" ID="565" created="2010-09-29 15:15:04Z" user="Philippe" handle="9">
+            <Attribute name="calculation" value="TruthToArg( UseExportFields, MaximumWidEntry,MaxWidthExportEntry * ConvFactor)" created="2007-09-14 11:27:19Z" user="E319133" modified="2007-09-14 11:38:08Z" />
+            <Input name="input" ref="557" created="2007-09-14 11:33:42Z" user="E319133" />
+            <Input name="input" ref="559" created="2007-09-14 11:35:12Z" user="E319133" />
+            <Output name="input" ref="570" created="2007-09-14 11:53:26Z" user="E319133" />
+            <Input name="input" ref="575" created="2007-09-14 11:33:42Z" user="E319133" />
+            <Input name="input" ref="580" created="2007-09-14 11:33:42Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="CalcMinDiam" ID="566" created="2010-09-29 15:15:04Z" user="Philippe" handle="10">
+            <Attribute name="calculation" value="TruthToArg( UseExportFields, MinDiameterEntry,MinDiamExportEntry * ConvFactor)" created="2007-09-14 11:28:07Z" user="E319133" modified="2007-09-14 11:38:42Z" />
+            <Input name="input" ref="557" created="2007-09-14 11:33:47Z" user="E319133" />
+            <Input name="input" ref="559" created="2007-09-14 11:35:16Z" user="E319133" />
+            <Output name="input" ref="571" created="2007-09-14 11:53:38Z" user="E319133" />
+            <Input name="input" ref="576" created="2007-09-14 11:33:47Z" user="E319133" />
+            <Input name="input" ref="581" created="2007-09-14 11:33:47Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="CalcMaxDiam" ID="567" created="2010-09-29 15:15:04Z" user="Philippe" handle="11">
+            <Attribute name="calculation" value="TruthToArg( UseExportFields, MaxDiameterEntry,MaxDiamExportEntry * ConvFactor)" created="2007-09-14 11:29:19Z" user="E319133" modified="2007-09-14 11:39:02Z" />
+            <Input name="input" ref="557" created="2007-09-14 11:33:52Z" user="E319133" />
+            <Input name="input" ref="559" created="2007-09-14 11:35:20Z" user="E319133" />
+            <Output name="input" ref="572" created="2007-09-14 11:53:50Z" user="E319133" />
+            <Input name="input" ref="577" created="2007-09-14 11:33:52Z" user="E319133" />
+            <Input name="input" ref="582" created="2007-09-14 11:33:52Z" user="E319133" />
+          </Widget>
+          <Widget type="Diagram" name="Values" ID="568" created="2010-09-29 15:15:04Z" user="Philippe" handle="12">
+            <Widget type="Calculation" name="ValueMinWidth" ID="569" created="2010-09-29 15:15:04Z" user="Philippe" handle="1">
+              <Attribute name="calculation" value="TruthToArg(CalcMinWidth = 0,CalcMinWidth,MinWidthDefault)" created="2007-09-14 11:48:09Z" user="E319133" modified="2007-09-14 11:49:01Z" />
+              <Input name="input" ref="564" created="2007-09-14 11:47:48Z" user="E319133" />
+              <Output name="value" ref="574" created="2007-09-14 11:49:14Z" user="E319133" />
+              <Input name="input" ref="583" created="2007-09-14 11:47:57Z" user="E319133" />
+            </Widget>
+            <Widget type="Calculation" name="ValueMaxWidth" ID="570" created="2010-09-29 15:15:04Z" user="Philippe" handle="2">
+              <Attribute name="calculation" value="TruthToArg(CalcMaxWidth = 0,CalcMaxWidth,MaxWidthDefault)" created="2007-09-14 11:54:09Z" user="E319133" modified="2007-09-14 11:54:52Z" />
+              <Input name="input" ref="565" created="2007-09-14 11:53:26Z" user="E319133" />
+              <Output name="value" ref="575" created="2007-09-14 11:55:09Z" user="E319133" />
+              <Input name="input" ref="584" created="2007-09-14 11:53:32Z" user="E319133" />
+            </Widget>
+            <Widget type="Calculation" name="ValueMinDiam" ID="571" created="2010-09-29 15:15:04Z" user="Philippe" handle="3">
+              <Attribute name="calculation" value="TruthToArg(CalcMinDiam = 0,CalcMinDiam,MinDiamDefault)" created="2007-09-14 11:55:44Z" user="E319133" modified="2007-09-14 11:56:22Z" />
+              <Input name="input" ref="566" created="2007-09-14 11:53:38Z" user="E319133" />
+              <Output name="value" ref="576" created="2007-09-14 11:56:32Z" user="E319133" />
+              <Input name="input" ref="588" created="2007-09-14 11:53:46Z" user="E319133" />
+            </Widget>
+            <Widget type="Calculation" name="ValueMaxDiam" ID="572" created="2010-09-29 15:15:04Z" user="Philippe" handle="4">
+              <Attribute name="calculation" value="TruthToArg(CalcMaxDiam = 0,CalcMaxDiam,MaxDiamDefault)" created="2007-09-14 11:55:48Z" user="E319133" modified="2007-09-14 11:57:08Z" />
+              <Input name="input" ref="567" created="2007-09-14 11:53:50Z" user="E319133" />
+              <Output name="value" ref="577" created="2007-09-14 11:57:16Z" user="E319133" />
+              <Input name="input" ref="589" created="2007-09-14 11:53:55Z" user="E319133" />
+            </Widget>
+          </Widget>
+        </Widget>
+        <Widget type="GroupForm" name="NonExpRollGroup" ID="573" created="2010-09-29 15:15:04Z" user="Philippe" handle="5" modified="2010-09-30 07:26:57Z">
+          <Widget type="Calculation" name="SetWhereMinWidth" ID="788" created="2010-09-30 07:23:41Z" user="Philippe" modified="2010-09-30 07:30:12Z" handle="1">
+            <Attribute name="calculation" value="TruthToArg(TypeCodeEntry='R' and EnableWidthDiam,&quot;ALL&quot;,&quot;&gt;=&quot;)" created="2010-09-30 07:24:56Z" user="Philippe" modified="2010-09-30 07:30:12Z" />
+            <Input name="input" ref="21" created="2010-09-30 07:23:51Z" user="Philippe" />
+            <Input name="input" ref="545" created="2010-09-30 07:28:47Z" user="Philippe" />
+            <Output name="whereOperator" ref="574" created="2010-09-30 07:25:09Z" user="Philippe" />
+            <Input name="input" ref="789" created="2010-09-30 07:28:47Z" user="Philippe" />
+            <Input name="input" ref="790" created="2010-09-30 07:28:47Z" user="Philippe" />
+            <Input name="input" ref="791" created="2010-09-30 07:28:47Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" ID="574" handle="2" name="MinWidthEntry" user="Philippe" created="2010-09-29 15:15:04Z" modified="2010-09-30 08:17:51Z">
+            <Input name="sensitive" ref="545" created="2003-01-21 16:43:43Z" user="bmishra" />
+            <Input name="value" ref="569" created="2007-09-14 11:49:14Z" user="E319133" />
+            <Input name="whereOperator" ref="788" created="2010-09-30 07:25:09Z" user="Philippe" />
+            <Output name="input" ref="560" created="2007-09-14 11:21:28Z" user="E319133" />
+            <Output name="input" ref="564" created="2007-09-14 11:33:37Z" user="E319133" />
+            <Output name="where" ref="636" created="2010-09-29 15:29:38Z" user="Philippe" />
+            <Output name="where" ref="464" created="2010-09-30 08:17:51Z" user="Philippe" />
+            <Input name="below" ref="575" created="2005-09-09 14:38:02Z" user="e150290" />
+            <Input name="default" ref="583" />
+          </Widget>
+          <Widget type="Calculation" name="SetWhereMaxWidth" ID="789" created="2010-09-30 07:25:22Z" user="Philippe" modified="2010-09-30 07:30:19Z" handle="3">
+            <Attribute name="calculation" value="TruthToArg(TypeCodeEntry='R' and EnableWidthDiam,&quot;ALL&quot;,&quot;&lt;=&quot;)" created="2010-09-30 07:24:56Z" user="Philippe" modified="2010-09-30 07:30:19Z" />
+            <Input name="input" ref="21" created="2010-09-30 07:25:23Z" user="Philippe" />
+            <Input name="input" ref="545" created="2010-09-30 07:29:20Z" user="Philippe" />
+            <Output name="input" ref="788" created="2010-09-30 07:28:47Z" user="Philippe" />
+            <Output name="whereOperator" ref="575" created="2010-09-30 07:25:59Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" ID="575" handle="4" name="MaximumWidEntry" user="Philippe" created="2010-09-29 15:15:04Z" modified="2010-09-30 08:17:51Z">
+            <Attribute name="whereOperator" value="&lt;=" />
+            <Input name="sensitive" ref="545" created="2003-01-21 16:43:43Z" user="bmishra" />
+            <Input name="value" ref="570" created="2007-09-14 11:55:09Z" user="E319133" />
+            <Input name="whereOperator" ref="789" created="2010-09-30 07:25:59Z" user="Philippe" />
+            <Output name="input" ref="561" created="2007-09-14 11:24:37Z" user="E319133" />
+            <Output name="input" ref="565" created="2007-09-14 11:33:42Z" user="E319133" />
+            <Output name="below" ref="574" created="2005-09-09 14:38:02Z" user="e150290" />
+            <Output name="where" ref="636" created="2010-09-29 15:29:45Z" user="Philippe" />
+            <Output name="where" ref="464" created="2010-09-30 08:17:51Z" user="Philippe" />
+            <Input name="ADOExpression" ref="576" created="2005-09-09 17:13:53Z" user="e150290" />
+            <Input name="below" ref="576" created="2005-09-09 17:16:13Z" user="e150290" />
+            <Input name="default" ref="584" />
+          </Widget>
+          <Widget type="Calculation" name="SetWhereMinDiam" ID="790" created="2010-09-30 07:26:15Z" user="Philippe" modified="2010-09-30 07:30:26Z" handle="5">
+            <Attribute name="calculation" value="TruthToArg(TypeCodeEntry='R' and EnableWidthDiam,&quot;ALL&quot;,&quot;&gt;=&quot;)" created="2010-09-30 07:24:56Z" user="Philippe" modified="2010-09-30 07:30:26Z" />
+            <Input name="input" ref="21" created="2010-09-30 07:26:15Z" user="Philippe" />
+            <Input name="input" ref="545" created="2010-09-30 07:29:25Z" user="Philippe" />
+            <Output name="input" ref="788" created="2010-09-30 07:28:47Z" user="Philippe" />
+            <Output name="whereOperator" ref="576" created="2010-09-30 07:26:51Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" ID="576" handle="6" name="MinDiameterEntry" user="Philippe" created="2010-09-29 15:15:04Z" modified="2010-09-30 08:17:51Z">
+            <Attribute name="whereOperator" value="&gt;=" />
+            <Input name="sensitive" ref="545" created="2003-01-21 19:30:38Z" user="bmishra" />
+            <Input name="default" ref="551" created="2006-07-13 13:53:57Z" user="e319133" />
+            <Input name="value" ref="571" created="2007-09-14 11:56:32Z" user="E319133" />
+            <Input name="whereOperator" ref="790" created="2010-09-30 07:26:51Z" user="Philippe" />
+            <Output name="input" ref="562" created="2007-09-14 11:24:53Z" user="E319133" />
+            <Output name="input" ref="566" created="2007-09-14 11:33:47Z" user="E319133" />
+            <Output name="ADOExpression" ref="575" created="2005-09-09 17:13:53Z" user="e150290" />
+            <Output name="below" ref="575" created="2005-09-09 17:16:13Z" user="e150290" />
+            <Output name="where" ref="636" created="2010-09-29 15:29:56Z" user="Philippe" />
+            <Output name="where" ref="464" created="2010-09-30 08:17:51Z" user="Philippe" />
+            <Input name="below" ref="577" created="2005-09-09 14:45:13Z" user="e150290" />
+          </Widget>
+          <Widget type="Calculation" name="SetWhereMaxDiam" ID="791" created="2010-09-30 07:26:55Z" user="Philippe" modified="2010-09-30 07:30:33Z" handle="7">
+            <Attribute name="calculation" value="TruthToArg(TypeCodeEntry='R' and EnableWidthDiam,&quot;ALL&quot;,&quot;&lt;=&quot;)" created="2010-09-30 07:24:56Z" user="Philippe" modified="2010-09-30 07:30:33Z" />
+            <Input name="input" ref="21" created="2010-09-30 07:26:55Z" user="Philippe" />
+            <Input name="input" ref="545" created="2010-09-30 07:29:31Z" user="Philippe" />
+            <Output name="input" ref="788" created="2010-09-30 07:28:47Z" user="Philippe" />
+            <Output name="whereOperator" ref="577" created="2010-09-30 07:27:24Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" ID="577" handle="8" name="MaxDiameterEntry" user="Philippe" created="2010-09-29 15:15:04Z" modified="2010-09-30 08:17:51Z">
+            <Attribute name="whereOperator" value="&lt;=" />
+            <Input name="sensitive" ref="545" created="2003-01-21 19:30:38Z" user="bmishra" />
+            <Input name="default" ref="549" created="2006-07-13 13:54:16Z" user="e319133" />
+            <Input name="value" ref="572" created="2007-09-14 11:57:16Z" user="E319133" />
+            <Input name="whereOperator" ref="791" created="2010-09-30 07:27:24Z" user="Philippe" />
+            <Output name="input" ref="563" created="2007-09-14 11:25:02Z" user="E319133" />
+            <Output name="input" ref="567" created="2007-09-14 11:33:52Z" user="E319133" />
+            <Output name="below" ref="576" created="2005-09-09 14:45:13Z" user="e150290" />
+            <Output name="where" ref="636" created="2010-09-29 15:30:02Z" user="Philippe" />
+            <Output name="where" ref="464" created="2010-09-30 08:17:51Z" user="Philippe" />
+          </Widget>
+          <Attribute name="borderWidth" value="0" created="2005-09-09 18:17:20Z" user="e150290" />
+          <Output name="below" ref="534" created="2005-09-09 18:49:12Z" user="e150290" />
+          <Input name="below" ref="593" created="2005-09-09 18:51:59Z" user="e150290" />
+        </Widget>
+        <Widget type="GroupForm" name="ExpRollGroup" ID="578" created="2010-09-29 15:15:04Z" user="Philippe" handle="6" modified="2010-09-30 07:36:53Z">
+          <Widget type="Calculation" name="SetWhereMinWidthExp" ID="792" created="2010-09-30 07:33:16Z" user="Philippe" modified="2010-09-30 07:34:32Z" handle="1">
+            <Attribute name="calculation" value="TruthToArg(TypeCodeEntry='R' and EnableWidthDiamExport,&quot;ALL&quot;,&quot;&gt;=&quot;)" created="2010-09-30 07:33:24Z" user="Philippe" modified="2010-09-30 07:34:19Z" />
+            <Input name="input" ref="21" created="2010-09-30 07:33:45Z" user="Philippe" />
+            <Output name="whereOperator" ref="579" created="2010-09-30 07:34:32Z" user="Philippe" />
+            <Input name="input" ref="585" created="2010-09-30 07:34:02Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" name="MinWidthExportEntry" ID="579" created="2010-09-29 15:15:04Z" user="Philippe" handle="2" modified="2010-09-30 08:31:03Z">
+            <Attribute name="name" value="width_export" created="2005-12-28 14:11:46Z" user="E159692" />
+            <Attribute name="prefix" value="&quot;&quot;" created="2006-12-29 12:07:16Z" user="e319133" />
+            <Input name="value" ref="560" created="2007-09-14 11:26:48Z" user="E319133" />
+            <Input name="whereOperator" ref="792" created="2010-09-30 07:34:32Z" user="Philippe" />
+            <Output name="input" ref="560" created="2007-09-14 11:21:38Z" user="E319133" />
+            <Output name="input" ref="564" created="2007-09-14 11:33:37Z" user="E319133" />
+            <Output name="where" ref="636" created="2010-09-30 07:39:57Z" user="Philippe" />
+            <Output name="where" ref="464" created="2010-09-30 08:17:51Z" user="Philippe" />
+            <Input name="below" ref="580" created="2005-09-09 14:38:29Z" user="e150290" />
+            <Input name="sensitive" ref="585" created="2003-01-21 16:43:52Z" user="bmishra" />
+            <Input name="default" ref="586" created="2003-01-21 20:30:54Z" user="bmishra" />
+          </Widget>
+          <Widget type="Calculation" name="SetWhereMaxWidthExp" ID="793" created="2010-09-30 07:34:36Z" user="Philippe" modified="2010-09-30 07:36:18Z" handle="3">
+            <Attribute name="calculation" value="TruthToArg(TypeCodeEntry='R' and EnableWidthDiamExport,&quot;ALL&quot;,&quot;&lt;=&quot;)" created="2010-09-30 07:33:24Z" user="Philippe" modified="2010-09-30 07:35:01Z" />
+            <Input name="input" ref="21" created="2010-09-30 07:34:36Z" user="Philippe" />
+            <Output name="whereOperator" ref="580" created="2010-09-30 07:35:15Z" user="Philippe" />
+            <Input name="input" ref="585" created="2010-09-30 07:34:36Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" name="MaxWidthExportEntry" ID="580" created="2010-09-29 15:15:04Z" user="Philippe" handle="4" modified="2010-09-30 08:17:51Z">
+            <Attribute name="name" value="width_export" created="2005-12-28 14:12:43Z" user="E159692" />
+            <Attribute name="prefix" value="&quot;&quot;" created="2006-12-29 12:11:32Z" user="e319133" />
+            <Input name="value" ref="561" created="2007-09-14 11:27:37Z" user="E319133" />
+            <Input name="whereOperator" ref="793" created="2010-09-30 07:35:15Z" user="Philippe" />
+            <Output name="input" ref="561" created="2007-09-14 11:24:42Z" user="E319133" />
+            <Output name="input" ref="565" created="2007-09-14 11:33:42Z" user="E319133" />
+            <Output name="below" ref="579" created="2005-09-09 14:38:29Z" user="e150290" />
+            <Output name="where" ref="636" created="2010-09-30 07:39:46Z" user="Philippe" />
+            <Output name="where" ref="464" created="2010-09-30 08:17:51Z" user="Philippe" />
+            <Input name="below" ref="581" created="2005-09-09 17:14:21Z" user="e150290" />
+            <Input name="sensitive" ref="585" created="2003-01-21 16:43:52Z" user="bmishra" />
+            <Input name="default" ref="587" created="2003-01-21 20:31:50Z" user="bmishra" />
+          </Widget>
+          <Widget type="Calculation" name="SetWhereMinDiamExp" ID="794" created="2010-09-30 07:35:25Z" user="Philippe" modified="2010-09-30 07:36:32Z" handle="5">
+            <Attribute name="calculation" value="TruthToArg(TypeCodeEntry='R' and EnableWidthDiamExport,&quot;ALL&quot;,&quot;&gt;=&quot;)" created="2010-09-30 07:33:24Z" user="Philippe" modified="2010-09-30 07:36:09Z" />
+            <Input name="input" ref="21" created="2010-09-30 07:35:25Z" user="Philippe" />
+            <Output name="whereOperator" ref="581" created="2010-09-30 07:36:32Z" user="Philippe" />
+            <Input name="input" ref="585" created="2010-09-30 07:35:25Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" name="MinDiamExportEntry" ID="581" created="2010-09-29 15:15:04Z" user="Philippe" handle="6" modified="2010-09-30 08:17:51Z">
+            <Attribute name="name" value="diam_export" created="2005-12-28 14:13:19Z" user="E159692" />
+            <Attribute name="prefix" value="&quot;&quot;" created="2006-12-29 12:11:44Z" user="e319133" />
+            <Input name="default" ref="552" created="2006-07-13 13:55:11Z" user="e319133" />
+            <Input name="value" ref="562" created="2007-09-14 11:29:00Z" user="E319133" />
+            <Input name="whereOperator" ref="794" created="2010-09-30 07:36:32Z" user="Philippe" />
+            <Output name="input" ref="562" created="2007-09-14 11:24:49Z" user="E319133" />
+            <Output name="input" ref="566" created="2007-09-14 11:33:47Z" user="E319133" />
+            <Output name="below" ref="580" created="2005-09-09 17:14:21Z" user="e150290" />
+            <Output name="where" ref="636" created="2010-09-30 07:39:33Z" user="Philippe" />
+            <Output name="where" ref="464" created="2010-09-30 08:17:51Z" user="Philippe" />
+            <Input name="below" ref="582" created="2005-09-09 14:39:35Z" user="e150290" />
+            <Input name="sensitive" ref="585" created="2003-01-21 19:30:53Z" user="bmishra" />
+          </Widget>
+          <Widget type="Calculation" name="SetWhereMaxDiamExp" ID="795" created="2010-09-30 07:36:51Z" user="Philippe" modified="2010-09-30 07:37:20Z" handle="7">
+            <Attribute name="calculation" value="TruthToArg(TypeCodeEntry='R' and EnableWidthDiamExport,&quot;ALL&quot;,&quot;&lt;=&quot;)" created="2010-09-30 07:33:24Z" user="Philippe" modified="2010-09-30 07:37:20Z" />
+            <Input name="input" ref="21" created="2010-09-30 07:36:51Z" user="Philippe" />
+            <Output name="whereOperator" ref="582" created="2010-09-30 07:37:07Z" user="Philippe" />
+            <Input name="input" ref="585" created="2010-09-30 07:36:51Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" name="MaxDiamExportEntry" ID="582" created="2010-09-29 15:15:04Z" user="Philippe" handle="8" modified="2010-09-30 08:17:51Z">
+            <Attribute name="name" value="diam_export" created="2005-12-28 14:13:37Z" user="E159692" />
+            <Attribute name="prefix" value="&quot;&quot;" created="2006-12-29 12:11:52Z" user="e319133" />
+            <Input name="default" ref="550" created="2006-07-13 13:55:30Z" user="e319133" />
+            <Input name="value" ref="563" created="2007-09-14 11:29:47Z" user="E319133" />
+            <Input name="whereOperator" ref="795" created="2010-09-30 07:37:07Z" user="Philippe" />
+            <Output name="input" ref="563" created="2007-09-14 11:24:58Z" user="E319133" />
+            <Output name="input" ref="567" created="2007-09-14 11:33:52Z" user="E319133" />
+            <Output name="below" ref="581" created="2005-09-09 14:39:35Z" user="e150290" />
+            <Output name="where" ref="636" created="2010-09-30 07:39:19Z" user="Philippe" />
+            <Output name="where" ref="464" created="2010-09-30 08:17:51Z" user="Philippe" />
+            <Input name="sensitive" ref="585" created="2003-01-21 19:30:53Z" user="bmishra" />
+          </Widget>
+        </Widget>
+        <Widget type="Calculation" ID="583" handle="7" name="MinWidthDefault" user="Philippe" created="2010-09-29 15:15:04Z">
+          <Attribute name="calculation" value="TruthToArg(USEMETRIC = &quot;Y&quot;, 1, 2)" />
+          <Input name="input" ref="542" />
+          <Output name="input" ref="569" created="2007-09-14 11:47:57Z" user="E319133" />
+          <Output name="default" ref="574" />
+        </Widget>
+        <Widget type="Calculation" ID="584" handle="8" name="MaxWidthDefault" user="Philippe" created="2010-09-29 15:15:04Z">
+          <Attribute name="calculation" value="TruthToArg(USEMETRIC = &quot;Y&quot;, 99, 250)" />
+          <Input name="input" ref="542" />
+          <Output name="input" ref="570" created="2007-09-14 11:53:32Z" user="E319133" />
+          <Output name="default" ref="575" />
+        </Widget>
+        <Widget type="Calculation" name="EnableWidthDiamExport" ID="585" created="2010-09-29 15:15:04Z" user="Philippe" handle="9" modified="2010-09-30 08:32:10Z">
+          <Attribute name="calculation" value="TruthToArg( MetricFlag = MillMetric, 1, 0)" created="2003-01-21 16:42:54Z" user="bmishra" modified="2003-01-21 16:43:23Z" />
+          <Input name="input" ref="635" created="2010-09-29 15:19:56Z" user="Philippe" />
+          <Input name="input" ref="544" created="2003-01-21 16:43:13Z" user="bmishra" />
+          <Output name="input" ref="792" created="2010-09-30 07:34:02Z" user="Philippe" />
+          <Output name="sensitive" ref="579" created="2003-01-21 16:43:52Z" user="bmishra" />
+          <Output name="input" ref="793" created="2010-09-30 07:34:36Z" user="Philippe" />
+          <Output name="sensitive" ref="580" created="2003-01-21 16:43:52Z" user="bmishra" />
+          <Output name="input" ref="794" created="2010-09-30 07:35:25Z" user="Philippe" />
+          <Output name="sensitive" ref="581" created="2003-01-21 19:30:53Z" user="bmishra" />
+          <Output name="input" ref="795" created="2010-09-30 07:36:51Z" user="Philippe" />
+          <Output name="sensitive" ref="582" created="2003-01-21 19:30:53Z" user="bmishra" />
+          <Output name="input" ref="597" created="2003-01-21 21:31:28Z" user="bmishra" />
+        </Widget>
+        <Widget type="Calculation" ID="586" handle="10" name="MinWidthExportDefault" created="2010-09-29 15:15:04Z" user="Philippe">
+          <Attribute name="calculation" value="TruthToArg(USEMETRIC = &quot;Y&quot;, 2, 1)" modified="2003-01-21 20:31:19Z" user="bmishra" />
+          <Input name="input" ref="542" created="2003-01-21 20:30:44Z" user="bmishra" />
+          <Output name="default" ref="579" created="2003-01-21 20:30:54Z" user="bmishra" />
+        </Widget>
+        <Widget type="Calculation" ID="587" handle="11" name="MaxWidthExportDefault" created="2010-09-29 15:15:04Z" user="Philippe">
+          <Attribute name="calculation" value="TruthToArg(USEMETRIC = &quot;Y&quot;,  250, 99)" modified="2003-01-21 20:43:57Z" user="bmishra" />
+          <Input name="input" ref="542" created="2003-01-21 20:31:40Z" user="bmishra" />
+          <Output name="default" ref="580" created="2003-01-21 20:31:50Z" user="bmishra" />
+        </Widget>
+        <Widget type="Calculation" ID="588" handle="12" name="MinDiamDefault" user="Philippe" created="2010-09-29 15:15:04Z">
+          <Attribute name="calculation" value="TruthToArg(USEMETRIC = &quot;Y&quot;, 10, 25)" />
+          <Input name="input" ref="542" />
+          <Output name="input" ref="571" created="2007-09-14 11:53:46Z" user="E319133" />
+        </Widget>
+        <Widget type="Calculation" ID="589" handle="13" name="MaxDiamDefault" user="Philippe" created="2010-09-29 15:15:04Z">
+          <Attribute name="calculation" value="TruthToArg(USEMETRIC = &quot;Y&quot;, 60, 150)" />
+          <Input name="input" ref="542" />
+          <Output name="input" ref="572" created="2007-09-14 11:53:55Z" user="E319133" />
+        </Widget>
+        <Widget type="Calculation" ID="590" handle="14" name="MinLenDefault" created="2010-09-29 15:15:04Z" user="Philippe">
+          <Attribute name="calculation" value="TruthToArg(USEMETRIC = &quot;Y&quot;, 1000, 30)" />
+          <Input name="input" ref="542" />
+          <Output name="default" ref="594" />
+          <Output name="value" ref="594" />
+        </Widget>
+        <Widget type="Calculation" ID="591" handle="15" name="MinDiamExportDefault" created="2010-09-29 15:15:04Z" user="Philippe">
+          <Attribute name="calculation" value="TruthToArg(USEMETRIC = &quot;Y&quot;,  25, 10)" modified="2003-01-21 20:44:50Z" user="bmishra" />
+          <Input name="input" ref="542" created="2003-01-21 20:36:14Z" user="bmishra" />
+        </Widget>
+        <Widget type="Calculation" ID="592" handle="16" name="MaxDiamExportDefault" created="2010-09-29 15:15:04Z" user="Philippe">
+          <Attribute name="calculation" value="TruthToArg(USEMETRIC = &quot;Y&quot;, 150, 60)" modified="2003-01-21 20:45:35Z" user="bmishra" />
+          <Input name="input" ref="542" created="2003-01-21 20:36:51Z" user="bmishra" />
+        </Widget>
+        <Widget type="GroupForm" name="Lineal" ID="593" created="2010-09-29 15:15:04Z" user="Philippe" handle="17" modified="2010-09-30 08:32:15Z">
+          <Widget type="Calculation" name="SetWhereMinLenLineal" ID="804" created="2010-09-30 08:30:56Z" user="Philippe" handle="1" modified="2010-09-30 08:32:10Z">
+            <Attribute name="calculation" value="TruthToArg(TypeCodeEntry='R' ,&quot;ALL&quot;,&quot;&gt;=&quot;)" created="2010-09-30 07:33:24Z" user="Philippe" modified="2010-09-30 08:31:43Z" />
+            <Input name="input" ref="21" created="2010-09-30 08:30:56Z" user="Philippe" />
+            <Output name="whereOperator" ref="594" created="2010-09-30 08:32:04Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" ID="594" handle="2" name="MinLenLinealEntry" user="Philippe" created="2010-09-29 15:15:04Z" modified="2010-09-30 08:33:03Z">
+            <Input name="default" ref="590" />
+            <Input name="value" ref="590" />
+            <Input name="whereOperator" ref="804" created="2010-09-30 08:32:04Z" user="Philippe" />
+            <Output name="where" ref="636" created="2010-09-30 08:33:03Z" user="Philippe" />
+            <Input name="below" ref="595" created="2005-09-09 14:41:08Z" user="e150290" />
+          </Widget>
+          <Widget type="Calculation" name="SetWhereMaxLenLineal" ID="805" created="2010-09-30 08:32:14Z" user="Philippe" handle="3" modified="2010-09-30 08:32:49Z">
+            <Attribute name="calculation" value="TruthToArg(TypeCodeEntry='R' ,&quot;ALL&quot;,&quot;&lt;=&quot;)" created="2010-09-30 07:33:24Z" user="Philippe" modified="2010-09-30 08:32:49Z" />
+            <Input name="input" ref="21" created="2010-09-30 08:32:14Z" user="Philippe" />
+            <Output name="whereOperator" ref="595" created="2010-09-30 08:32:42Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" ID="595" handle="4" name="MaxLenLinealEntry" user="Philippe" created="2010-09-29 15:15:04Z" modified="2010-09-30 08:33:12Z">
+            <Input name="whereOperator" ref="805" created="2010-09-30 08:32:42Z" user="Philippe" />
+            <Output name="below" ref="594" created="2005-09-09 14:41:08Z" user="e150290" />
+            <Output name="where" ref="636" created="2010-09-30 08:33:12Z" user="Philippe" />
+            <Input name="default" ref="596" />
+            <Input name="value" ref="596" />
+          </Widget>
+          <Output name="below" ref="573" created="2005-09-09 18:51:59Z" user="e150290" />
+        </Widget>
+        <Widget type="Calculation" ID="596" handle="18" name="MaxLenDefault" created="2010-09-29 15:15:04Z" user="Philippe">
+          <Attribute name="calculation" value="TruthToArg(USEMETRIC = &quot;Y&quot;, 200000, 60000)" />
+          <Input name="input" ref="542" />
+          <Output name="default" ref="595" />
+          <Output name="value" ref="595" />
+        </Widget>
+        <Widget type="Calculation" name="EnablePopup1" ID="597" created="2010-09-29 15:15:04Z" user="Philippe" handle="19" modified="2010-09-30 07:40:44Z">
+          <Attribute name="calculation" value="TruthToArg( EnableWidthDiam = 1 and EnableWidthDiamExport = 0, 1, 1)" created="2003-01-21 21:27:17Z" user="Philippe" modified="2010-09-30 07:40:44Z" />
+          <Input name="input" ref="545" created="2003-01-21 21:30:57Z" user="bmishra" />
+          <Input name="input" ref="585" created="2003-01-21 21:31:28Z" user="bmishra" />
+          <Output name="activate" ref="636" created="2010-09-29 15:29:06Z" user="Philippe" />
+        </Widget>
+        <Input name="displayed" ref="787" created="2010-09-29 16:26:35Z" user="Philippe" />
+        <Input name="leftAlign" ref="697" created="2010-09-30 15:10:53Z" user="Philippe" />
+      </Widget>
+      <Widget type="Form" ID="697" handle="5" name="SheetSearchForm" grid_width="7" grid_height="7" user="Philippe" created="2010-09-29 16:23:09Z" modified="2010-09-30 15:10:53Z">
+        <Widget type="GroupForm" name="SpecMetric" ID="700" created="2010-09-29 16:23:09Z" user="Philippe" handle="1" modified="2010-09-30 07:43:21Z">
+          <Widget type="Template" ID="710" handle="1" name="USEMETRIC" user="Philippe" created="2010-09-29 16:23:09Z">
+            <Output name="input" ref="714" />
+            <Output name="input" ref="715" />
+            <Output name="input" ref="747" created="2003-01-21 20:46:19Z" user="bmishra" />
+            <Output name="input" ref="748" created="2003-01-21 20:49:04Z" user="bmishra" />
+          </Widget>
+          <Widget type="Template" name="MetricFlag:MetricFlagEntry" ID="712" created="2010-09-29 16:23:09Z" user="Philippe" handle="2" modified="2010-09-30 08:05:35Z">
+            <Output name="input" ref="713" created="2003-01-21 19:28:45Z" user="bmishra" />
+            <Output name="input" ref="720" created="2007-09-14 12:31:26Z" user="E319133" />
+            <Output name="input" ref="721" created="2007-09-14 12:32:01Z" user="E319133" />
+            <Output name="input" ref="722" created="2007-09-14 12:32:05Z" user="E319133" />
+            <Output name="input" ref="746" created="2003-01-21 19:29:29Z" user="bmishra" />
+          </Widget>
+          <Input name="below" ref="736" created="2005-09-09 18:26:19Z" user="e150290" />
+        </Widget>
+        <Widget type="Calculation" name="EnableWidthLen" ID="713" created="2010-09-29 16:23:09Z" user="Philippe" handle="2" modified="2010-09-30 08:08:38Z">
+          <Attribute name="calculation" value="TruthToArg( MetricFlag = MillMetric, 0, 1)" created="2003-01-21 16:42:54Z" user="bmishra" />
+          <Input name="input" ref="635" created="2010-09-29 16:29:19Z" user="Philippe" />
+          <Input name="input" ref="712" created="2003-01-21 19:28:45Z" user="bmishra" />
+          <Output name="input" ref="796" created="2010-09-30 08:01:01Z" user="Philippe" />
+          <Output name="sensitive" ref="737" created="2003-01-21 19:29:02Z" user="bmishra" />
+          <Output name="input" ref="797" created="2010-09-30 08:02:01Z" user="Philippe" />
+          <Output name="sensitive" ref="738" created="2003-01-21 19:29:02Z" user="bmishra" />
+          <Output name="input" ref="798" created="2010-09-30 08:03:12Z" user="Philippe" />
+          <Output name="sensitive" ref="739" created="2003-01-21 19:30:24Z" user="bmishra" />
+          <Output name="input" ref="799" created="2010-09-30 08:04:31Z" user="Philippe" />
+          <Output name="sensitive" ref="740" created="2003-01-21 19:30:24Z" user="bmishra" />
+        </Widget>
+        <Widget type="Calculation" ID="714" handle="3" name="MinDefault" user="Philippe" created="2010-09-29 16:23:09Z">
+          <Attribute name="calculation" value="TruthToArg(USEMETRIC = &quot;Y&quot;, 8, 20)" />
+          <Input name="input" ref="710" />
+          <Output name="input" ref="732" created="2007-09-14 12:16:13Z" user="E319133" />
+          <Output name="input" ref="734" created="2007-09-14 12:16:19Z" user="E319133" />
+          <Output name="default" ref="737" />
+          <Output name="default" ref="739" />
+        </Widget>
+        <Widget type="Calculation" ID="715" handle="4" name="MaxDefault" user="Philippe" created="2010-09-29 16:23:09Z">
+          <Attribute name="calculation" value="TruthToArg(USEMETRIC = &quot;Y&quot;, 80, 200)" />
+          <Input name="input" ref="710" />
+          <Output name="input" ref="733" created="2007-09-14 12:16:24Z" user="E319133" />
+          <Output name="input" ref="735" created="2007-09-14 12:16:30Z" user="E319133" />
+          <Output name="default" ref="738" />
+          <Output name="default" ref="740" />
+        </Widget>
+        <Widget type="Diagram" name="ConvertValues" ID="716" created="2010-09-29 16:23:09Z" user="Philippe" handle="5" modified="2010-09-30 07:43:47Z">
+          <Widget type="Diagram" name="MetricConversionValues" ID="717" created="2010-09-29 16:23:09Z" user="Philippe" handle="1">
+            <Widget type="Calculation" name="MetricToImperialFactor" ID="718" created="2010-09-29 16:23:09Z" user="Philippe" handle="1">
+              <Attribute name="calculation" value="100/(254)" created="2007-09-14 11:06:51Z" user="E319133" />
+              <Output name="input" ref="720" created="2007-09-14 11:09:48Z" user="E319133" />
+            </Widget>
+            <Widget type="Calculation" name="ImperialToMetricFactor" ID="719" created="2010-09-29 16:23:09Z" user="Philippe" handle="2">
+              <Attribute name="calculation" value="254/100" created="2007-09-14 11:07:08Z" user="E319133" />
+              <Output name="input" ref="720" created="2007-09-14 11:09:52Z" user="E319133" />
+            </Widget>
+            <Widget type="Calculation" name="ConvFactor" ID="720" created="2010-09-29 16:23:09Z" user="Philippe" handle="3">
+              <Attribute name="calculation" value="TruthToArg( MetricFlag &lt;&gt; 'N',  ImperialToMetricFactor, MetricToImperialFactor)" created="2007-09-14 11:07:39Z" user="E319133" />
+              <Input name="input" ref="712" created="2007-09-14 12:31:26Z" user="E319133" />
+              <Input name="input" ref="718" created="2007-09-14 11:09:48Z" user="E319133" />
+              <Input name="input" ref="719" created="2007-09-14 11:09:52Z" user="E319133" />
+              <Output name="input" ref="723" created="2007-09-14 11:22:55Z" user="E319133" />
+              <Output name="input" ref="724" created="2007-09-14 11:23:05Z" user="E319133" />
+              <Output name="input" ref="725" created="2007-09-14 11:23:08Z" user="E319133" />
+              <Output name="input" ref="726" created="2007-09-14 11:23:13Z" user="E319133" />
+              <Output name="input" ref="727" created="2007-09-14 11:33:37Z" user="E319133" />
+              <Output name="input" ref="728" created="2007-09-14 11:33:42Z" user="E319133" />
+              <Output name="input" ref="729" created="2007-09-14 11:33:47Z" user="E319133" />
+              <Output name="input" ref="730" created="2007-09-14 11:33:52Z" user="E319133" />
+            </Widget>
+          </Widget>
+          <Widget type="Calculation" name="UseRegular" ID="721" created="2010-09-29 16:23:09Z" user="Philippe" handle="2" modified="2010-09-29 16:30:22Z">
+            <Attribute name="calculation" value="TruthToArg( MetricFlag = MillMetric, 0, 1)" created="2003-01-21 16:42:54Z" user="bmishra" />
+            <Input name="input" ref="635" created="2010-09-29 16:30:22Z" user="Philippe" />
+            <Input name="input" ref="712" created="2007-09-14 12:32:01Z" user="E319133" />
+            <Output name="input" ref="723" created="2007-09-14 11:22:05Z" user="E319133" />
+            <Output name="input" ref="724" created="2007-09-14 11:22:09Z" user="E319133" />
+            <Output name="input" ref="725" created="2007-09-14 11:22:13Z" user="E319133" />
+            <Output name="input" ref="726" created="2007-09-14 11:22:33Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="UseExportFields" ID="722" created="2010-09-29 16:23:09Z" user="Philippe" handle="3" modified="2010-09-29 16:30:30Z">
+            <Attribute name="calculation" value="TruthToArg( MetricFlag = MillMetric, 1, 0)" created="2003-01-21 16:42:54Z" user="bmishra" modified="2003-01-21 16:43:23Z" />
+            <Input name="input" ref="635" created="2010-09-29 16:30:30Z" user="Philippe" />
+            <Input name="input" ref="712" created="2007-09-14 12:32:05Z" user="E319133" />
+            <Output name="input" ref="727" created="2007-09-14 11:35:07Z" user="E319133" />
+            <Output name="input" ref="728" created="2007-09-14 11:35:12Z" user="E319133" />
+            <Output name="input" ref="729" created="2007-09-14 11:35:16Z" user="E319133" />
+            <Output name="input" ref="730" created="2007-09-14 11:35:20Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="CalcMinShtWidthExp" ID="723" created="2010-09-29 16:23:09Z" user="Philippe" handle="4">
+            <Attribute name="calculation" value="TruthToArg( UseRegular, MinShtWidthExpEntry, MinWidthSheetEntry * ConvFactor)" created="2007-09-14 11:25:44Z" user="E319133" modified="2007-09-14 12:21:52Z" />
+            <Input name="input" ref="720" created="2007-09-14 11:22:55Z" user="E319133" />
+            <Input name="input" ref="721" created="2007-09-14 11:22:05Z" user="E319133" />
+            <Output name="value" ref="742" created="2007-09-14 12:42:45Z" user="E319133" />
+            <Input name="input" ref="737" created="2007-09-14 12:07:07Z" user="E319133" />
+            <Input name="input" ref="742" created="2007-09-14 12:08:50Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="CalcMaxShtWidthExp" ID="724" created="2010-09-29 16:23:09Z" user="Philippe" handle="5">
+            <Attribute name="calculation" value="TruthToArg( UseRegular,MaxShtWidthExpEntry,MaxWidthSheetEntry * ConvFactor)" created="2007-09-14 11:27:19Z" user="E319133" modified="2007-09-14 12:24:08Z" />
+            <Input name="input" ref="720" created="2007-09-14 11:23:05Z" user="E319133" />
+            <Input name="input" ref="721" created="2007-09-14 11:22:09Z" user="E319133" />
+            <Output name="value" ref="743" created="2007-09-14 12:43:09Z" user="E319133" />
+            <Input name="input" ref="738" created="2007-09-14 12:07:15Z" user="E319133" />
+            <Input name="input" ref="743" created="2007-09-14 12:08:58Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="CalcMinShtLenExp" ID="725" created="2010-09-29 16:23:09Z" user="Philippe" handle="6">
+            <Attribute name="calculation" value="TruthToArg( UseRegular,MinShtLenExpEntry,MinLenSheetEntry * ConvFactor)" created="2007-09-14 11:28:07Z" user="E319133" modified="2007-09-14 12:25:39Z" />
+            <Input name="input" ref="720" created="2007-09-14 11:23:08Z" user="E319133" />
+            <Input name="input" ref="721" created="2007-09-14 11:22:13Z" user="E319133" />
+            <Output name="value" ref="744" created="2007-09-14 12:43:15Z" user="E319133" />
+            <Input name="input" ref="739" created="2007-09-14 12:07:20Z" user="E319133" />
+            <Input name="input" ref="744" created="2007-09-14 12:09:04Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="CalcMaxShtLenExp" ID="726" created="2010-09-29 16:23:09Z" user="Philippe" handle="7">
+            <Attribute name="calculation" value="TruthToArg( UseRegular,MaxShtLenExpEntry,MaxLenSheetEntry * ConvFactor)" created="2007-09-14 11:29:19Z" user="E319133" modified="2007-09-14 12:26:45Z" />
+            <Input name="input" ref="720" created="2007-09-14 11:23:13Z" user="E319133" />
+            <Input name="input" ref="721" created="2007-09-14 11:22:33Z" user="E319133" />
+            <Output name="value" ref="745" created="2007-09-14 12:43:22Z" user="E319133" />
+            <Input name="input" ref="740" created="2007-09-14 12:08:13Z" user="E319133" />
+            <Input name="input" ref="745" created="2007-09-14 12:09:08Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="CalcMinWidthSheet" ID="727" created="2010-09-29 16:23:09Z" user="Philippe" handle="8">
+            <Attribute name="calculation" value="TruthToArg( UseExportFields, MinWidthSheetEntry,MinShtWidthExpEntry  * ConvFactor)" created="2007-09-14 11:25:44Z" user="E319133" modified="2007-09-14 12:23:15Z" />
+            <Input name="input" ref="720" created="2007-09-14 11:33:37Z" user="E319133" />
+            <Input name="input" ref="722" created="2007-09-14 11:35:07Z" user="E319133" />
+            <Output name="input" ref="732" created="2007-09-14 11:47:48Z" user="E319133" />
+            <Input name="input" ref="737" created="2007-09-14 12:09:30Z" user="E319133" />
+            <Input name="input" ref="742" created="2007-09-14 12:09:36Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="CalcMaxWidthSheet" ID="728" created="2010-09-29 16:23:09Z" user="Philippe" handle="9">
+            <Attribute name="calculation" value="TruthToArg( UseExportFields,MaxWidthSheetEntry,MaxShtWidthExpEntry * ConvFactor)" created="2007-09-14 11:27:19Z" user="E319133" modified="2007-09-14 12:24:29Z" />
+            <Input name="input" ref="720" created="2007-09-14 11:33:42Z" user="E319133" />
+            <Input name="input" ref="722" created="2007-09-14 11:35:12Z" user="E319133" />
+            <Output name="input" ref="733" created="2007-09-14 11:53:26Z" user="E319133" />
+            <Input name="input" ref="738" created="2007-09-14 12:09:42Z" user="E319133" />
+            <Input name="input" ref="743" created="2007-09-14 12:09:46Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="CalcMinLenSheet" ID="729" created="2010-09-29 16:23:09Z" user="Philippe" handle="10">
+            <Attribute name="calculation" value="TruthToArg( UseExportFields,MinLenSheetEntry,MinShtLenExpEntry * ConvFactor)" created="2007-09-14 11:28:07Z" user="E319133" modified="2007-09-14 12:25:56Z" />
+            <Input name="input" ref="720" created="2007-09-14 11:33:47Z" user="E319133" />
+            <Input name="input" ref="722" created="2007-09-14 11:35:16Z" user="E319133" />
+            <Output name="input" ref="734" created="2007-09-14 11:53:38Z" user="E319133" />
+            <Input name="input" ref="739" created="2007-09-14 12:10:12Z" user="E319133" />
+            <Input name="input" ref="744" created="2007-09-14 12:10:19Z" user="E319133" />
+          </Widget>
+          <Widget type="Calculation" name="CalcMaxLenSheet" ID="730" created="2010-09-29 16:23:09Z" user="Philippe" handle="11">
+            <Attribute name="calculation" value="TruthToArg( UseExportFields,MaxLenSheetEntry,MaxShtLenExpEntry * ConvFactor)" created="2007-09-14 11:29:19Z" user="E319133" modified="2007-09-14 12:26:56Z" />
+            <Input name="input" ref="720" created="2007-09-14 11:33:52Z" user="E319133" />
+            <Input name="input" ref="722" created="2007-09-14 11:35:20Z" user="E319133" />
+            <Output name="input" ref="735" created="2007-09-14 11:53:50Z" user="E319133" />
+            <Input name="input" ref="740" created="2007-09-14 12:10:26Z" user="E319133" />
+            <Input name="input" ref="745" created="2007-09-14 12:10:31Z" user="E319133" />
+          </Widget>
+          <Widget type="Diagram" name="Values" ID="731" created="2010-09-29 16:23:09Z" user="Philippe" handle="12">
+            <Widget type="Calculation" name="ValueMinWidthSheet" ID="732" created="2010-09-29 16:23:09Z" user="Philippe" handle="1">
+              <Attribute name="calculation" value="TruthToArg(CalcMinWidthSheet = 0,CalcMinWidthSheet,MinDefault)" created="2007-09-14 11:48:09Z" user="E319133" modified="2007-09-14 12:18:30Z" />
+              <Input name="input" ref="714" created="2007-09-14 12:16:13Z" user="E319133" />
+              <Input name="input" ref="727" created="2007-09-14 11:47:48Z" user="E319133" />
+              <Output name="value" ref="737" created="2007-09-14 12:19:00Z" user="E319133" />
+            </Widget>
+            <Widget type="Calculation" name="ValueMaxWidthSheet" ID="733" created="2010-09-29 16:23:09Z" user="Philippe" handle="2">
+              <Attribute name="calculation" value="TruthToArg(CalcMaxWidthSheet = 0,CalcMaxWidthSheet,MaxDefault" created="2007-09-14 11:54:09Z" user="E319133" modified="2007-09-14 12:19:19Z" />
+              <Input name="input" ref="715" created="2007-09-14 12:16:24Z" user="E319133" />
+              <Input name="input" ref="728" created="2007-09-14 11:53:26Z" user="E319133" />
+              <Output name="value" ref="738" created="2007-09-14 12:19:28Z" user="E319133" />
+            </Widget>
+            <Widget type="Calculation" name="ValueMinLenSheet" ID="734" created="2010-09-29 16:23:09Z" user="Philippe" handle="3">
+              <Attribute name="calculation" value="TruthToArg(CalcMinLenSheet = 0,CalcMinLenSheet,MinDefault)" created="2007-09-14 11:55:44Z" user="E319133" modified="2007-09-14 12:19:53Z" />
+              <Input name="input" ref="714" created="2007-09-14 12:16:19Z" user="E319133" />
+              <Input name="input" ref="729" created="2007-09-14 11:53:38Z" user="E319133" />
+              <Output name="value" ref="739" created="2007-09-14 12:19:58Z" user="E319133" />
+            </Widget>
+            <Widget type="Calculation" name="ValueMaxLenSheet" ID="735" created="2010-09-29 16:23:09Z" user="Philippe" handle="4">
+              <Attribute name="calculation" value="TruthToArg(CalcMaxLenSheet = 0,CalcMaxLenSheet,MaxDefault)" created="2007-09-14 11:55:48Z" user="E319133" modified="2007-09-14 12:20:21Z" />
+              <Input name="input" ref="715" created="2007-09-14 12:16:30Z" user="E319133" />
+              <Input name="input" ref="730" created="2007-09-14 11:53:50Z" user="E319133" />
+              <Output name="value" ref="740" created="2007-09-14 12:20:26Z" user="E319133" />
+            </Widget>
+          </Widget>
+        </Widget>
+        <Widget type="GroupForm" name="NonExportGroup" ID="736" created="2010-09-29 16:23:09Z" user="Philippe" handle="6" modified="2010-09-30 08:05:54Z">
+          <Widget type="Calculation" name="SetWhereMinWidth" ID="796" created="2010-09-30 07:59:34Z" user="Philippe" handle="1" modified="2010-09-30 08:02:22Z">
+            <Attribute name="calculation" value="TruthToArg( (TypeCodeEntry='S' or TypeCodeEntry='C') and EnableWidthLen,&quot;ALL&quot;,&quot;&gt;=&quot;)" created="2010-09-30 07:33:24Z" user="Philippe" modified="2010-09-30 08:01:20Z" />
+            <Input name="input" ref="21" created="2010-09-30 07:59:34Z" user="Philippe" />
+            <Input name="input" ref="713" created="2010-09-30 08:01:01Z" user="Philippe" />
+            <Output name="whereOperator" ref="737" created="2010-09-30 08:01:33Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" ID="737" handle="2" name="MinWidthSheetEntry" user="Philippe" created="2010-09-29 16:23:09Z" modified="2010-09-30 08:17:51Z">
+            <Attribute name="name" value="article.width_sheet" created="2008-06-02 15:46:30Z" user="msdmgr" />
+            <Input name="sensitive" ref="713" created="2003-01-21 19:29:02Z" user="bmishra" />
+            <Input name="default" ref="714" />
+            <Input name="value" ref="732" created="2007-09-14 12:19:00Z" user="E319133" />
+            <Input name="whereOperator" ref="796" created="2010-09-30 08:01:33Z" user="Philippe" />
+            <Output name="input" ref="723" created="2007-09-14 12:07:07Z" user="E319133" />
+            <Output name="input" ref="727" created="2007-09-14 12:09:30Z" user="E319133" />
+            <Output name="where" ref="636" created="2010-09-30 08:01:50Z" user="Philippe" />
+            <Output name="where" ref="464" created="2010-09-30 08:17:51Z" user="Philippe" />
+            <Input name="below" ref="738" created="2005-09-09 17:56:59Z" user="e150290" />
+          </Widget>
+          <Widget type="Calculation" name="SetWhereMaxWidth" ID="797" created="2010-09-30 08:02:01Z" user="Philippe" handle="3" modified="2010-09-30 08:02:47Z">
+            <Attribute name="calculation" value="TruthToArg( (TypeCodeEntry='S' or TypeCodeEntry='C') and EnableWidthLen,&quot;ALL&quot;,&quot;&lt;=&quot;)" created="2010-09-30 07:33:24Z" user="Philippe" modified="2010-09-30 08:02:42Z" />
+            <Input name="input" ref="21" created="2010-09-30 08:02:01Z" user="Philippe" />
+            <Input name="input" ref="713" created="2010-09-30 08:02:01Z" user="Philippe" />
+            <Output name="whereOperator" ref="738" created="2010-09-30 08:02:47Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" ID="738" handle="4" name="MaxWidthSheetEntry" user="Philippe" created="2010-09-29 16:23:09Z" modified="2010-09-30 08:17:51Z">
+            <Attribute name="name" value="article.width_sheet" created="2008-06-02 15:46:40Z" user="msdmgr" />
+            <Input name="sensitive" ref="713" created="2003-01-21 19:29:02Z" user="bmishra" />
+            <Input name="default" ref="715" />
+            <Input name="value" ref="733" created="2007-09-14 12:19:28Z" user="E319133" />
+            <Input name="whereOperator" ref="797" created="2010-09-30 08:02:47Z" user="Philippe" />
+            <Output name="input" ref="724" created="2007-09-14 12:07:15Z" user="E319133" />
+            <Output name="input" ref="728" created="2007-09-14 12:09:42Z" user="E319133" />
+            <Output name="below" ref="737" created="2005-09-09 17:56:59Z" user="e150290" />
+            <Output name="where" ref="636" created="2010-09-30 08:02:58Z" user="Philippe" />
+            <Output name="where" ref="464" created="2010-09-30 08:17:51Z" user="Philippe" />
+            <Input name="below" ref="739" created="2005-09-09 17:36:23Z" user="e150290" />
+          </Widget>
+          <Widget type="Calculation" name="SetWhereMinLen" ID="798" created="2010-09-30 08:03:12Z" user="Philippe" handle="5" modified="2010-09-30 08:04:08Z">
+            <Attribute name="calculation" value="TruthToArg( (TypeCodeEntry='S' or TypeCodeEntry='C') and EnableWidthLen,&quot;ALL&quot;,&quot;&gt;=&quot;)" created="2010-09-30 07:33:24Z" user="Philippe" modified="2010-09-30 08:04:04Z" />
+            <Input name="input" ref="21" created="2010-09-30 08:03:12Z" user="Philippe" />
+            <Input name="input" ref="713" created="2010-09-30 08:03:12Z" user="Philippe" />
+            <Output name="whereOperator" ref="739" created="2010-09-30 08:04:08Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" ID="739" handle="6" name="MinLenSheetEntry" user="Philippe" created="2010-09-29 16:23:09Z" modified="2010-09-30 08:17:51Z">
+            <Attribute name="name" value="article.length_sheet" created="2008-06-02 15:47:01Z" user="msdmgr" />
+            <Input name="sensitive" ref="713" created="2003-01-21 19:30:24Z" user="bmishra" />
+            <Input name="default" ref="714" />
+            <Input name="value" ref="734" created="2007-09-14 12:19:58Z" user="E319133" />
+            <Input name="whereOperator" ref="798" created="2010-09-30 08:04:08Z" user="Philippe" />
+            <Output name="input" ref="725" created="2007-09-14 12:07:20Z" user="E319133" />
+            <Output name="input" ref="729" created="2007-09-14 12:10:12Z" user="E319133" />
+            <Output name="below" ref="738" created="2005-09-09 17:36:23Z" user="e150290" />
+            <Output name="where" ref="464" created="2010-09-30 08:17:51Z" user="Philippe" />
+            <Input name="below" ref="740" created="2005-09-09 17:37:18Z" user="e150290" />
+          </Widget>
+          <Widget type="Calculation" name="SetWhereMaxLen" ID="799" created="2010-09-30 08:04:31Z" user="Philippe" handle="7" modified="2010-09-30 08:05:00Z">
+            <Attribute name="calculation" value="TruthToArg( (TypeCodeEntry='S' or TypeCodeEntry='C') and EnableWidthLen,&quot;ALL&quot;,&quot;&lt;=&quot;)" created="2010-09-30 07:33:24Z" user="Philippe" modified="2010-09-30 08:04:52Z" />
+            <Input name="input" ref="21" created="2010-09-30 08:04:31Z" user="Philippe" />
+            <Input name="input" ref="713" created="2010-09-30 08:04:31Z" user="Philippe" />
+            <Output name="whereOperator" ref="740" created="2010-09-30 08:05:00Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" ID="740" handle="8" name="MaxLenSheetEntry" user="Philippe" created="2010-09-29 16:23:09Z" modified="2010-09-30 08:17:51Z">
+            <Attribute name="name" value="article.length_sheet" created="2008-06-02 15:47:07Z" user="msdmgr" />
+            <Input name="sensitive" ref="713" created="2003-01-21 19:30:24Z" user="bmishra" />
+            <Input name="default" ref="715" />
+            <Input name="value" ref="735" created="2007-09-14 12:20:26Z" user="E319133" />
+            <Input name="whereOperator" ref="799" created="2010-09-30 08:05:00Z" user="Philippe" />
+            <Output name="input" ref="726" created="2007-09-14 12:08:13Z" user="E319133" />
+            <Output name="input" ref="730" created="2007-09-14 12:10:26Z" user="E319133" />
+            <Output name="below" ref="739" created="2005-09-09 17:37:18Z" user="e150290" />
+            <Output name="where" ref="636" created="2010-09-30 08:05:11Z" user="Philippe" />
+            <Output name="where" ref="464" created="2010-09-30 08:17:51Z" user="Philippe" />
+          </Widget>
+          <Attribute name="borderWidth" value="0" created="2005-09-09 18:21:01Z" user="e150290" />
+          <Output name="below" ref="700" created="2005-09-09 18:26:19Z" user="e150290" />
+          <Input name="right" ref="741" created="2005-09-09 17:58:16Z" user="e150290" />
+        </Widget>
+        <Widget type="GroupForm" name="ExportGroup" ID="741" created="2010-09-29 16:23:09Z" user="Philippe" handle="7" modified="2010-09-30 08:11:59Z">
+          <Widget type="Calculation" name="SetWhereMinWidthExp" ID="800" created="2010-09-30 08:07:46Z" user="Philippe" handle="1" modified="2010-09-30 08:09:11Z">
+            <Attribute name="calculation" value="TruthToArg( (TypeCodeEntry='S' or TypeCodeEntry='C') and EnableWidthLenExport,&quot;ALL&quot;,&quot;&gt;=&quot;)" created="2010-09-30 07:33:24Z" user="Philippe" modified="2010-09-30 08:09:01Z" />
+            <Input name="input" ref="21" created="2010-09-30 08:07:46Z" user="Philippe" />
+            <Output name="whereOperator" ref="742" created="2010-09-30 08:09:11Z" user="Philippe" />
+            <Input name="input" ref="746" created="2010-09-30 08:08:34Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" name="MinShtWidthExpEntry" ID="742" created="2010-09-29 16:23:09Z" user="Philippe" handle="2" modified="2010-09-30 08:17:51Z">
+            <Attribute name="name" value="width_sheet_export" created="2005-12-28 14:14:33Z" user="E159692" />
+            <Attribute name="prefix" value="&quot;&quot;" created="2006-12-29 12:16:06Z" user="e319133" />
+            <Input name="value" ref="723" created="2007-09-14 12:42:45Z" user="E319133" />
+            <Input name="whereOperator" ref="800" created="2010-09-30 08:09:11Z" user="Philippe" />
+            <Output name="input" ref="723" created="2007-09-14 12:08:50Z" user="E319133" />
+            <Output name="input" ref="727" created="2007-09-14 12:09:36Z" user="E319133" />
+            <Output name="where" ref="636" created="2010-09-30 08:09:21Z" user="Philippe" />
+            <Output name="where" ref="464" created="2010-09-30 08:17:51Z" user="Philippe" />
+            <Input name="below" ref="743" created="2005-09-09 17:33:03Z" user="e150290" />
+            <Input name="sensitive" ref="746" created="2003-01-21 19:30:03Z" user="bmishra" />
+            <Input name="default" ref="747" created="2003-01-21 20:48:35Z" user="bmishra" />
+          </Widget>
+          <Widget type="Calculation" name="SetWhereMaxWidthExp" ID="801" created="2010-09-30 08:09:25Z" user="Philippe" handle="3" modified="2010-09-30 08:10:35Z">
+            <Attribute name="calculation" value="TruthToArg( (TypeCodeEntry='S' or TypeCodeEntry='C') and EnableWidthLenExport,&quot;ALL&quot;,&quot;&lt;=&quot;)" created="2010-09-30 07:33:24Z" user="Philippe" modified="2010-09-30 08:09:57Z" />
+            <Input name="input" ref="21" created="2010-09-30 08:09:25Z" user="Philippe" />
+            <Output name="whereOperator" ref="743" created="2010-09-30 08:10:09Z" user="Philippe" />
+            <Input name="input" ref="746" created="2010-09-30 08:09:25Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" name="MaxShtWidthExpEntry" ID="743" created="2010-09-29 16:23:09Z" user="Philippe" handle="4" modified="2010-09-30 08:17:51Z">
+            <Attribute name="name" value="width_sheet_export" created="2005-12-28 14:14:51Z" user="E159692" />
+            <Attribute name="prefix" value="&quot;&quot;" created="2006-12-29 12:16:10Z" user="e319133" />
+            <Input name="value" ref="724" created="2007-09-14 12:43:09Z" user="E319133" />
+            <Input name="whereOperator" ref="801" created="2010-09-30 08:10:09Z" user="Philippe" />
+            <Output name="input" ref="724" created="2007-09-14 12:08:58Z" user="E319133" />
+            <Output name="input" ref="728" created="2007-09-14 12:09:46Z" user="E319133" />
+            <Output name="below" ref="742" created="2005-09-09 17:33:03Z" user="e150290" />
+            <Output name="where" ref="636" created="2010-09-30 08:10:27Z" user="Philippe" />
+            <Output name="where" ref="464" created="2010-09-30 08:17:51Z" user="Philippe" />
+            <Input name="below" ref="744" created="2005-09-09 17:35:32Z" user="e150290" />
+            <Input name="sensitive" ref="746" created="2003-01-21 19:30:03Z" user="bmishra" />
+            <Input name="default" ref="748" created="2003-01-21 20:49:37Z" user="bmishra" />
+          </Widget>
+          <Widget type="Calculation" name="SetWhereMinShtLenExp" ID="802" created="2010-09-30 08:10:49Z" user="Philippe" handle="5" modified="2010-09-30 08:11:35Z">
+            <Attribute name="calculation" value="TruthToArg( (TypeCodeEntry='S' or TypeCodeEntry='C') and EnableWidthLenExport,&quot;ALL&quot;,&quot;&gt;=&quot;)" created="2010-09-30 07:33:24Z" user="Philippe" modified="2010-09-30 08:11:27Z" />
+            <Input name="input" ref="21" created="2010-09-30 08:10:49Z" user="Philippe" />
+            <Output name="whereOperator" ref="744" created="2010-09-30 08:11:35Z" user="Philippe" />
+            <Input name="input" ref="746" created="2010-09-30 08:10:49Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" name="MinShtLenExpEntry" ID="744" created="2010-09-29 16:23:09Z" user="Philippe" handle="6" modified="2010-09-30 08:17:51Z">
+            <Attribute name="name" value="len_sheet_export" created="2005-12-28 14:15:20Z" user="E159692" />
+            <Attribute name="prefix" value="&quot;&quot;" created="2006-12-29 12:16:15Z" user="e319133" />
+            <Input name="value" ref="725" created="2007-09-14 12:43:15Z" user="E319133" />
+            <Input name="whereOperator" ref="802" created="2010-09-30 08:11:35Z" user="Philippe" />
+            <Output name="input" ref="725" created="2007-09-14 12:09:04Z" user="E319133" />
+            <Output name="input" ref="729" created="2007-09-14 12:10:19Z" user="E319133" />
+            <Output name="below" ref="743" created="2005-09-09 17:35:32Z" user="e150290" />
+            <Output name="where" ref="636" created="2010-09-30 08:11:51Z" user="Philippe" />
+            <Output name="where" ref="464" created="2010-09-30 08:17:51Z" user="Philippe" />
+            <Input name="below" ref="745" created="2005-09-09 17:33:50Z" user="e150290" />
+            <Input name="sensitive" ref="746" created="2003-01-21 19:30:03Z" user="bmishra" />
+            <Input name="default" ref="747" created="2003-01-21 20:48:35Z" user="bmishra" />
+          </Widget>
+          <Widget type="Calculation" name="SetWhereMaxShtLenExp" ID="803" created="2010-09-30 08:11:57Z" user="Philippe" handle="7" modified="2010-09-30 08:12:24Z">
+            <Attribute name="calculation" value="TruthToArg( (TypeCodeEntry='S' or TypeCodeEntry='C') and EnableWidthLenExport,&quot;ALL&quot;,&quot;&lt;=&quot;)" created="2010-09-30 07:33:24Z" user="Philippe" modified="2010-09-30 08:12:16Z" />
+            <Input name="input" ref="21" created="2010-09-30 08:11:57Z" user="Philippe" />
+            <Output name="whereOperator" ref="745" created="2010-09-30 08:12:24Z" user="Philippe" />
+            <Input name="input" ref="746" created="2010-09-30 08:11:57Z" user="Philippe" />
+          </Widget>
+          <Widget type="Template" name="MaxShtLenExpEntry" ID="745" created="2010-09-29 16:23:09Z" user="Philippe" handle="8" modified="2010-09-30 08:17:51Z">
+            <Attribute name="name" value="len_sheet_export" created="2005-12-28 14:16:20Z" user="E159692" />
+            <Attribute name="prefix" value="&quot;&quot;" created="2006-12-29 12:16:19Z" user="e319133" />
+            <Input name="value" ref="726" created="2007-09-14 12:43:22Z" user="E319133" />
+            <Input name="whereOperator" ref="803" created="2010-09-30 08:12:24Z" user="Philippe" />
+            <Output name="input" ref="726" created="2007-09-14 12:09:08Z" user="E319133" />
+            <Output name="input" ref="730" created="2007-09-14 12:10:31Z" user="E319133" />
+            <Output name="below" ref="744" created="2005-09-09 17:33:50Z" user="e150290" />
+            <Output name="where" ref="636" created="2010-09-30 08:12:38Z" user="Philippe" />
+            <Output name="where" ref="464" created="2010-09-30 08:17:51Z" user="Philippe" />
+            <Input name="sensitive" ref="746" created="2003-01-21 19:30:03Z" user="bmishra" />
+            <Input name="default" ref="748" created="2003-01-21 20:49:37Z" user="bmishra" />
+          </Widget>
+          <Output name="right" ref="736" created="2005-09-09 17:58:16Z" user="e150290" />
+        </Widget>
+        <Widget type="Calculation" name="EnableWidthLenExport" ID="746" created="2010-09-29 16:23:09Z" user="Philippe" handle="8" modified="2010-09-30 08:11:57Z">
+          <Attribute name="calculation" value="TruthToArg( MetricFlag = MillMetric, 1, 0)" created="2003-01-21 16:42:54Z" user="bmishra" modified="2003-01-21 16:43:23Z" />
+          <Input name="input" ref="635" created="2010-09-29 16:29:38Z" user="Philippe" />
+          <Input name="input" ref="712" created="2003-01-21 19:29:29Z" user="bmishra" />
+          <Output name="input" ref="800" created="2010-09-30 08:08:34Z" user="Philippe" />
+          <Output name="sensitive" ref="742" created="2003-01-21 19:30:03Z" user="bmishra" />
+          <Output name="input" ref="801" created="2010-09-30 08:09:25Z" user="Philippe" />
+          <Output name="sensitive" ref="743" created="2003-01-21 19:30:03Z" user="bmishra" />
+          <Output name="input" ref="802" created="2010-09-30 08:10:49Z" user="Philippe" />
+          <Output name="sensitive" ref="744" created="2003-01-21 19:30:03Z" user="bmishra" />
+          <Output name="input" ref="803" created="2010-09-30 08:11:57Z" user="Philippe" />
+          <Output name="sensitive" ref="745" created="2003-01-21 19:30:03Z" user="bmishra" />
+        </Widget>
+        <Widget type="Calculation" ID="747" handle="9" name="MinExportDefault" created="2010-09-29 16:23:09Z" user="Philippe">
+          <Attribute name="calculation" value="TruthToArg(USEMETRIC = &quot;Y&quot;, 20, 8)" modified="2003-01-21 20:46:39Z" user="bmishra" />
+          <Input name="input" ref="710" created="2003-01-21 20:46:19Z" user="bmishra" />
+          <Output name="default" ref="742" created="2003-01-21 20:48:35Z" user="bmishra" />
+          <Output name="default" ref="744" created="2003-01-21 20:48:35Z" user="bmishra" />
+        </Widget>
+        <Widget type="Calculation" ID="748" handle="10" name="MaxExportDefault" created="2010-09-29 16:23:09Z" user="Philippe">
+          <Attribute name="calculation" value="TruthToArg(USEMETRIC = &quot;Y&quot;, 200, 80)" modified="2003-01-21 20:55:46Z" user="bmishra" />
+          <Input name="input" ref="710" created="2003-01-21 20:49:04Z" user="bmishra" />
+          <Output name="default" ref="743" created="2003-01-21 20:49:37Z" user="bmishra" />
+          <Output name="default" ref="745" created="2003-01-21 20:49:37Z" user="bmishra" />
+        </Widget>
+        <Input name="displayed" ref="786" created="2010-09-29 16:25:12Z" user="Philippe" />
+        <Output name="leftAlign" ref="530" created="2010-09-30 15:10:53Z" user="Philippe" />
+      </Widget>
+      <Output name="right" ref="817" created="2010-09-30 15:09:23Z" user="Philippe" />
+      <Output name="topAlign" ref="817" created="2010-09-30 15:09:31Z" user="Philippe" />
+      <Input name="right" ref="637" created="2010-09-30 14:10:11Z" user="Philippe" />
+      <Input name="topAlign" ref="637" created="2010-09-30 15:11:42Z" user="Philippe" />
+    </Widget>
+    <Widget type="Form" name="RightCriteriasForm" ID="637" created="2010-09-29 15:45:49Z" user="Philippe" modified="2010-09-30 15:12:45Z" handle="4">
+      <Widget type="Form" name="WrapForm" ID="813" created="2010-09-30 14:54:00Z" user="Philippe" modified="2010-09-30 15:12:48Z" handle="1">
+        <Widget type="Template" ID="83" handle="1" name="WrapIDEntry" modified="2010-09-30 14:58:29Z" user="Philippe">
+          <Attribute name="suffix" value="&quot; **&quot;" />
+          <Attribute name="required" value="0" created="2009-10-28 20:35:30Z" user="gvg" />
+          <Output name="validation" ref="84" />
+          <Output name="input" ref="455" created="2010-09-29 16:08:04Z" user="Philippe" />
+          <Output name="where" ref="636" created="2010-09-29 15:27:42Z" user="Philippe" />
+          <Output name="where" ref="464" created="2009-10-29 12:48:22Z" user="gvg" />
+          <Input name="whereOperator" ref="455" created="2010-09-29 16:08:15Z" user="Philippe" />
+          <Input name="reset" ref="806" created="2010-09-30 08:34:25Z" user="Philippe" />
+        </Widget>
+        <Widget type="Template" ID="84" handle="2" name="WrapCodeDMenu" modified="2010-09-30 14:57:05Z" user="Philippe">
+          <Input name="validation" ref="83" />
+        </Widget>
+        <Widget type="Calculation" name="AllWrapIDs" ID="455" created="2009-10-28 20:38:19Z" user="Philippe" modified="2010-09-29 16:08:15Z" handle="3">
+          <Attribute name="calculation" value="TruthToArg(WrapIDEntry = &quot; &quot;, &quot;=&quot;, &quot;ALL&quot;)" created="2009-10-28 20:39:12Z" user="gvg" />
+          <Input name="input" ref="83" created="2010-09-29 16:08:04Z" user="Philippe" />
+          <Output name="whereOperator" ref="83" created="2010-09-29 16:08:15Z" user="Philippe" />
+        </Widget>
+        <Attribute name="orientation" value="horizontal" created="2010-09-30 14:56:24Z" user="Philippe" />
+      </Widget>
+      <Widget type="Form" name="PalletSpecForm" ID="815" created="2010-09-30 14:54:54Z" user="Philippe" modified="2010-09-30 15:12:51Z" handle="2">
+        <Widget type="Template" ID="149" handle="1" name="PalletSpecIDEntry" modified="2010-09-30 14:58:29Z" user="Philippe">
+          <Attribute name="required" value="FALSE" />
+          <Attribute name="suffix" value="&quot; **&quot;" />
+          <Attribute name="default" value="&quot;   &quot;" />
+          <Output name="input" ref="456" created="2009-10-28 20:40:07Z" user="gvg" />
+          <Output name="validation" ref="150" />
+          <Output name="where" ref="636" created="2010-09-29 15:27:42Z" user="Philippe" />
+          <Output name="where" ref="464" created="2009-10-29 12:48:22Z" user="gvg" />
+          <Input name="whereOperator" ref="456" created="2009-10-28 20:40:25Z" user="gvg" />
+          <Input name="reset" ref="806" created="2010-09-30 08:34:34Z" user="Philippe" />
+        </Widget>
+        <Widget type="Calculation" name="AllPalletSpecs" ID="456" created="2009-10-28 20:39:52Z" user="Philippe" modified="2010-09-29 15:52:05Z" handle="2">
+          <Attribute name="calculation" value="TruthToArg(PalletSpecIDEntry = &quot; &quot; or PalletSpecIDEntry = 0, &quot;=&quot;,&quot;ALL&quot;)" created="2009-10-28 20:40:54Z" user="gvg" modified="2009-10-29 15:37:41Z" />
+          <Input name="input" ref="149" created="2009-10-28 20:40:07Z" user="gvg" />
+          <Output name="whereOperator" ref="149" created="2009-10-28 20:40:25Z" user="gvg" />
+        </Widget>
+        <Widget type="Template" ID="150" handle="3" name="PalletSpecDMenu" modified="2010-09-30 14:56:49Z" user="Philippe">
+          <Input name="TypeCode:where" ref="21" />
+          <Input name="validation" ref="149" />
+        </Widget>
+        <Attribute name="orientation" value="horizontal" created="2010-09-30 14:55:23Z" user="Philippe" />
+      </Widget>
+      <Widget type="Form" name="CoreIDForm" ID="639" created="2010-09-29 15:49:05Z" user="Philippe" modified="2010-09-30 15:12:55Z" handle="3">
+        <Widget type="Template" ID="643" handle="1" name="CoreIDEntry" user="Philippe" created="2010-09-29 15:50:00Z" modified="2010-09-30 14:58:40Z">
+          <Attribute name="required" value="FALSE" />
+          <Attribute name="suffix" value="&quot; **&quot;" />
+          <Attribute name="default" value="&quot;   &quot;" />
+          <Output name="input" ref="645" created="2010-09-29 15:54:04Z" user="Philippe" />
+          <Output name="validation" ref="644" created="2010-09-29 15:56:06Z" user="Philippe" />
+          <Output name="where" ref="636" created="2010-09-30 08:19:21Z" user="Philippe" />
+          <Output name="where" ref="464" created="2010-09-30 08:19:29Z" user="Philippe" />
+          <Input name="whereOperator" ref="645" created="2010-09-29 15:53:31Z" user="Philippe" />
+          <Input name="reset" ref="806" created="2010-09-30 08:34:41Z" user="Philippe" />
+        </Widget>
+        <Widget type="Calculation" name="AllCoreType" ID="645" created="2010-09-29 15:51:32Z" user="Philippe" handle="2" modified="2010-09-29 15:57:31Z">
+          <Attribute name="calculation" value="TruthToArg(CoreIDEntry = &quot; &quot; or CoreIDEntry = 0, &quot;=&quot;,&quot;ALL&quot;)" created="2009-10-28 20:40:54Z" user="Philippe" modified="2010-09-29 15:57:31Z" />
+          <Input name="input" ref="643" created="2010-09-29 15:54:04Z" user="Philippe" />
+          <Output name="whereOperator" ref="643" created="2010-09-29 15:53:31Z" user="Philippe" />
+        </Widget>
+        <Widget type="Template" ID="644" handle="3" name="CoreTypeDMenu" user="Philippe" created="2010-09-29 15:51:12Z" modified="2010-09-29 15:56:06Z">
+          <Input name="validation" ref="643" created="2010-09-29 15:56:06Z" user="Philippe" />
+        </Widget>
+        <Attribute name="orientation" value="horizontal" created="2010-09-30 14:55:36Z" user="Philippe" />
+      </Widget>
+      <Widget type="Form" name="ArticleIDForm" ID="641" created="2010-09-29 15:49:41Z" user="Philippe" handle="4" modified="2010-09-30 15:12:58Z">
+        <Widget type="Template" ID="673" handle="1" name="ArticleIDEntry" user="Philippe" created="2010-09-29 16:03:12Z" modified="2010-09-30 15:13:14Z">
+          <Attribute name="required" value="0" created="2010-09-30 15:13:14Z" user="Philippe" />
+          <Output name="input" ref="696" created="2010-09-29 16:06:47Z" user="Philippe" />
+          <Output name="where" ref="636" created="2010-09-29 16:07:12Z" user="Philippe" />
+          <Output name="where" ref="464" created="2010-09-30 08:19:48Z" user="Philippe" />
+          <Input name="below" ref="674" created="2010-09-30 14:29:15Z" user="Philippe" />
+          <Input name="whereOperator" ref="696" created="2010-09-29 16:06:39Z" user="Philippe" />
+          <Input name="ArticleID:value" ref="682" />
+          <Input name="ArticleID:value" ref="686" />
+          <Input name="reset" ref="806" created="2010-09-30 08:34:48Z" user="Philippe" />
+        </Widget>
+        <Widget type="Template" ID="674" handle="2" name="RevNumEntry" user="Philippe" created="2010-09-29 16:03:12Z" modified="2010-09-30 14:29:15Z">
+          <Attribute name="sensitive" value="False" created="2008-09-09 11:51:49Z" user="msdmgr" />
+          <Output name="below" ref="673" created="2010-09-30 14:29:15Z" user="Philippe" />
+          <Input name="RevNum:value" ref="682" />
+          <Input name="right" ref="684" />
+          <Input name="RevNum:value" ref="687" />
+        </Widget>
+        <Widget type="Calculation" name="AllArticleIDs" ID="696" created="2010-09-29 16:06:11Z" user="Philippe" handle="3" modified="2010-09-29 16:08:53Z">
+          <Attribute name="calculation" value="TruthToArg(ArticleIDEntry = &quot; &quot;, &quot;like&quot;, &quot;ALL&quot;)" created="2009-10-28 20:39:12Z" user="Philippe" modified="2010-09-29 16:08:53Z" />
+          <Input name="input" ref="673" created="2010-09-29 16:06:47Z" user="Philippe" />
+          <Output name="whereOperator" ref="673" created="2010-09-29 16:06:39Z" user="Philippe" />
+        </Widget>
+        <Widget type="Option" ID="675" handle="4" name="ADDSMENU" grid_width="7" grid_height="1" created="2010-09-29 16:03:12Z" user="Philippe">
+          <Widget type="Diagram" ID="676" handle="1" name="Y" grid_width="8" grid_height="1" created="2010-09-29 16:03:12Z" user="Philippe">
+            <Widget type="Connector" ID="677" handle="1" name="gradespec" created="2010-09-29 16:03:12Z" user="Philippe" modified="2010-09-29 16:03:39Z">
+              <Output name="gradespec" ref="681" />
+            </Widget>
+            <Widget type="Connector" ID="678" handle="2" name="typecode" created="2010-09-29 16:03:12Z" user="Philippe" modified="2010-09-29 16:03:39Z">
+              <Output name="typecode" ref="681" />
+            </Widget>
+            <Widget type="InternalField" ID="679" handle="3" name="CallingProg" created="2010-09-29 16:03:12Z" user="Philippe">
+              <Attribute name="default" value="&quot;MAINT&quot;" />
+              <Output name="program" ref="681" />
+            </Widget>
+            <Widget type="Template" ID="680" handle="4" name="ArticleSMenuButton" created="2010-09-29 16:03:12Z" user="Philippe" modified="2010-09-30 14:26:10Z">
+              <Output name="displayed" ref="681" />
+              <Input name="done:value" ref="681" />
+            </Widget>
+            <Widget type="Template" ID="681" handle="5" name="ArticleSMenu()" created="2010-09-29 16:03:12Z" user="Philippe">
+              <Input name="gradespec" ref="677" />
+              <Input name="typecode" ref="678" />
+              <Input name="program" ref="679" />
+              <Input name="displayed" ref="680" />
+              <Output name="done:value" ref="680" />
+              <Output name="value" ref="682" />
+            </Widget>
+            <Widget type="Connector" ID="682" handle="6" name="value" created="2010-09-29 16:03:12Z" user="Philippe">
+              <Input name="value" ref="681" />
+              <Output name="ArticleID:value" ref="673" />
+              <Output name="RevNum:value" ref="674" />
+            </Widget>
+          </Widget>
+          <Widget type="Diagram" ID="683" handle="2" name="DEFAULT" grid_width="8" grid_height="3" created="2010-09-29 16:03:12Z" user="Philippe">
+            <Widget type="Template" ID="684" handle="1" name="PopupMenu" created="2010-09-29 16:03:12Z" user="Philippe">
+              <Output name="right" ref="674" />
+              <Output name="validation" ref="685" />
+            </Widget>
+            <Widget type="Cursor" ID="685" handle="2" name="Key:article" created="2010-09-29 16:03:12Z" user="Philippe" modified="2010-09-29 16:03:39Z">
+              <Attribute name="from" value="article" />
+              <Input name="validation" ref="684" />
+              <Output name="select" ref="686" />
+              <Output name="select" ref="687" />
+              <Output name="select" ref="688" />
+              <Output name="select" ref="689" />
+              <Output name="select" ref="690" />
+              <Output name="select" ref="691" />
+              <Output name="select" ref="692" />
+              <Output name="select" ref="693" />
+            </Widget>
+            <Widget type="Template" ID="686" handle="3" name="ArticleIDColumn" created="2010-09-29 16:03:12Z" user="Philippe">
+              <Input name="select" ref="685" />
+              <Output name="ArticleID:value" ref="673" />
+            </Widget>
+            <Widget type="Template" ID="687" handle="4" name="RevNumColumn" created="2010-09-29 16:03:12Z" user="Philippe">
+              <Input name="select" ref="685" />
+              <Output name="RevNum:value" ref="674" />
+            </Widget>
+            <Widget type="Template" ID="688" handle="5" name="TimeEffColumn" created="2010-09-29 16:03:12Z" user="Philippe">
+              <Input name="select" ref="685" />
+            </Widget>
+            <Widget type="Template" ID="689" handle="6" name="WidthColumn" created="2010-09-29 16:03:12Z" user="Philippe">
+              <Input name="select" ref="685" />
+            </Widget>
+            <Widget type="Template" ID="690" handle="7" name="DiameterColumn" created="2010-09-29 16:03:12Z" user="Philippe">
+              <Input name="select" ref="685" />
+            </Widget>
+            <Widget type="Template" ID="691" handle="8" name="WidthSheetColumn" created="2010-09-29 16:03:12Z" user="Philippe">
+              <Input name="select" ref="685" />
+            </Widget>
+            <Widget type="Template" ID="692" handle="9" name="LenSheetColumn" created="2010-09-29 16:03:12Z" user="Philippe">
+              <Input name="select" ref="685" />
+            </Widget>
+            <Widget type="Template" ID="693" handle="10" name="PalletSpecIDColumn" created="2010-09-29 16:03:12Z" user="Philippe">
+              <Input name="select" ref="685" />
+            </Widget>
+          </Widget>
+        </Widget>
+      </Widget>
+      <Attribute name="orientation" value="vertical" created="2010-09-30 14:50:36Z" user="Philippe" />
+      <Output name="right" ref="525" created="2010-09-30 14:10:11Z" user="Philippe" />
+      <Output name="topAlign" ref="525" created="2010-09-30 15:11:42Z" user="Philippe" />
+    </Widget>
+    <Attribute name="borderWidth" value="2" />
+    <Attribute name="orientation" value="Vertical" />
+    <Output name="below" ref="3" />
+    <Input name="below" ref="62" />
+    <Input name="right" ref="346" />
+    <Input name="topAlign" ref="346" />
+  </Widget>
+  <Widget type="RaisedForm" ID="62" handle="4" name="DataForm" grid_width="9" grid_height="2" modified="2009-10-28 19:31:27Z" user="gvg">
+    <Widget type="Form" name="CostCalcMethod" ID="442" created="2009-10-28 19:31:27Z" user="gvg" handle="1" modified="2009-10-28 20:14:10Z">
+      <Widget type="Form" name="RadioForm" ID="446" created="2009-10-28 20:13:23Z" user="gvg" modified="2009-10-28 20:26:41Z" handle="1">
+        <Widget type="Template" name="PercentageRadio" ID="443" created="2009-10-28 20:10:12Z" user="gvg" handle="1" modified="2009-10-29 12:29:09Z">
+          <Attribute name="default" value="1" created="2009-10-28 20:21:43Z" user="gvg" />
+          <Output name="input" ref="451" created="2009-10-28 20:23:04Z" user="gvg" />
+          <Output name="input" ref="439" created="2009-10-29 12:29:09Z" user="gvg" />
+        </Widget>
+        <Widget type="Template" name="FlatRadio" ID="444" created="2009-10-28 20:10:24Z" user="gvg" handle="2" modified="2009-10-29 12:29:09Z">
+          <Output name="input" ref="452" created="2009-10-28 20:23:18Z" user="gvg" />
+          <Output name="input" ref="439" created="2009-10-29 12:29:09Z" user="gvg" />
+        </Widget>
+        <Widget type="Template" name="IncrementRadio" ID="445" created="2009-10-28 20:10:32Z" user="gvg" handle="3" modified="2009-10-28 20:23:41Z">
+          <Output name="input" ref="453" created="2009-10-28 20:23:41Z" user="gvg" />
+        </Widget>
+        <Attribute name="orientation" value="vertical" created="2009-10-28 20:15:55Z" user="gvg" />
+        <Attribute name="defaultDistance" value="5" created="2009-10-28 20:24:13Z" user="gvg" modified="2009-10-28 20:26:41Z" />
+        <Input name="right" ref="447" created="2009-10-28 20:15:40Z" user="gvg" />
+      </Widget>
+      <Widget type="Form" name="PriceFieldForm" ID="447" created="2009-10-28 20:14:10Z" user="gvg" modified="2009-10-28 20:22:30Z" handle="2">
+        <Widget type="Calculation" name="AllowPercent" ID="451" created="2009-10-28 20:22:10Z" user="gvg" modified="2009-10-28 20:24:33Z" handle="1">
+          <Attribute name="calculation" value="PercentageRadio" created="2009-10-28 20:22:45Z" user="gvg" />
+          <Input name="input" ref="443" created="2009-10-28 20:23:04Z" user="gvg" />
+          <Output name="sensitive" ref="448" created="2009-10-28 20:24:33Z" user="gvg" />
+        </Widget>
+        <Widget type="Template" name="PercentEntry" ID="448" created="2009-10-28 20:14:26Z" user="gvg" modified="2009-10-29 12:29:09Z" handle="2">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-10-28 20:15:05Z" user="gvg" />
+          <Input name="sensitive" ref="451" created="2009-10-28 20:24:33Z" user="gvg" />
+          <Output name="input" ref="439" created="2009-10-29 12:29:09Z" user="gvg" />
+        </Widget>
+        <Widget type="Calculation" name="AllowFlat" ID="452" created="2009-10-28 20:22:17Z" user="gvg" modified="2009-10-28 20:24:40Z" handle="3">
+          <Attribute name="calculation" value="FlatRadio" created="2009-10-28 20:23:27Z" user="gvg" />
+          <Input name="input" ref="444" created="2009-10-28 20:23:18Z" user="gvg" />
+          <Output name="sensitive" ref="449" created="2009-10-28 20:24:40Z" user="gvg" />
+        </Widget>
+        <Widget type="Template" name="FlatPrice:PriceEntry" ID="449" created="2009-10-28 20:14:42Z" user="gvg" modified="2009-10-29 12:29:09Z" handle="4">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-10-28 20:15:13Z" user="gvg" />
+          <Input name="sensitive" ref="452" created="2009-10-28 20:24:40Z" user="gvg" />
+          <Output name="input" ref="439" created="2009-10-29 12:29:09Z" user="gvg" />
+        </Widget>
+        <Widget type="Calculation" name="AllowIncrement" ID="453" created="2009-10-28 20:22:30Z" user="gvg" modified="2009-10-28 20:24:47Z" handle="5">
+          <Attribute name="calculation" value="IncrementRadio" created="2009-10-28 20:23:50Z" user="gvg" />
+          <Input name="input" ref="445" created="2009-10-28 20:23:41Z" user="gvg" />
+          <Output name="sensitive" ref="450" created="2009-10-28 20:24:47Z" user="gvg" />
+        </Widget>
+        <Widget type="Template" name="IncrementPrice:PriceEntry" ID="450" created="2009-10-28 20:14:55Z" user="gvg" modified="2009-10-29 12:29:09Z" handle="6">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-10-28 20:15:19Z" user="gvg" />
+          <Input name="sensitive" ref="453" created="2009-10-28 20:24:47Z" user="gvg" />
+          <Output name="input" ref="439" created="2009-10-29 12:29:09Z" user="gvg" />
+        </Widget>
+        <Attribute name="orientation" value="vertical" created="2009-10-28 20:16:04Z" user="gvg" />
+        <Output name="right" ref="446" created="2009-10-28 20:15:40Z" user="gvg" />
+      </Widget>
+    </Widget>
+    <Widget type="Form" name="Costs" ID="441" created="2009-10-28 19:30:18Z" user="Philippe" modified="2010-09-30 08:12:47Z" handle="2">
+      <Widget type="Template" ID="63" handle="1" name="SelectAllToggle" modified="2009-10-29 15:45:53Z" user="gvg">
+        <Output name="value" ref="438" created="2009-10-29 13:58:45Z" user="gvg" />
+        <Input name="below" ref="440" created="2009-10-28 19:24:44Z" user="gvg" />
+        <Input name="reset" ref="482" created="2009-10-29 15:45:53Z" user="gvg" />
+      </Widget>
+      <Widget type="AutoHeader" name="Header" ID="440" created="2009-10-28 19:23:53Z" user="gvg" modified="2009-10-29 14:03:00Z" handle="2">
+        <Output name="below" ref="63" created="2009-10-28 19:24:44Z" user="gvg" />
+        <Input name="headerForm" ref="434" created="2009-10-28 19:24:06Z" user="gvg" />
+        <Input name="below" ref="127" created="2009-10-29 14:03:00Z" user="gvg" />
+      </Widget>
+      <Widget type="Template" name="ActiveColumn" ID="474" created="2009-10-29 14:22:15Z" user="Philippe" modified="2010-09-30 09:00:57Z" handle="3">
+        <Output name="where" ref="636" created="2010-09-29 15:27:42Z" user="Philippe" />
+        <Output name="where" ref="464" created="2010-09-30 09:00:57Z" user="Philippe" />
+      </Widget>
+      <Widget type="Cursor" ID="636" handle="4" name="Main:article" user="Philippe" created="2010-09-29 15:27:42Z" modified="2010-09-30 08:33:12Z">
+        <Attribute name="resetOnFailure" value="FALSE" />
+        <Attribute name="from" value="article" />
+        <Input name="where" ref="492" created="2010-09-29 15:27:42Z" user="Philippe" />
+        <Input name="where" ref="21" created="2010-09-29 15:27:42Z" user="Philippe" />
+        <Input name="where" ref="574" created="2010-09-29 15:29:38Z" user="Philippe" />
+        <Input name="where" ref="575" created="2010-09-29 15:29:45Z" user="Philippe" />
+        <Input name="where" ref="576" created="2010-09-29 15:29:56Z" user="Philippe" />
+        <Input name="where" ref="577" created="2010-09-29 15:30:02Z" user="Philippe" />
+        <Input name="where" ref="579" created="2010-09-30 07:39:57Z" user="Philippe" />
+        <Input name="where" ref="580" created="2010-09-30 07:39:46Z" user="Philippe" />
+        <Input name="where" ref="581" created="2010-09-30 07:39:33Z" user="Philippe" />
+        <Input name="where" ref="582" created="2010-09-30 07:39:19Z" user="Philippe" />
+        <Input name="where" ref="594" created="2010-09-30 08:33:03Z" user="Philippe" />
+        <Input name="where" ref="595" created="2010-09-30 08:33:12Z" user="Philippe" />
+        <Input name="activate" ref="597" created="2010-09-29 15:29:06Z" user="Philippe" />
+        <Input name="where" ref="737" created="2010-09-30 08:01:50Z" user="Philippe" />
+        <Input name="where" ref="738" created="2010-09-30 08:02:58Z" user="Philippe" />
+        <Input name="where" ref="740" created="2010-09-30 08:05:11Z" user="Philippe" />
+        <Input name="where" ref="742" created="2010-09-30 08:09:21Z" user="Philippe" />
+        <Input name="where" ref="743" created="2010-09-30 08:10:27Z" user="Philippe" />
+        <Input name="where" ref="744" created="2010-09-30 08:11:51Z" user="Philippe" />
+        <Input name="where" ref="745" created="2010-09-30 08:12:38Z" user="Philippe" />
+        <Input name="where" ref="83" created="2010-09-29 15:27:42Z" user="Philippe" />
+        <Input name="where" ref="149" created="2010-09-29 15:27:42Z" user="Philippe" />
+        <Input name="where" ref="643" created="2010-09-30 08:19:21Z" user="Philippe" />
+        <Input name="where" ref="673" created="2010-09-29 16:07:12Z" user="Philippe" />
+        <Input name="where" ref="474" created="2010-09-29 15:27:42Z" user="Philippe" />
+        <Output name="select" ref="485" created="2009-10-30 18:48:08Z" user="gvg" />
+        <Output name="select" ref="467" created="2009-10-29 13:56:20Z" user="gvg" />
+        <Output name="select" ref="435" created="2009-10-30 18:47:44Z" user="gvg" />
+        <Output name="select" ref="476" created="2009-10-29 15:41:00Z" user="gvg" />
+        <Output name="select" ref="477" created="2009-10-29 15:41:00Z" user="gvg" />
+        <Output name="select" ref="478" created="2009-10-29 15:41:00Z" user="gvg" />
+        <Output name="select" ref="479" created="2009-10-29 15:41:00Z" user="gvg" />
+        <Output name="select" ref="470" created="2009-10-29 13:56:20Z" user="gvg" />
+        <Output name="select" ref="483" created="2009-10-30 18:47:44Z" user="gvg" />
+        <Output name="select" ref="484" created="2009-10-30 18:47:44Z" user="gvg" />
+        <Output name="select" ref="462" created="2009-10-29 12:42:07Z" user="gvg" />
+        <Output name="select" ref="436" created="2009-10-28 19:18:51Z" user="gvg" />
+        <Output name="doneFlag" ref="127" created="2009-10-28 19:14:43Z" user="gvg" />
+        <Output name="fetchFlag" ref="127" created="2009-10-28 19:14:31Z" user="gvg" />
+        <Output name="resetFlag" ref="127" created="2009-10-28 19:15:04Z" user="gvg" />
+        <Output name="status" ref="466" created="2009-10-29 12:46:54Z" user="gvg" />
+        <Input name="order" ref="476" created="2010-09-29 15:27:42Z" user="Philippe" />
+        <Input name="order" ref="477" created="2010-09-29 15:27:42Z" user="Philippe" />
+        <Input name="order" ref="478" created="2010-09-29 15:27:42Z" user="Philippe" />
+        <Input name="order" ref="479" created="2010-09-29 15:27:42Z" user="Philippe" />
+        <Input name="fetchPage" ref="464" created="2010-09-29 15:27:42Z" user="Philippe" />
+        <Input name="fetchRows" ref="464" created="2010-09-29 15:27:42Z" user="Philippe" />
+        <Input name="out:syncTime" ref="464" created="2010-09-29 15:27:42Z" user="Philippe" />
+      </Widget>
+      <Widget type="GroupForm" ID="127" handle="5" name="RightDataForm" grid_width="7" grid_height="3" modified="2010-09-30 08:12:47Z" user="Philippe">
+        <Widget type="Form" name="InnerForm" ID="434" created="2009-10-28 19:14:16Z" user="gvg" modified="2009-10-30 18:47:56Z" handle="1">
+          <Widget type="Template" name="SelectToggle" ID="438" created="2009-10-28 19:17:44Z" user="gvg" handle="1" modified="2009-10-29 15:45:53Z">
+            <Attribute name="name" value="selected" created="2009-10-29 12:37:41Z" user="gvg" />
+            <Attribute name="prefix" value="&quot;&quot;" created="2009-10-29 12:37:49Z" user="gvg" />
+            <Input name="value" ref="63" created="2009-10-29 13:58:45Z" user="gvg" />
+            <Output name="input" ref="439" created="2009-10-29 12:29:29Z" user="gvg" />
+            <Output name="input" ref="475" created="2009-10-29 15:23:01Z" user="gvg" />
+            <Output name="from" ref="457" created="2009-10-29 14:12:29Z" user="gvg" />
+            <Input name="reset" ref="482" created="2009-10-29 15:45:53Z" user="gvg" />
+          </Widget>
+          <Widget type="Template" name="TypeCodeField" ID="485" created="2009-10-30 18:47:56Z" user="Philippe" modified="2010-09-30 08:12:47Z" handle="2">
+            <Attribute name="prefix" value="&quot;&quot;" created="2009-10-30 18:48:17Z" user="gvg" />
+            <Input name="select" ref="636" created="2009-10-30 18:48:08Z" user="gvg" />
+          </Widget>
+          <Widget type="Template" name="GradeSpecField" ID="467" created="2009-10-29 13:47:27Z" user="Philippe" modified="2010-09-30 08:12:47Z" handle="3">
+            <Attribute name="prefix" value="&quot;&quot;" created="2009-10-29 13:56:32Z" user="gvg" />
+            <Input name="select" ref="636" created="2009-10-29 13:56:20Z" user="gvg" />
+          </Widget>
+          <Widget type="Template" name="ArticleIDField" ID="435" created="2009-10-28 19:16:14Z" user="Philippe" modified="2010-09-30 08:12:47Z" handle="4">
+            <Attribute name="prefix" value="&quot;&quot;" created="2009-10-28 19:23:20Z" user="gvg" />
+            <Input name="select" ref="636" created="2009-10-30 18:47:44Z" user="gvg" />
+            <Output name="from" ref="457" created="2009-10-29 14:12:29Z" user="gvg" />
+          </Widget>
+          <Widget type="Template" name="WidthColumn" ID="476" created="2009-10-29 15:40:12Z" user="Philippe" modified="2010-09-30 08:12:47Z" handle="5">
+            <Input name="select" ref="636" created="2009-10-29 15:41:00Z" user="gvg" />
+            <Output name="order" ref="636" created="2010-09-29 15:27:42Z" user="Philippe" />
+            <Output name="input" ref="480" created="2009-10-29 15:51:48Z" user="gvg" />
+          </Widget>
+          <Widget type="Template" name="DiameterColumn" ID="477" created="2009-10-29 15:40:23Z" user="Philippe" modified="2010-09-30 08:12:47Z" handle="6">
+            <Input name="select" ref="636" created="2009-10-29 15:41:00Z" user="gvg" />
+            <Output name="order" ref="636" created="2010-09-29 15:27:42Z" user="Philippe" />
+            <Output name="input" ref="481" created="2009-10-29 15:43:38Z" user="gvg" />
+          </Widget>
+          <Widget type="Template" name="WidthSheetColumn" ID="478" created="2009-10-29 15:40:33Z" user="Philippe" modified="2010-09-30 08:12:47Z" handle="7">
+            <Input name="select" ref="636" created="2009-10-29 15:41:00Z" user="gvg" />
+            <Output name="order" ref="636" created="2010-09-29 15:27:42Z" user="Philippe" />
+            <Output name="input" ref="480" created="2009-10-29 15:51:48Z" user="gvg" />
+          </Widget>
+          <Widget type="Calculation" name="WhichWidth" ID="480" created="2009-10-29 15:41:54Z" user="gvg" modified="2009-10-29 15:51:48Z" handle="8">
+            <Attribute name="calculation" value="TruthToArg(TypeCodeEntry = 'S' or TypeCodeEntry = 'C', WidthColumn, WidthSheetColumn)" created="2009-10-29 15:42:50Z" user="gvg" />
+            <Input name="input" ref="21" created="2009-10-29 15:51:48Z" user="gvg" />
+            <Input name="input" ref="476" created="2009-10-29 15:51:48Z" user="gvg" />
+            <Input name="input" ref="478" created="2009-10-29 15:51:48Z" user="gvg" />
+            <Output name="value" ref="468" created="2009-10-29 15:43:05Z" user="gvg" />
+          </Widget>
+          <Widget type="Template" name="LenSheetColumn" ID="479" created="2009-10-29 15:40:41Z" user="Philippe" modified="2010-09-30 08:12:47Z" handle="9">
+            <Input name="select" ref="636" created="2009-10-29 15:41:00Z" user="gvg" />
+            <Output name="order" ref="636" created="2010-09-29 15:27:42Z" user="Philippe" />
+            <Output name="input" ref="481" created="2009-10-29 15:43:38Z" user="gvg" />
+          </Widget>
+          <Widget type="Calculation" name="WhichDiam" ID="481" created="2009-10-29 15:43:13Z" user="gvg" modified="2009-10-29 15:44:15Z" handle="10">
+            <Attribute name="calculation" value="TruthToArg(TypeCodeEntry = &quot;C&quot; or TypeCodeEntry = &quot;S&quot;, DiameterColumn, LenSheetColumn)" created="2009-10-29 15:44:08Z" user="gvg" />
+            <Input name="input" ref="21" created="2009-10-29 15:43:38Z" user="gvg" />
+            <Input name="input" ref="477" created="2009-10-29 15:43:38Z" user="gvg" />
+            <Input name="input" ref="479" created="2009-10-29 15:43:38Z" user="gvg" />
+            <Output name="value" ref="469" created="2009-10-29 15:44:15Z" user="gvg" />
+          </Widget>
+          <Widget type="Template" name="WidthField" ID="468" created="2009-10-29 13:47:45Z" user="gvg" modified="2009-10-29 15:53:11Z" handle="11">
+            <Attribute name="prefix" value="&quot;&quot;" created="2009-10-29 13:56:43Z" user="gvg" />
+            <Attribute name="suffix" value="&quot;&quot;" created="2009-10-29 13:56:50Z" user="gvg" />
+            <Input name="value" ref="480" created="2009-10-29 15:43:05Z" user="gvg" />
+          </Widget>
+          <Widget type="Template" name="DiamOrLenField" ID="469" created="2009-10-29 13:47:58Z" user="gvg" modified="2009-10-29 15:53:01Z" handle="12">
+            <Attribute name="suffix" value="&quot;&quot;" created="2009-10-29 13:56:59Z" user="gvg" />
+            <Attribute name="prefix" value="&quot;&quot;" created="2009-10-29 13:57:05Z" user="gvg" />
+            <Input name="value" ref="481" created="2009-10-29 15:44:15Z" user="gvg" />
+          </Widget>
+          <Widget type="Template" name="CoreIDField" ID="470" created="2009-10-29 13:48:20Z" user="Philippe" modified="2010-09-30 08:12:47Z" handle="13">
+            <Attribute name="prefix" value="&quot;&quot;" created="2009-10-29 13:57:14Z" user="gvg" />
+            <Input name="select" ref="636" created="2009-10-29 13:56:20Z" user="gvg" />
+          </Widget>
+          <Widget type="Template" name="WrapIDField" ID="483" created="2009-10-30 18:47:16Z" user="Philippe" modified="2010-09-30 08:12:47Z" handle="14">
+            <Attribute name="prefix" value="&quot;&quot;" created="2009-10-30 18:48:49Z" user="gvg" />
+            <Input name="select" ref="636" created="2009-10-30 18:47:44Z" user="gvg" />
+          </Widget>
+          <Widget type="Template" name="PalletSpecIDField" ID="484" created="2009-10-30 18:47:26Z" user="Philippe" modified="2010-09-30 08:12:47Z" handle="15">
+            <Attribute name="prefix" value="&quot;&quot;" created="2009-10-30 18:49:00Z" user="gvg" />
+            <Input name="select" ref="636" created="2009-10-30 18:47:44Z" user="gvg" />
+          </Widget>
+          <Widget type="Template" name="RevNumColumn" ID="462" created="2009-10-29 12:40:52Z" user="Philippe" modified="2010-09-30 08:12:47Z" handle="16">
+            <Input name="select" ref="636" created="2009-10-29 12:42:07Z" user="gvg" />
+            <Output name="from" ref="457" created="2009-10-29 14:12:29Z" user="gvg" />
+          </Widget>
+          <Widget type="Template" name="CostColumn" ID="436" created="2009-10-28 19:16:24Z" user="Philippe" modified="2010-09-30 08:12:47Z" handle="17">
+            <Input name="select" ref="636" created="2009-10-28 19:18:51Z" user="gvg" />
+            <Output name="input" ref="439" created="2009-10-29 12:29:19Z" user="gvg" />
+            <Output name="input" ref="473" created="2009-10-29 14:07:11Z" user="gvg" />
+          </Widget>
+          <Widget type="Calculation" name="GetNewCost" ID="439" created="2009-10-28 19:19:05Z" user="gvg" handle="18" modified="2009-10-29 12:33:00Z">
+            <Attribute name="calculation" value="TruthToArg(SelectToggle,CostColumn,TruthToArg(PercentageRadio,TruthToArg(FlatRadio,CostColumn + IncrementPrice,FlatPrice),CostColumn + (CostColumn * (PercentEntry / 100)))" created="2009-10-29 12:32:46Z" user="gvg" />
+            <Input name="input" ref="443" created="2009-10-29 12:29:09Z" user="gvg" />
+            <Input name="input" ref="444" created="2009-10-29 12:29:09Z" user="gvg" />
+            <Input name="input" ref="448" created="2009-10-29 12:29:09Z" user="gvg" />
+            <Input name="input" ref="449" created="2009-10-29 12:29:09Z" user="gvg" />
+            <Input name="input" ref="450" created="2009-10-29 12:29:09Z" user="gvg" />
+            <Input name="input" ref="438" created="2009-10-29 12:29:29Z" user="gvg" />
+            <Input name="input" ref="436" created="2009-10-29 12:29:19Z" user="gvg" />
+            <Output name="value" ref="437" created="2009-10-29 12:33:00Z" user="gvg" />
+          </Widget>
+          <Widget type="Template" name="CostField" ID="437" created="2009-10-28 19:17:08Z" user="gvg" modified="2009-10-29 14:12:29Z" handle="19">
+            <Attribute name="prefix" value="&quot;&quot;" created="2009-10-28 19:23:28Z" user="gvg" />
+            <Input name="value" ref="439" created="2009-10-29 12:33:00Z" user="gvg" />
+            <Output name="input" ref="473" created="2009-10-29 14:07:11Z" user="gvg" />
+            <Output name="from" ref="457" created="2009-10-29 14:12:29Z" user="gvg" />
+            <Input name="state" ref="473" created="2009-10-29 14:08:07Z" user="gvg" />
+          </Widget>
+          <Widget type="Calculation" name="CostsDifferent" ID="473" created="2009-10-29 14:06:47Z" user="gvg" modified="2009-10-29 15:44:53Z" handle="20">
+            <Attribute name="calculation" value="TruthToArg(CostField &lt;&gt; CostColumn,0,2)" created="2009-10-29 14:07:44Z" user="gvg" />
+            <Input name="input" ref="436" created="2009-10-29 14:07:11Z" user="gvg" />
+            <Input name="input" ref="437" created="2009-10-29 14:07:11Z" user="gvg" />
+            <Output name="state" ref="437" created="2009-10-29 14:08:07Z" user="gvg" />
+          </Widget>
+          <Output name="headerForm" ref="440" created="2009-10-28 19:24:06Z" user="gvg" />
+        </Widget>
+        <Attribute name="orientation" value="vertical" created="2009-10-28 19:23:10Z" user="gvg" />
+        <Input name="doneFlag" ref="636" created="2009-10-28 19:14:43Z" user="gvg" />
+        <Input name="fetchFlag" ref="636" created="2009-10-28 19:14:31Z" user="gvg" />
+        <Input name="resetFlag" ref="636" created="2009-10-28 19:15:04Z" user="gvg" />
+        <Output name="below" ref="440" created="2009-10-29 14:03:00Z" user="gvg" />
+        <Input name="below" ref="464" created="2009-10-29 12:49:18Z" user="gvg" />
+      </Widget>
+      <Widget type="Calculation" name="AnySelected" ID="475" created="2009-10-29 15:22:47Z" user="gvg" modified="2009-10-29 15:23:25Z" handle="6">
+        <Attribute name="calculation" value="sum(&quot;SelectToggle&quot;)" created="2009-10-29 15:23:13Z" user="gvg" />
+        <Input name="input" ref="438" created="2009-10-29 15:23:01Z" user="gvg" />
+        <Output name="activate" ref="376" created="2009-10-29 15:23:25Z" user="gvg" />
+      </Widget>
+      <Widget type="Template" name="DoneTimeColumn" ID="466" created="2009-10-29 12:46:41Z" user="Philippe" modified="2010-09-30 08:12:47Z" handle="7">
+        <Input name="status" ref="636" created="2009-10-29 12:46:54Z" user="gvg" />
+        <Output name="in:fetch" ref="464" created="2009-10-29 12:49:00Z" user="gvg" />
+      </Widget>
+      <Widget type="InternalField" name="TableName" ID="465" created="2009-10-29 12:46:12Z" user="gvg" modified="2009-10-29 12:47:20Z" handle="8">
+        <Attribute name="default" value="article" created="2009-10-29 12:47:09Z" user="gvg" />
+        <Output name="table" ref="464" created="2009-10-29 12:47:20Z" user="gvg" />
+      </Widget>
+      <Widget type="Template" name="ArrayControl()" ID="464" created="2009-10-29 12:46:03Z" user="Philippe" modified="2010-09-30 09:00:57Z" handle="9">
+        <Input name="where" ref="492" created="2010-09-30 08:18:41Z" user="Philippe" />
+        <Input name="where" ref="21" created="2009-10-29 12:48:22Z" user="gvg" />
+        <Input name="where" ref="574" created="2010-09-30 08:17:51Z" user="Philippe" />
+        <Input name="where" ref="575" created="2010-09-30 08:17:51Z" user="Philippe" />
+        <Input name="where" ref="576" created="2010-09-30 08:17:51Z" user="Philippe" />
+        <Input name="where" ref="577" created="2010-09-30 08:17:51Z" user="Philippe" />
+        <Input name="where" ref="579" created="2010-09-30 08:17:51Z" user="Philippe" />
+        <Input name="where" ref="580" created="2010-09-30 08:17:51Z" user="Philippe" />
+        <Input name="where" ref="581" created="2010-09-30 08:17:51Z" user="Philippe" />
+        <Input name="where" ref="582" created="2010-09-30 08:17:51Z" user="Philippe" />
+        <Input name="where" ref="737" created="2010-09-30 08:17:51Z" user="Philippe" />
+        <Input name="where" ref="738" created="2010-09-30 08:17:51Z" user="Philippe" />
+        <Input name="where" ref="739" created="2010-09-30 08:17:51Z" user="Philippe" />
+        <Input name="where" ref="740" created="2010-09-30 08:17:51Z" user="Philippe" />
+        <Input name="where" ref="742" created="2010-09-30 08:17:51Z" user="Philippe" />
+        <Input name="where" ref="743" created="2010-09-30 08:17:51Z" user="Philippe" />
+        <Input name="where" ref="744" created="2010-09-30 08:17:51Z" user="Philippe" />
+        <Input name="where" ref="745" created="2010-09-30 08:17:51Z" user="Philippe" />
+        <Input name="where" ref="83" created="2009-10-29 12:48:22Z" user="gvg" />
+        <Input name="where" ref="149" created="2009-10-29 12:48:22Z" user="gvg" />
+        <Input name="where" ref="643" created="2010-09-30 08:19:29Z" user="Philippe" />
+        <Input name="where" ref="673" created="2010-09-30 08:19:48Z" user="Philippe" />
+        <Input name="where" ref="474" created="2010-09-30 09:00:57Z" user="Philippe" />
+        <Input name="in:fetch" ref="466" created="2009-10-29 12:49:00Z" user="gvg" />
+        <Input name="table" ref="465" created="2009-10-29 12:47:20Z" user="gvg" />
+        <Output name="fetchPage" ref="636" created="2010-09-29 15:27:42Z" user="Philippe" />
+        <Output name="fetchRows" ref="636" created="2010-09-29 15:27:42Z" user="Philippe" />
+        <Output name="out:syncTime" ref="636" created="2010-09-29 15:27:42Z" user="Philippe" />
+        <Output name="below" ref="127" created="2009-10-29 12:49:18Z" user="gvg" />
+      </Widget>
+    </Widget>
+    <Attribute name="orientation" value="Vertical" />
+    <Output name="below" ref="4" />
+  </Widget>
+  <Widget type="Form" ID="346" handle="5" name="ButtonForm" grid_width="3" grid_height="4" modified="2010-09-30 14:23:35Z" user="Philippe">
+    <Widget type="Template" ID="348" handle="1" name="ModifyButton">
+      <Output name="modify:start" ref="376" />
+    </Widget>
+    <Widget type="Template" name="ResetButton" ID="806" created="2010-09-30 08:33:50Z" user="Philippe" modified="2010-09-30 08:50:48Z" handle="2">
+      <Output name="reset" ref="83" created="2010-09-30 08:34:25Z" user="Philippe" />
+      <Output name="reset" ref="149" created="2010-09-30 08:34:34Z" user="Philippe" />
+      <Output name="reset" ref="643" created="2010-09-30 08:34:41Z" user="Philippe" />
+      <Output name="reset" ref="673" created="2010-09-30 08:34:48Z" user="Philippe" />
+      <Output name="start" ref="808" created="2010-09-30 08:44:47Z" user="Philippe" />
+      <Output name="input" ref="807" created="2010-09-30 08:42:12Z" user="Philippe" />
+    </Widget>
+    <Widget type="Form" name="DummyForm" ID="809" created="2010-09-30 08:45:14Z" user="Philippe" modified="2010-09-30 08:46:44Z" handle="3">
+      <Widget type="Transaction" name="RefreshValues" ID="808" created="2010-09-30 08:44:38Z" user="Philippe" modified="2010-09-30 08:46:58Z" handle="1">
+        <Widget type="Calculation" name="Now(0)" ID="811" created="2010-09-30 08:45:35Z" user="Philippe" modified="2010-09-30 08:46:00Z" handle="1">
+        </Widget>
+        <Attribute name="activate" value="1" created="2010-09-30 08:44:53Z" user="Philippe" />
+        <Input name="start" ref="806" created="2010-09-30 08:44:47Z" user="Philippe" />
+        <Output name="status" ref="812" created="2010-09-30 08:46:58Z" user="Philippe" />
+      </Widget>
+      <Widget type="Template" name="DoneTimeColumn" ID="812" created="2010-09-30 08:46:44Z" user="Philippe" modified="2010-09-30 08:47:09Z" handle="2">
+        <Input name="status" ref="808" created="2010-09-30 08:46:58Z" user="Philippe" />
+        <Output name="syncTime" ref="548" created="2010-09-30 08:47:09Z" user="Philippe" />
+      </Widget>
+    </Widget>
+    <Widget type="Calculation" name="RefreshDefaultValues" ID="807" created="2010-09-30 08:42:04Z" user="Philippe" modified="2010-09-30 08:42:25Z" handle="4">
+      <Attribute name="calculation" value="me+1" created="2010-09-30 08:42:25Z" user="Philippe" />
+      <Input name="input" ref="806" created="2010-09-30 08:42:12Z" user="Philippe" />
+    </Widget>
+    <Attribute name="orientation" value="vertical" created="2010-09-30 14:23:35Z" user="Philippe" />
+    <Output name="right" ref="4" />
+    <Output name="topAlign" ref="4" />
+  </Widget>
+  <Widget type="Transaction" ID="376" handle="6" name="ModifyTrans" grid_width="5" grid_height="3" modified="2009-10-29 15:45:33Z" user="gvg">
+    <Widget type="InternalField" name="Selected" ID="458" created="2009-10-29 12:36:26Z" user="gvg" modified="2009-10-29 12:38:36Z" handle="1">
+      <Attribute name="name" value="selected" created="2009-10-29 12:38:00Z" user="gvg" />
+      <Attribute name="default" value="1" created="2009-10-29 12:38:06Z" user="gvg" />
+      <Output name="where" ref="457" created="2009-10-29 12:38:36Z" user="gvg" />
+    </Widget>
+    <Widget type="FormCursor" name="GetArticles" ID="457" created="2009-10-29 12:36:13Z" user="gvg" handle="2" modified="2009-10-29 14:12:29Z">
+      <Input name="from" ref="438" created="2009-10-29 14:12:29Z" user="gvg" />
+      <Input name="from" ref="435" created="2009-10-29 14:12:29Z" user="gvg" />
+      <Input name="from" ref="462" created="2009-10-29 14:12:29Z" user="gvg" />
+      <Input name="from" ref="437" created="2009-10-29 14:12:29Z" user="gvg" />
+      <Input name="where" ref="458" created="2009-10-29 12:38:36Z" user="gvg" />
+      <Output name="select" ref="460" created="2009-10-29 12:39:56Z" user="gvg" />
+      <Output name="select" ref="463" created="2009-10-29 12:42:41Z" user="gvg" />
+      <Output name="select" ref="461" created="2009-10-29 12:39:56Z" user="gvg" />
+      <Output name="fetchFlag" ref="459" created="2009-10-29 12:40:08Z" user="gvg" />
+    </Widget>
+    <Widget type="Transaction" name="ListOfArticles" ID="459" created="2009-10-29 12:38:54Z" user="gvg" modified="2009-10-29 12:42:26Z" handle="3">
+      <Widget type="Template" name="ArticleIDColumn" ID="460" created="2009-10-29 12:39:25Z" user="gvg" modified="2009-10-29 12:43:00Z" handle="1">
+        <Input name="select" ref="457" created="2009-10-29 12:39:56Z" user="gvg" />
+        <Output name="where" ref="379" created="2009-10-29 12:43:00Z" user="gvg" />
+      </Widget>
+      <Widget type="Template" name="RevNumColumn" ID="463" created="2009-10-29 12:42:26Z" user="gvg" modified="2009-10-29 12:43:00Z" handle="2">
+        <Input name="select" ref="457" created="2009-10-29 12:42:41Z" user="gvg" />
+        <Output name="where" ref="379" created="2009-10-29 12:43:00Z" user="gvg" />
+      </Widget>
+      <Widget type="Template" name="CostColumn" ID="461" created="2009-10-29 12:39:37Z" user="gvg" modified="2009-10-29 12:43:14Z" handle="3">
+        <Input name="select" ref="457" created="2009-10-29 12:39:56Z" user="gvg" />
+        <Output name="update" ref="379" created="2009-10-29 12:43:14Z" user="gvg" />
+      </Widget>
+      <Widget type="Calculation" ID="377" handle="4" name="NowTime">
+        <Attribute name="calculation" value="Now(0)" />
+        <Output name="value" ref="378" />
+      </Widget>
+      <Widget type="Template" ID="378" handle="5" name="TimeModifiedColumn">
+        <Input name="value" ref="377" />
+        <Output name="update" ref="379" />
+      </Widget>
+      <Widget type="Cursor" ID="379" handle="6" name="Modify:article" modified="2009-10-29 12:43:14Z" user="gvg">
+        <Attribute name="to" value="article" />
+        <Input name="where" ref="460" created="2009-10-29 12:43:00Z" user="gvg" />
+        <Input name="where" ref="463" created="2009-10-29 12:43:00Z" user="gvg" />
+        <Input name="update" ref="461" created="2009-10-29 12:43:14Z" user="gvg" />
+        <Input name="update" ref="378" />
+      </Widget>
+      <Input name="fetchFlag" ref="457" created="2009-10-29 12:40:08Z" user="gvg" />
+    </Widget>
+    <Input name="activate" ref="475" created="2009-10-29 15:23:25Z" user="gvg" />
+    <Input name="modify:start" ref="348" />
+    <Output name="status" ref="482" created="2009-10-29 15:45:33Z" user="gvg" />
+  </Widget>
+  <Widget type="Template" name="DoneTimeColumn" ID="482" created="2009-10-29 15:45:25Z" user="gvg" modified="2009-10-29 15:45:53Z" handle="7">
+    <Input name="status" ref="376" created="2009-10-29 15:45:33Z" user="gvg" />
+    <Output name="reset" ref="63" created="2009-10-29 15:45:53Z" user="gvg" />
+    <Output name="reset" ref="438" created="2009-10-29 15:45:53Z" user="gvg" />
+  </Widget>
+  <History>(C) Copyright 1990-97, Honeywell-Measurex Corporation. This document contains
+    proprietary information and trade secrets which are the property of
+    Honeywell-Measurex Corporation.
+
+  Date     Who   Description of change
+--------   ----  --------------------------------------------------------------
+11/15/94   tfp   Support TypeCode 'B'ales.
+01/04/95   tfp   #2310, reset SuccessColumn when ResetButton is pressed.
+
+03/24/95   SPM  Remove select from WgtRollField
+03/24/95   krc  Added CoatedSide
+
+04/04/95   SPM  Added WireSide
+
+04/18/95   SPG  Check that WgtRoll and WgtPerThous that are displayed are the
+		same as on the database.
+
+05/19/95   SPG  Added the field WgtPerThousSold to insert for 'C'arton and
+		'S'heet articles.
+
+08/01/95   DLR  Added validationString me&gt;0 to LenLineal.  Added calculations
+                to prevent BwtNominal, WgtRoll, and AreaRoll fields from being
+                stored as zeros.  Defaulted insert of class = "M". (#1019)
+08/17/95   dvr  Forced recalculation of LenLineal by resetting DiamAct.  Changed
+                the method of not allowing changes-could have changed grade_spec
+                before which would have caused all kinds of integrity problems.
+01/18/96   GLP  Remove hardcoded format in PalletSpecEntry.
+01/31/96   CChiu Fix bug #6060: use grip cursor to place item to be deleted
+                         at bottom of array.  Same correction as done in
+                         Simpson (#2046).  
+02/14/96   tfp  Change CalcMSF to use LengthToWidthFactor not 12.
+
+02/19/96   SPM  Fix #6512 Implied insert fields
+02/23/96   CChiu Fix bug# 6563. Disable roll data entries if type code is
+                         not "R"oll.
+03/01/96   raw  Fix 6642 - Added a default to the wire side calculation.
+	        Also discovered that reset messes up the grade spec smenu.
+03/06/96   GLP  Add To PalletSpecID calc to check for "000" and "". Add reset
+		connection to entry fields insted of reseting the form. Add
+		calculation to trap out lenlineal from CalcLen() when typecode
+		is not "R".
+03/08/96   tfp  reset sheet data when roll product. #6670
+03/18/96   LBH  Added program connection to Smenu so see inactive,
+		added connections gradespec &amp; typecode to articleSmenu
+		back, changed calc that was checking for "000" to 0.
+03/26/96   GLP  Add "ROLL DATA" &amp; "BALES, SHEETS &amp; CARTONS ONLY" header text to 
+		OptiVISION.
+04/29/96   RAI  Add description for misc_pattern fields.
+
+05/01/96   SPM  Make Wgtbale required.
+
+06/10/96   SPM  Add BwtNominal to PalletSpecDMenu where.
+                Sensitize fields in the ROLL data form when record exists.
+07/25/96   GLP  Add calculation to the MWeight and MWeightSold to allow for
+		rounding by using a column with a different format based on 
+		the sheet size area checked against the constants decimal value.
+07/26/96   DBO  #3111 Fix calculations that allowed sensitive fields to
+                permit data entry,  removed the double sensitive connection to
+                those entry fields
+08/20/96   GLP  Add checks to all calculated fields or fields selected from
+                tables other than article to turn brown if they are different
+                than what is on the article table.
+09/25/96   BTL  Changed calculation in 3.16.22 (RollFormWOwc) to disallow
+	        wrap_id = "000"
+01/23/97   SPM  "Remove hardcode decimal values"
+03/10/97   GLP  Change the ROLLS calculation from 0,1 to me,me+1.
+04/08/97   MLW  #11997: Fixed length lineal entry to allow entry for rolls
+                during modification.
+05/09/97   MLW  Corrected problem with fix for #11997 with duplicate connector.
+08/19/97   pjd  Removed obsolete buttons for OptiVISION 3.3
+10/23/97   raw  #1314: Wgt Roll not displaying correctly for bales.
+02/16/98   BM	#40011. Removed RollFormWOwc, not needed, extra validation.
+		Changed "required" to "TRUE" for WrapIDEntry. The "red wrap id"
+		problem described (40011) cannot really occur, since the
+		validations exist.
+03/04/98   raw  Performance: select from pallet_spec without type code
+                Added verify false to master cursors
+10/08/98   RE   #1604: Added calculation so that if length is either entered or
+	        calculated then the user cannot change it.
+10/19/98   PKC	Do not allow DandyID, EmbPatID, SecurityPatID and HolePunchID
+		to be modified for existing articles.
+10/20/98   PKC	Do not allow a new article to be added 
+		if SAP="Y" and SECURITYLEVEL &lt; 13
+05/20/99   LBH  Changes for Release 350 - calculate diam from length.
+08/18/99   jrw  2891:Ran new valueIn connections to 3.24.3 (articleSmenu) from
+                3.22 and 3.23 and another connection between 3.21 and 3.24
+09/01/99   JRM  #3163: this fix was already done. However, took oppertunity to 
+                add the reset to LenLinealField.
+05/05/00   raw  1-1EZQM: Change 500 sheets to have a default 500 also
+05/18/00   raw  1-1EXX9: recalculate length when core diam changes.
+09/14/00   ANDY 410 top 10 changes.
+11/10/00   raw  1-2OH2Q: reset does not work when ADDSMENU=Y
+04/19/01   Dave #1-2S960 fixed: now article master will allow the palletspec 
+                with Bw nominal of 0 or &gt;= BW nominal of Gradespec. 
+10/10/01   ESP  1-5TAYD fix for SQL error when language is portuguese.
+01/29/2003 BM 500: New fields for Imperial and Metric width/diam/length.
+03/05/03   NJN  500:Connected select to Metric_Flag from cursor.
+08/28/03   AMG  1-M7VDE :Sensetive calculation for pattern Id field moved from 
+		RightMidDataForm to RightDataForm.
+05/19/05   NJN  1-172ZZ2:API Code field does not use the APICodeDmenu.
+                Added APICodeDMenu widget 430 for validation and value.
+09/01/05   MAD  1-1HNNJ3 : CheckDiff calculation (432) added. 
+08/11/05   SB   1-1SLXNF: Modified Calculation(106,111) and reset to TypeCodeColumn(26)from ResetButton.
+01/20/06   SB   1-219O4X: Removed the LengthLinealField(99) and related calculations.
+01/20/06   SB   1-2010DM: TurnoverRateEntry(124) made optional.
+07/18/06   MAD  1-1HNNJ3 : 0.01 changed to 1/100 in calculation CheckDiff (432) to support Comma and Decimal.
+09/26/06   MAD  1-35KIYB : Calculation 97 changed. Changed LenLinealColumn to LenLinealEntry.
+</History>
+  <Revisions created="2007-12-26 09:38:38Z" user="E387250">10/30/09  GVG    Initial release
+10/30/10  PHH   add Multiple criterias to filter out article
+10/30/10  PHH  Rearrage widgets</Revisions>
+</Application>

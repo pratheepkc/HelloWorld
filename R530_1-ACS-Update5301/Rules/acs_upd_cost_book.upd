@@ -1,0 +1,540 @@
+#============================================================================
+# MxUpdate rules 
+#
+# NOTE: This rules file is used to update the cost book from the recipes
+#
+#============================================================================
+# Rev.  Date:     Who   Description
+# ---  --------   ----  -----------------------------------------------------
+# 01   20/01/09   BRN   Initial release
+#============================================================================
+DEFINE  ACS       	ENV;
+DEFINE  USEMETRIC		ENV;
+DEFINE  CORPMILL		ENV;
+DEFINE  MILL		ENV;
+DEFINE  USER		ENV;
+DEFINE  LengthToWidthFactor long;
+DEFINE  TonsFactor 	long;
+DEFINE  serial_key_id	string;
+DEFINE  serial_mill_id	string;
+DEFINE  serial_informat string;
+DEFINE  serial_found	long;
+DEFINE continue_search long;
+DEFINE count_loop long;
+DEFINE  ts_begin 	long;
+DEFINE  ts_end 	long;
+
+
+NO * EXECUTE
+#       Run selects in this rule to prepare the variables only
+        select * from act_cbk_mast_tmp;
+        select * from act_cbk_crit_tmp;
+        select * from act_cbk_det_tmp;
+        select * from act_cost_book_mast;
+        select * from act_cost_book_crit;
+        select * from act_cost_book_det;
+        select * from unit_convert;
+        select * from acs_product_code;
+	  select * from acs_product_mill_a;
+	  select * from serial_num;
+
+MX * ST
+	echo Startup rule;
+	LET mode = "Single";
+	LET type = "STD";
+
+* * *
+
+
+	echo ------------> $mx_action_code;
+# Set the metric and imperial factor
+	if  ($USEMETRIC = "Y") then
+		let LengthToWidthFactor = 100;
+		let TonsFactor = 1000;
+	else
+		let LengthToWidthFactor = 12;
+		let TonsFactor = 2000;
+	end if
+
+#################################### Update cost book from batch		###################################################
+CBK_MAST * UPD_CBK
+
+# Check the cost book info
+	select cost_book_uid
+		from acs_cbk_mast_tmp
+		where batch_num = $batch_num;
+	select type_code
+		from acs_cost_bk_mast
+		where cost_book_uid = $cost_book_uid;
+
+# Update only if the cost book is not standard
+	if ($type_code <> "S") then
+
+# look for all the criteria in the temporary table
+		foreach select cost_book_crit_uid
+			from acs_cbk_crit_tmp
+			where batch_num = $batch_num;
+
+			foreach select cost_group_id, cost_type_id, act_cost
+				from acs_cbk_det_tmp
+				where batch_num = $batch_num
+				and cost_book_crit_uid = $cost_book_crit_uid
+				and cost_group_id <> ' '
+				and cost_type_id <> ' ';
+
+# Check against the cost book
+				select count(*) cnt	
+					from acs_cost_bk_det
+					where cost_book_crit_uid = $cost_book_crit_uid
+					and cost_group_id = $cost_group_id
+					and cost_type_id = $cost_type_id;
+				if ($cnt = 0) then
+# Create the record
+					let serial_key_id = "ACS_CBK_D";
+					call GET_CBK_NUM();
+					let cost_book_det_uid = $serial_cbk_id;
+					select param_value currency_id
+						from acs_sys_parameter
+						where param_name = 'MillCurrency';
+					let unit_meas = "WGT";
+					let ts_create = {time};
+					insert into acs_cost_bk_det
+							(cost_book_det_uid, cost_book_crit_uid, cost_group_id, cost_type_id, currency_id, unit_meas, ts_modified,
+							ts_create, avg_cost_mton, avg_cost_sqm, avg_cost_unit, avg_cost_time)
+						values	
+							($cost_book_det_uid, $cost_book_crit_uid, $cost_group_id, $cost_type_id, $currency_id, $unit_meas, 0,
+							$ts_create, $act_cost, 0, 0, 0);
+
+				else
+					if ($cnt = 1) then
+# Update the record
+						update acs_cost_bk_det
+							set avg_cost_mton = $act_cost
+							where cost_book_crit_uid = $cost_book_crit_uid
+							and cost_group_id = $cost_group_id
+							and cost_type_id = $cost_type_id;
+					else
+# Don't do anything
+					end if
+				end if
+
+			end foreach
+
+		end foreach
+
+
+		update acs_cbk_mast_tmp
+			set stat = 'C', ts_modified = $ts_modified
+			where batch_num = $batch_num;
+
+	end if
+
+
+#################################### New Batch		###################################################
+CBK_MAST * NEW
+
+# Create an empty record for the master
+	call GET_BATCH_NUM();
+	let batch_num = $last_num;
+	let batch_name = " ";
+	let batch_date =  {time};
+	let stat = "N";
+	let cost_book_uid = " ";
+	let ts_modified = 0;
+	let ts_create = {time};
+	insert into acs_cbk_mast_tmp
+          		(batch_num, batch_name, batch_date, stat, mill_id, cost_book_uid, ts_modified, ts_create)
+	       values	
+          		($batch_num, $batch_name, $batch_date, $stat, $MILL, $cost_book_uid, $ts_modified, $ts_create);
+
+#################################### Modify Batch		###################################################
+CBK_MAST * MODIFY
+	echo batch_num = $batch_num;
+
+# Check if the cost book changed
+	select  cost_book_uid  cur_cost_book_uid, batch_date cur_batch_date, mill_id cur_mill_id
+		from acs_cbk_mast_tmp
+		where batch_num = $batch_num;
+	
+	let ts_modified = {time};
+	update acs_cbk_mast_tmp
+		set 	batch_name = $batch_name,
+			batch_date = $batch_date,
+			stat = $stat,
+			mill_id = $mill_id,
+			cost_book_uid = $cost_book_uid,
+			ts_modified = $ts_modified
+		where batch_num = $batch_num;
+
+# Reinit the data if it has changed
+	if ($cost_book_uid <> $cur_cost_book_uid or $batch_date <> $cur_batch_date or $mill_id <> $cur_mill_id ) then
+
+# Delete the records
+		delete from acs_cbk_crit_tmp
+			where batch_num = $batch_num;
+
+		delete from acs_cbk_det_tmp
+			where batch_num = $batch_num;
+
+		delete from acs_cbk_rmtl_tmp
+			where batch_num = $batch_num;
+	
+# Set the mill id selected
+		if ($mill_id = " " or $mill_id = "") then
+			let sel_mill_id = "%";
+		else
+			let sel_mill_id = $mill_id;
+		end if		
+
+# Init the records with only the WGT unit of measure
+		let ts_create = {time};
+		let ts_modified = 0;
+		foreach select cost_book_crit_uid
+				from acs_cost_bk_crit
+				where cost_book_uid = $cost_book_uid
+				and unit_meas = 'WGT'
+				and mill_id like $sel_mill_id
+				and grade_spec <> ' ' and grade_spec <> ''
+				and machine_type in ('PM','CO');
+
+			insert into acs_cbk_crit_tmp
+          			(batch_num, cost_book_crit_uid, recipe_prod_id, ts_begin)
+		       values	
+      	    		($batch_num, $cost_book_crit_uid, ' ', 0);
+	
+			foreach select cost_book_det_uid, cost_group_id, cost_type_id, avg_cost_mton
+					from acs_cost_bk_det
+					where cost_book_crit_uid = $cost_book_crit_uid;
+
+				insert into acs_cbk_det_tmp
+      	    			(batch_num, cost_book_crit_uid, cost_book_det_uid, cost_group_id ,
+					cost_type_id, std_cost, act_cost, ts_modified, ts_create)
+			       values	
+      	    			($batch_num, $cost_book_crit_uid, $cost_book_det_uid, $cost_group_id ,
+					$cost_type_id, $avg_cost_mton, 0, $ts_modified, $ts_create);
+
+			end foreach
+	
+# Get the values from the production recipe
+			call GET_ACT_VALUES();
+
+		end foreach
+
+
+	end if
+
+#################################### Delete Batch		###################################################
+CBK_MAST * DELETE
+	echo batch_num = $batch_num;
+	delete from acs_cbk_mast_tmp
+		where batch_num = $batch_num;
+
+	delete from acs_cbk_crit_tmp
+		where batch_num = $batch_num;
+
+	delete from acs_cbk_det_tmp
+		where batch_num = $batch_num;
+
+	delete from acs_cbk_rmtl_tmp
+		where batch_num = $batch_num;
+
+#################################### Close Batch		###################################################
+CBK_MAST * CLOSE
+	echo batch_num = $batch_num;
+
+	let ts_modified = {time};
+
+	select stat
+		from 	acs_cbk_mast_tmp
+		where batch_num = $batch_num;
+	if ($stat = "N") then
+		update acs_cbk_mast_tmp
+			set stat = 'C', ts_modified = $ts_modified
+			where batch_num = $batch_num;
+	else
+		update acs_cbk_mast_tmp
+			set stat = 'N', ts_modified = $ts_modified
+			where batch_num = $batch_num;
+	end if
+
+
+#################################### Calc Act Cost from Recipe		###################################################
+CBK_CRIT * CALC
+
+	echo batch_num = $batch_num;
+	echo cost_book_crit_uid = $cost_book_crit_uid;
+
+	call GET_ACT_VALUES();
+
+#################################### Modify Detail		###################################################
+CBK_DET * MODIFY
+	echo batch_num = $batch_num;
+
+	let ts_modified = {time};
+
+	update acs_cbk_det_tmp
+		set act_cost = $act_cost, ts_modified = $ts_modified
+		where batch_num = $batch_num
+		and cost_book_crit_uid = $cost_book_crit_uid
+		and cost_group_id = $cost_group_id
+		and cost_type_id = $cost_type_id;
+
+
+############################# Calculate values from the production recipe ############################
+SUBROUTINE GET_ACT_VALUES()
+
+# reset the actual values
+	select count(*) cnt
+		from acs_cbk_det_tmp
+		where batch_num = $batch_num
+		and cost_book_crit_uid = $cost_book_crit_uid;
+	if ($cnt > 0) then
+		update acs_cbk_det_tmp
+			set act_cost = 0
+ 			where batch_num = $batch_num
+			and cost_book_crit_uid = $cost_book_crit_uid;
+	end if
+
+	delete from acs_cbk_rmtl_tmp
+		where batch_num = $batch_num
+		and cost_book_crit_uid = $cost_book_crit_uid;
+
+# Build the production recipe data
+	select mill_id, machine_type, machine_id, grade_spec grade_spec_made
+		from acs_cost_bk_crit
+		where cost_book_crit_uid = $cost_book_crit_uid;
+	select batch_date ts_transaction
+		from acs_cbk_mast_tmp
+		where batch_num = $batch_num;
+
+	Call ACSBuildRecipeActView();
+
+# Get the production recipe used	
+	select recipe_prod_id, ts_begin
+		from acs_recact_all
+		where user_id = $user_id
+			and prod_mill_id = $mill_id
+			and prod_mach_type = $machine_type
+			and prod_mach_id = $machine_id
+			and grade_spec = $grade_spec_made
+			and ts_transaction = $ts_transaction
+			and flow_seq = 1;
+
+# Update the criteria
+	update acs_cbk_crit_tmp
+		set recipe_prod_id = $recipe_prod_id, ts_begin = $ts_begin
+		where cost_book_crit_uid = $cost_book_crit_uid
+		and batch_num = $batch_num;
+
+
+# Calculate the cost for the criteria
+	foreach select raw_matl_grp_id, raw_matl_id, quantity, product_code_id
+		from acs_recact_all
+		where user_id = $user_id
+			and prod_mill_id = $mill_id
+			and prod_mach_type = $machine_type
+			and prod_mach_id = $machine_id
+			and grade_spec = $grade_spec_made
+			and ts_transaction = $ts_transaction
+			and class = 'P';
+
+		select acct_seg_id, percent_active, cost_unit
+			from raw_matl_mill
+			where mill_id = $mill_id
+			and raw_matl_grp_id = $raw_matl_grp_id
+			and raw_matl_id = $raw_matl_id;
+
+		if ($percent_active > 0) then
+			let act_cost = ($quantity / $percent_active) * 100 * $cost_unit;
+		else 
+			let act_cost = 0;
+		end if
+
+# Get the cost structure data
+		select cost_type_id
+			from acs_acct_seg
+			where acct_seg_id = $acct_seg_id;
+
+		select cost_group_id
+			from acs_cost_type
+			where cost_type_id = $cost_type_id;
+
+# Update the batch
+		select cost_book_det_uid
+			from acs_cbk_det_tmp
+	 		where batch_num = $batch_num
+			and cost_book_crit_uid = $cost_book_crit_uid
+			and cost_group_id = $cost_group_id
+			and cost_type_id = $cost_type_id;
+
+		if ($success = 1) then
+			update acs_cbk_det_tmp
+				set act_cost = act_cost + $act_cost
+		 		where batch_num = $batch_num
+				and cost_book_crit_uid = $cost_book_crit_uid
+				and cost_group_id = $cost_group_id
+				and cost_type_id = $cost_type_id;
+		else			
+			insert into acs_cbk_det_tmp
+    	    				(batch_num, cost_book_crit_uid, cost_book_det_uid, cost_group_id ,
+					cost_type_id, std_cost, act_cost, ts_modified, ts_create)
+			       values	
+      	    			($batch_num, $cost_book_crit_uid, ' ', $cost_group_id ,
+					$cost_type_id, 0, $act_cost, $ts_modified, $ts_create);
+		end if
+
+# Create the raw material detail record for auditing purposes		
+		insert into acs_cbk_rmtl_tmp
+				(batch_num, cost_book_crit_uid, cost_group_id, cost_type_id, raw_matl_grp_id, raw_matl_id,
+				quantity, percent_active, product_code_id, cost_unit, ts_create)
+			values
+				($batch_num, $cost_book_crit_uid, $cost_group_id, $cost_type_id, $raw_matl_grp_id, $raw_matl_id,
+				$quantity, $percent_active, $product_code_id, $cost_unit, $ts_create);
+
+	end foreach
+
+END SUBROUTINE
+
+############################# Get a serial number for the batch number ############################
+SUBROUTINE GET_BATCH_NUM()
+
+	let serial_key_id = "ACS_BATCH";
+	let serial_mill_id = $CORPMILL;
+	let serial_informat = "&&&";
+
+	let serial_found=0;
+	let count_loop=0;
+	let continue_search=1;
+
+	while ($serial_found = 0) and ($continue_search=1)  do
+
+		select last_num,wrap_low,wrap_high,table_name,column_name
+			from serial_num
+			where key_id = $serial_key_id and mill_id = $serial_mill_id;
+
+		if ($success = 1) then
+			let last_num = $last_num + 1;
+			if ($last_num > $wrap_high) then
+				let last_num = $wrap_low;
+			end if
+
+			update serial_num
+				set last_num=$last_num
+				where key_id = $serial_key_id and mill_id = $serial_mill_id;
+
+		else
+			echo No Serial number find for key_id: $serial_key_id and mill: $serial_mill_id, create it;
+           		let last_num = 1;
+
+		      insert into serial_num
+            		(mill_id, key_id, wrap_high, wrap_low, column_name, 
+		              table_name, last_num, serial_desc)
+		         values	
+            		($serial_mill_id, $serial_key_id , 999, 1, 'batch_num', 
+		              'acs_cbk_mast_tmp', $last_num, 'ACS AUTO CREATED');
+		end if
+
+## check if the record already exists in acs_cbk_mast_tmp
+		let last_num = $last_num:$serial_informat;
+
+		select count(*) cnt_tmp from acs_cbk_mast_tmp where batch_num = $last_num;
+
+ 		if ($cnt_tmp > 0) then
+			if ($count_loop > 500) then
+				echo Error No Serial number available for key_id: $serial_key_id and mill: $serial_mill_id;
+				let continue_search=0;
+			else
+				let count_loop=$count_loop+1;
+			end if
+		else
+			let serial_found=1;
+			let last_num = $last_num;
+		end if
+	 end while
+
+END SUBROUTINE
+
+############################# Get a serial number for a cost book record ############################
+SUBROUTINE GET_CBK_NUM()
+
+	let serial_key_id = $serial_key_id;
+	let serial_mill_id = $CORPMILL;
+	let serial_informat = "&&&&&&&";
+	
+	let serial_found=0;
+	let count_loop=0;
+	let continue_search=1;
+
+	while ($serial_found = 0) and ($continue_search=1)  do
+
+		select last_num,wrap_low,wrap_high,table_name,column_name
+			from serial_num
+			where key_id = $serial_key_id and mill_id = $serial_mill_id;
+
+		if ($success = 1) then
+			let last_num = $last_num + 1;
+			if ($last_num > $wrap_high) then
+				let last_num = $wrap_low;
+			end if
+
+			update serial_num
+				set last_num=$last_num
+				where key_id = $serial_key_id and mill_id = $serial_mill_id;
+
+		else
+			echo No Serial number find for key_id: $serial_key_id and mill: $serial_mill_id, create it;
+           		let last_num = 1;
+			if ($serial_key_id = "ACS_CBK_M") then
+				let table_name = "acs_cost_bk_mast";
+				let column_name = "cost_book_uid";
+			else
+				if ($serial_key_id = "ACS_CBK_C") then
+					let table_name = "acs_cost_bk_crit";
+					let column_name = "cost_book_crit_uid";
+				else
+					let table_name = "acs_cost_bk_det";
+					let column_name = "cost_book_det_uid";
+				end if
+			end if
+
+		      insert into serial_num
+            		(mill_id, key_id, wrap_high, wrap_low, column_name, 
+		              table_name, last_num, serial_desc)
+		         values	
+            		($serial_mill_id, $serial_key_id , 8999999, 1, $column_name, 
+		              $table_name, $last_num, 'ACS AUTO CREATED');
+		end if
+
+## check if the record already exists in acs_cost
+		let tmp_last_num = $last_num:$serial_informat;
+		let str_last_num = $tmp_last_num;
+
+		if ($serial_key_id = "ACS_CBK_M") then
+			select count(*) cnt_tmp from acs_cost_bk_mast where cost_book_uid=$str_last_num;
+		else
+			if ($serial_key_id = "ACS_CBK_C") then
+				select count(*) cnt_tmp from acs_cost_bk_crit where cost_book_crit_uid=$str_last_num;
+			else
+				select count(*) cnt_tmp from acs_cost_bk_det where cost_book_det_uid=$str_last_num;
+			end if
+		end if
+
+ 		if ($cnt_tmp > 0) then
+			if ($count_loop > 5000) then
+				echo Error No Serial number available for key_id: $serial_key_id and mill: $serial_mill_id;
+				let continue_search=0;
+			else
+				let count_loop=$count_loop+1;
+			end if
+		else
+			let serial_found=1;
+			let serial_cbk_id = $str_last_num;
+		end if
+	 end while
+
+END SUBROUTINE
+
+###===============================================================================
+## Included Routines
+###===============================================================================
+	INCLUDE "acs_viewrecipe_all";

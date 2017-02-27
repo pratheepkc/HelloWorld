@@ -1,0 +1,177 @@
+#============================================================================
+#  ACS MxUpdate Rules for to determine std costs from the cost book
+#
+#  REV     DATE     WHO      DESCRIPTION
+# -----  --------  -----    ------------------------------------------------
+#   1    05/29/09   PKC     Determine costs from the cost book.
+#   2    14/12/10   BRN     Add By Time Unit of Measure management
+#============================================================================
+SUBROUTINE GetStdCostBook()
+
+# Get the std cost from the cost book based on the following priority
+#1. MMM + Grade Spec + Size Range 
+#2. MMM + Grade + Bwt Range + Size Range 
+#3. MMM + Grade Spec 
+#4. MMM + Grade + Bwt Range 
+#5. MMM + Grade + Size 
+#6. MMM + Grade
+#7. MMM
+
+# The logic followed will be as follows:
+# Find the right cost book that was effective when the unit was created.
+# Find the matching cost book criteria
+# Get the avg cost based on the UOM in the matching criteria. 
+# Loop through each of the steps starting from the last step in the std route. Use the loss% to gross up the weight, area for each previous step.
+
+	LET cost_book_found = FALSE;
+	select cost_book_id, cost_book_uid
+	  from acs_cost_bk_mast
+	 where ts_begin < $ts_wound
+	   and type_code = 'S'
+	  order by ts_begin DESC;
+
+	IF ($success = TRUE) then
+	echo getting cost_book $cost_book_id, $cost_book_uid;
+	Call CostBookGSSize();
+	IF ($cost_book_found = FALSE) then
+		Call CostBookGSBwtSize();
+		if ($cost_book_found = FALSE) then
+		   Call CostBookGS();
+		   if ($cost_book_found = FALSE) then
+			Call CostBookGradeBwt();
+			If ($cost_book_found = FALSE) then
+				Call CostBookGradeSize();
+				If ($cost_book_found = FALSE) then
+					Call CostBookGrade();
+					if ($cost_book_found = FALSE) then
+					    Call CostBookMMM();
+					end if
+				end if
+			end if
+		   end if
+		end if
+	end if
+	end if
+
+END SUBROUTINE
+
+SUBROUTINE CostBookGSSize()
+
+	select cost_book_crit_uid, loss_percent
+	  from acs_cost_bk_crit
+	 where cost_book_uid = $cost_book_uid
+	   and mill_id = $mill_id
+	   and machine_type = $machine_type
+	   and machine_id = $machine_id
+	   and grade_spec = $grade_spec_made
+	   and width_min <= $width_act
+	   and width_max >= $width_act
+         and unit_meas = $unit_meas;
+
+	LET cost_book_found = $success;
+#	echo CostBookGSSize $cost_book_found;
+
+END SUBROUTINE
+
+SUBROUTINE CostBookGSBwtSize()
+
+	select cost_book_crit_uid, loss_percent
+	  from acs_cost_bk_crit
+	 where cost_book_uid = $cost_book_uid
+	   and mill_id = $mill_id
+	   and machine_type = $machine_type
+	   and machine_id = $machine_id
+	   and grade_spec = $grade_spec_made
+	   and bsw_min <= $bsw_nominal
+	   and bsw_max >= $bsw_nominal
+	   and width_min <= $width_act
+	   and width_max >= $width_act
+         and unit_meas = $unit_meas;
+
+	LET cost_book_found = $success;
+#	echo CostBookGSBwtSize $cost_book_found;
+
+END SUBROUTINE
+
+SUBROUTINE CostBookGS()
+
+	select cost_book_crit_uid, loss_percent
+	  from acs_cost_bk_crit
+	 where cost_book_uid = $cost_book_uid
+	   and mill_id = $mill_id
+	   and machine_type = $machine_type
+	   and machine_id = $machine_id
+	   and grade_spec = $grade_spec_made
+         and unit_meas = $unit_meas;
+
+	LET cost_book_found = $success;
+#	echo CostBookGS $cost_book_found;
+
+END SUBROUTINE
+
+SUBROUTINE CostBookGradeBwt()
+
+	select cost_book_crit_uid, loss_percent
+	  from acs_cost_bk_crit
+	 where cost_book_uid = $cost_book_uid
+	   and mill_id = $mill_id
+	   and machine_type = $machine_type
+	   and machine_id = $machine_id
+	   and grade_id = $grade_id
+	   and bsw_min <= $bsw_nominal
+	   and bsw_max >= $bsw_nominal
+         and unit_meas = $unit_meas;
+
+	LET cost_book_found = $success;
+#	echo CostBookGradeBwt $cost_book_found;
+
+END SUBROUTINE
+
+SUBROUTINE CostBookGradeSize()
+
+	select cost_book_crit_uid, loss_percent
+	  from acs_cost_bk_crit
+	 where cost_book_uid = $cost_book_uid
+	   and mill_id = $mill_id
+	   and machine_type = $machine_type
+	   and machine_id = $machine_id
+	   and grade_id = $grade_id
+	   and width_min <= $width_act
+	   and width_max >= $width_act
+         and unit_meas = $unit_meas;
+
+	LET cost_book_found = $success;
+#	echo CostBookSize $cost_book_found;
+
+END SUBROUTINE
+
+SUBROUTINE CostBookGrade()
+
+	select cost_book_crit_uid, loss_percent
+	  from acs_cost_bk_crit
+	 where cost_book_uid = $cost_book_uid
+	   and mill_id = $mill_id
+	   and machine_type = $machine_type
+	   and machine_id = $machine_id
+	   and grade_id = $grade_id
+         and unit_meas = $unit_meas;
+
+	LET cost_book_found = $success;
+#	echo CostBookGrade $cost_book_found;
+
+END SUBROUTINE
+
+SUBROUTINE CostBookMMM()
+
+	select cost_book_crit_uid, loss_percent
+	  from acs_cost_bk_crit
+	 where cost_book_uid = $cost_book_uid
+	   and mill_id = $mill_id
+	   and machine_type = $machine_type
+	   and machine_id = $machine_id
+         and unit_meas = $unit_meas;
+
+	LET cost_book_found = $success;
+#	echo CostBookMMM $cost_book_found;
+
+END SUBROUTINE

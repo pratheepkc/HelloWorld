@@ -1,0 +1,233 @@
+<Application type="Application" name="acs_costbookSmenu" ID="1" Directory="Appl" lastID="173" modified="2010-12-10 09:52:40Z" user="brice">
+  <Widget type="Connector" name="value" ID="107" created="2009-01-31 14:26:55Z" user="brice" modified="2010-12-02 10:18:04Z" handle="1">
+    <Output name="CBUIDIn:value" ref="97" created="2010-12-02 10:17:48Z" user="brice" />
+    <Input name="CBUIDOut:value" ref="96" created="2010-12-02 10:18:04Z" user="brice" />
+    <Input name="CostBookID:value" ref="108" created="2010-12-02 09:59:42Z" user="brice" />
+    <Input name="done:value" ref="153" created="2009-02-25 09:33:59Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Connector" name="input" ID="128" created="2009-02-03 16:45:50Z" user="brice" modified="2010-12-02 09:59:53Z" handle="2">
+    <Input name="CBValid:input" ref="127" created="2010-12-02 09:59:53Z" user="brice" />
+  </Widget>
+  <Widget type="Connector" name="reset" ID="149" created="2009-02-24 10:13:29Z" user="brice" modified="2010-12-08 10:21:26Z" handle="3">
+    <Output name="reset" ref="77" created="2009-02-24 10:13:47Z" user="msdmgr" />
+    <Output name="reset" ref="81" created="2009-02-24 10:13:54Z" user="msdmgr" />
+    <Output name="reset" ref="172" created="2010-12-08 10:21:26Z" user="brice" />
+  </Widget>
+  <Widget type="Form" name="Filter" ID="23" created="2009-01-29 18:28:55Z" user="brice" handle="4" modified="2010-12-10 09:51:36Z">
+    <Widget type="Template" name="KeyFieldText" ID="44" created="2009-01-29 18:33:18Z" user="brice" modified="2010-12-08 10:29:25Z" handle="1">
+      <Attribute name="prefix" value="COST BOOK LIST" created="2009-01-29 18:33:55Z" user="brice" modified="2010-12-02 10:03:06Z" />
+      <Input name="below" ref="76" created="2010-12-08 10:29:25Z" user="brice" />
+    </Widget>
+    <Widget type="Template" name="CostBookUIDColumn" ID="97" created="2009-01-30 14:56:07Z" user="brice" modified="2010-12-07 15:31:59Z" handle="2">
+      <Attribute name="prefix" value="&quot;&quot;" created="2009-01-30 16:07:35Z" user="msdmgr" />
+      <Input name="CBUIDIn:value" ref="107" created="2010-12-02 10:17:48Z" user="brice" />
+      <Output name="value" ref="96" created="2009-01-31 17:03:51Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Form" name="CostBookID" ID="76" created="2009-01-30 08:58:19Z" user="brice" modified="2010-12-08 10:29:25Z" handle="3">
+      <Widget type="Template" name="CostBookIDEntry" ID="77" created="2009-01-30 08:58:57Z" user="brice" modified="2010-12-07 15:31:50Z" handle="1">
+        <Attribute name="required" value="0" created="2009-02-03 15:36:47Z" user="msdmgr" />
+        <Input name="reset" ref="149" created="2009-02-24 10:13:47Z" user="msdmgr" />
+        <Output name="input" ref="106" created="2009-01-31 14:16:37Z" user="msdmgr" />
+        <Output name="where" ref="83" created="2009-01-31 14:17:35Z" user="msdmgr" />
+        <Output name="where" ref="92" created="2009-01-31 14:17:41Z" user="msdmgr" />
+        <Input name="whereOperator" ref="106" created="2009-01-31 14:16:48Z" user="msdmgr" />
+      </Widget>
+      <Widget type="Calculation" name="SetWhereCostBookID" ID="106" created="2009-01-31 14:15:46Z" user="brice" modified="2010-12-02 10:19:55Z" handle="2">
+        <Attribute name="calculation" value="TruthToArg(CostBookIDEntry = &quot; &quot; or  CostBookIDEntry= &quot;&quot; or CostBookIDEntry=0,&quot;like&quot;,&quot;ALL&quot;)" created="2009-01-31 14:16:21Z" user="brice" modified="2010-12-02 10:19:55Z" />
+        <Input name="input" ref="77" created="2009-01-31 14:16:37Z" user="msdmgr" />
+        <Output name="whereOperator" ref="77" created="2009-01-31 14:16:48Z" user="msdmgr" />
+      </Widget>
+      <Output name="below" ref="44" created="2010-12-08 10:29:25Z" user="brice" />
+    </Widget>
+    <Widget type="Form" name="CostBookName" ID="162" created="2010-12-08 10:07:43Z" user="brice" modified="2010-12-08 10:07:51Z" handle="4">
+      <Widget type="Template" name="CostBookNameEntry" ID="81" created="2009-01-30 14:17:07Z" user="brice" modified="2010-12-07 15:31:50Z" handle="1">
+        <Input name="reset" ref="149" created="2009-02-24 10:13:54Z" user="msdmgr" />
+        <Output name="input" ref="126" created="2009-02-03 15:38:43Z" user="msdmgr" />
+        <Output name="where" ref="83" created="2009-02-03 15:40:06Z" user="msdmgr" />
+        <Output name="where" ref="92" created="2009-02-03 15:40:12Z" user="msdmgr" />
+        <Input name="whereOperator" ref="126" created="2009-02-03 15:39:31Z" user="msdmgr" />
+      </Widget>
+      <Widget type="Calculation" name="SetWhereCostBookName" ID="126" created="2009-02-03 15:37:40Z" user="brice" modified="2010-12-02 10:08:20Z" handle="2">
+        <Attribute name="calculation" value="TruthToArg(CostBookNameEntry = &quot; &quot; or  CostBookNameEntry= &quot;&quot; or CostBookNameEntry=0,&quot;like&quot;,&quot;ALL&quot;)" created="2009-02-03 15:38:34Z" user="brice" modified="2010-12-02 10:08:20Z" />
+        <Input name="input" ref="81" created="2009-02-03 15:38:43Z" user="msdmgr" />
+        <Output name="whereOperator" ref="81" created="2009-02-03 15:39:31Z" user="msdmgr" />
+      </Widget>
+    </Widget>
+    <Widget type="Form" ID="164" handle="5" name="TypeCode" grid_width="6" grid_height="5" created="2010-12-08 10:09:17Z" user="brice" modified="2010-12-08 10:09:24Z">
+      <Widget type="Template" ID="165" handle="1" name="TableNameColumn" created="2010-12-08 10:09:17Z" user="brice" modified="2010-12-08 10:09:59Z">
+        <Attribute name="default" value="acs_cost_bk_mast" modified="2010-12-08 10:09:59Z" user="brice" />
+        <Output name="where" ref="167" />
+      </Widget>
+      <Widget type="Template" ID="166" handle="2" name="TypeCodeEntry" user="brice" created="2010-12-08 10:09:17Z" modified="2010-12-08 10:21:19Z">
+        <Attribute name="suffix" value="&quot; **&quot;" created="2008-12-03 13:02:01Z" user="msdmgr" />
+        <Attribute name="required" value="0" created="2008-12-03 13:24:08Z" user="msdmgr" />
+        <Output name="validation" ref="167" created="2008-12-03 13:01:50Z" user="msdmgr" />
+        <Output name="input" ref="168" created="2008-12-03 13:23:02Z" user="msdmgr" />
+        <Output name="value" ref="169" created="2008-12-03 13:23:13Z" user="msdmgr" />
+      </Widget>
+      <Widget type="Template" ID="167" handle="3" name="TypeCodeDMenu" created="2010-12-08 10:09:17Z" user="brice">
+        <Input name="where" ref="165" />
+        <Input name="validation" ref="166" created="2008-12-03 13:01:50Z" user="msdmgr" />
+      </Widget>
+      <Widget type="Calculation" name="SetWhereOperator" ID="168" created="2010-12-08 10:09:17Z" user="brice" handle="4" modified="2010-12-08 10:21:19Z">
+        <Attribute name="calculation" value="TruthToArg(TypeCodeEntry = &quot;&quot; or TypeCodeEntry = &quot; &quot;, &quot;=&quot;, &quot;ALL&quot;)" created="2008-12-03 13:22:53Z" user="msdmgr" />
+        <Input name="input" ref="166" created="2008-12-03 13:23:02Z" user="msdmgr" />
+        <Output name="whereOperator" ref="169" created="2008-12-03 13:21:11Z" user="msdmgr" />
+      </Widget>
+      <Widget type="Template" name="TypeCodeColumn" ID="169" created="2010-12-08 10:09:17Z" user="brice" handle="5" modified="2010-12-08 10:09:45Z">
+        <Input name="value" ref="166" created="2008-12-03 13:23:13Z" user="msdmgr" />
+        <Input name="whereOperator" ref="168" created="2008-12-03 13:21:11Z" user="msdmgr" />
+        <Output name="where" ref="83" created="2010-12-08 10:09:37Z" user="brice" />
+        <Output name="where" ref="92" created="2010-12-08 10:09:45Z" user="brice" />
+      </Widget>
+    </Widget>
+    <Widget type="Form" name="BeginDateName" ID="171" created="2010-12-08 10:21:26Z" user="brice" modified="2010-12-08 10:21:36Z" handle="6">
+      <Widget type="Template" name="TimeBeginEntry" ID="172" created="2010-12-08 10:21:26Z" user="brice" handle="1" modified="2010-12-08 10:44:50Z">
+        <Attribute name="default" value="0" created="2010-12-08 10:30:00Z" user="brice" />
+        <Attribute name="required" value="FALSE" created="2010-12-08 10:30:06Z" user="brice" />
+        <Attribute name="validationString" value="me &gt;= 0" created="2010-12-08 10:44:50Z" user="brice" />
+        <Input name="reset" ref="149" created="2010-12-08 10:21:26Z" user="brice" />
+        <Output name="input" ref="173" created="2009-02-03 15:38:43Z" user="msdmgr" />
+        <Output name="where" ref="83" created="2009-02-03 15:40:06Z" user="msdmgr" />
+        <Output name="where" ref="92" created="2009-02-03 15:40:12Z" user="msdmgr" />
+        <Input name="whereOperator" ref="173" created="2009-02-03 15:39:31Z" user="msdmgr" />
+      </Widget>
+      <Widget type="Calculation" name="SetWhereTimeBegin" ID="173" created="2010-12-08 10:21:26Z" user="brice" handle="2" modified="2010-12-08 10:43:54Z">
+        <Attribute name="calculation" value="TruthToArg(TimeBeginEntry = &quot; &quot; or  TimeBeginEntry= &quot;&quot; or TimeBeginEntry=0,&quot;&gt;&quot;,&quot;ALL&quot;)" created="2009-02-03 15:38:34Z" user="brice" modified="2010-12-08 10:43:54Z" />
+        <Input name="input" ref="172" created="2009-02-03 15:38:43Z" user="msdmgr" />
+        <Output name="whereOperator" ref="172" created="2009-02-03 15:39:31Z" user="msdmgr" />
+      </Widget>
+    </Widget>
+    <Attribute name="borderWidth" value="1" created="2009-01-30 08:56:22Z" user="msdmgr" />
+    <Input name="below" ref="125" created="2009-02-03 14:35:16Z" user="msdmgr" />
+  </Widget>
+  <Widget type="Form" name="ProdCodeSelect" ID="125" created="2009-02-03 14:32:31Z" user="brice" modified="2010-12-02 10:02:30Z" handle="5">
+    <Widget type="Template" name="CostBookIDColumn" ID="140" created="2009-02-23 16:40:53Z" user="brice" modified="2010-12-02 10:02:48Z" handle="1">
+      <Output name="order" ref="83" created="2009-02-23 16:41:01Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Cursor" name="acs_cost_bk_mast" ID="83" created="2009-01-30 14:23:43Z" user="brice" modified="2010-12-08 10:21:26Z" handle="2">
+      <Attribute name="table" value="acs_cost_bk_mast" created="2010-12-02 09:55:02Z" user="brice" modified="2010-12-02 10:04:54Z" />
+      <Input name="where" ref="77" created="2009-01-31 14:17:35Z" user="msdmgr" />
+      <Input name="where" ref="81" created="2009-02-03 15:40:06Z" user="msdmgr" />
+      <Input name="where" ref="169" created="2010-12-08 10:09:37Z" user="brice" />
+      <Input name="where" ref="172" created="2009-02-03 15:40:06Z" user="msdmgr" />
+      <Input name="order" ref="140" created="2009-02-23 16:41:01Z" user="msdmgr" />
+      <Output name="select" ref="86" created="2009-01-30 14:27:39Z" user="msdmgr" />
+      <Output name="select" ref="154" created="2010-12-02 09:57:32Z" user="brice" />
+      <Output name="select" ref="155" created="2010-12-02 10:02:13Z" user="brice" />
+      <Output name="select" ref="158" created="2010-12-02 10:26:56Z" user="brice" />
+      <Output name="select" ref="159" created="2010-12-02 10:27:13Z" user="brice" />
+      <Output name="select" ref="87" created="2009-01-30 14:27:44Z" user="msdmgr" />
+      <Output name="doneFlag" ref="84" created="2009-01-30 14:34:02Z" user="msdmgr" />
+      <Output name="fetchFlag" ref="84" created="2009-01-30 14:34:09Z" user="msdmgr" />
+      <Output name="resetFlag" ref="84" created="2009-01-30 14:34:16Z" user="msdmgr" />
+      <Input name="fetchPage" ref="92" created="2009-01-30 14:41:45Z" user="msdmgr" />
+      <Input name="fetchRows" ref="92" created="2009-01-30 14:41:53Z" user="msdmgr" />
+      <Input name="out:syncTime" ref="92" created="2009-01-30 14:42:30Z" user="msdmgr" />
+    </Widget>
+    <Widget type="AutoHeader" name="HeaderList" ID="82" created="2009-01-30 14:22:45Z" user="msdmgr" handle="3" modified="2009-02-03 14:35:10Z">
+      <Input name="headerForm" ref="85" created="2009-01-30 14:34:50Z" user="msdmgr" />
+      <Input name="below" ref="84" created="2009-01-30 14:32:50Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Form" name="ItemArray" ID="84" created="2009-01-30 14:24:01Z" user="msdmgr" modified="2009-02-03 14:32:09Z" handle="4">
+      <Widget type="Form" name="ItemLine" ID="85" created="2009-01-30 14:24:51Z" user="brice" modified="2010-12-02 10:27:13Z" handle="1">
+        <Widget type="Template" name="CostBookUIDColumn" ID="86" created="2009-01-30 14:25:26Z" user="brice" modified="2010-12-02 09:57:55Z" handle="1">
+          <Input name="select" ref="83" created="2009-01-30 14:27:39Z" user="msdmgr" />
+          <Output name="input" ref="94" created="2009-01-30 14:51:07Z" user="msdmgr" />
+        </Widget>
+        <Widget type="Template" name="CostBookIDField" ID="154" created="2010-12-02 09:57:32Z" user="brice" handle="2" modified="2010-12-02 10:02:06Z">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-01-30 14:29:54Z" user="msdmgr" />
+          <Input name="select" ref="83" created="2010-12-02 09:57:32Z" user="brice" />
+        </Widget>
+        <Widget type="Template" name="CostBookNameField" ID="155" created="2010-12-02 10:02:13Z" user="brice" handle="3" modified="2010-12-02 10:20:51Z">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-01-30 14:30:00Z" user="msdmgr" />
+          <Input name="select" ref="83" created="2010-12-02 10:02:13Z" user="brice" />
+        </Widget>
+        <Widget type="Template" name="TypeCodeField" ID="158" created="2010-12-02 10:26:56Z" user="brice" handle="4">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-01-30 14:30:00Z" user="msdmgr" />
+          <Input name="select" ref="83" created="2010-12-02 10:26:56Z" user="brice" />
+        </Widget>
+        <Widget type="Template" name="TimeBeginField" ID="159" created="2010-12-02 10:27:13Z" user="brice" handle="5">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-01-30 14:30:00Z" user="msdmgr" />
+          <Input name="select" ref="83" created="2010-12-02 10:27:13Z" user="brice" />
+        </Widget>
+        <Widget type="Template" name="TimeEndField" ID="87" created="2009-01-30 14:25:57Z" user="brice" modified="2010-12-02 10:27:19Z" handle="6">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-01-30 14:30:00Z" user="msdmgr" />
+          <Input name="select" ref="83" created="2009-01-30 14:27:44Z" user="msdmgr" />
+        </Widget>
+        <Widget type="Diagram" name="SetColorLine" ID="93" created="2009-01-30 14:48:04Z" user="msdmgr" modified="2009-01-30 14:57:57Z" handle="7">
+          <Widget type="Calculation" name="SetColorLine" ID="94" created="2009-01-30 14:49:11Z" user="brice" modified="2010-12-02 10:02:06Z" handle="1">
+            <Attribute name="calculation" value="TruthToArg(CostBookUIDColumn = CBSelect, &quot;REGULAR&quot;,&quot;SELECTED&quot;)" created="2009-01-30 14:50:13Z" user="brice" modified="2010-12-02 10:02:02Z" />
+            <Input name="input" ref="86" created="2009-01-30 14:51:07Z" user="msdmgr" />
+            <Output name="value" ref="98" created="2009-01-30 14:58:02Z" user="msdmgr" />
+            <Input name="input" ref="96" created="2009-01-30 14:52:27Z" user="msdmgr" />
+          </Widget>
+          <Widget type="InternalField" name="LineColor" ID="98" created="2009-01-30 14:57:57Z" user="msdmgr" modified="2009-01-30 14:58:18Z" handle="2">
+            <Input name="value" ref="94" created="2009-01-30 14:58:02Z" user="msdmgr" />
+            <Output name="GC" ref="85" created="2009-01-30 14:58:18Z" user="msdmgr" />
+          </Widget>
+        </Widget>
+        <Attribute name="orientation" value="horizontal" created="2009-01-30 14:29:46Z" user="msdmgr" modified="2009-01-30 14:35:42Z" />
+        <Input name="GC" ref="98" created="2009-01-30 14:58:18Z" user="msdmgr" />
+        <Output name="headerForm" ref="82" created="2009-01-30 14:34:50Z" user="msdmgr" />
+        <Output name="clickValue" ref="96" created="2009-01-30 14:53:40Z" user="msdmgr" />
+        <Output name="status" ref="153" created="2009-02-25 09:38:08Z" user="kbhatia" />
+      </Widget>
+      <Attribute name="orientation" value="vertical" created="2009-01-30 14:30:44Z" user="msdmgr" />
+      <Attribute name="displayElements" value="10" created="2009-01-30 14:38:52Z" user="msdmgr" modified="2009-02-03 14:32:09Z" />
+      <Attribute name="borderWidth" value="2" created="2009-01-31 14:22:16Z" user="msdmgr" />
+      <Input name="doneFlag" ref="83" created="2009-01-30 14:34:02Z" user="msdmgr" />
+      <Input name="fetchFlag" ref="83" created="2009-01-30 14:34:09Z" user="msdmgr" />
+      <Input name="resetFlag" ref="83" created="2009-01-30 14:34:16Z" user="msdmgr" />
+      <Output name="below" ref="82" created="2009-01-30 14:32:50Z" user="msdmgr" />
+      <Input name="below" ref="92" created="2009-01-30 14:44:50Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Diagram" name="ArrayControl" ID="90" created="2009-01-30 14:39:36Z" user="msdmgr" modified="2009-01-30 14:40:34Z" handle="5">
+      <Widget type="InternalField" name="TableName" ID="91" created="2009-01-30 14:40:03Z" user="brice" modified="2010-12-02 10:04:44Z" handle="1">
+        <Attribute name="default" value="acs_cost_bk_mast" created="2009-01-30 14:40:19Z" user="brice" modified="2010-12-02 10:04:44Z" />
+        <Output name="table" ref="92" created="2009-01-30 14:41:02Z" user="msdmgr" />
+      </Widget>
+      <Widget type="Template" name="ArrayControl()" ID="92" created="2009-01-30 14:40:34Z" user="brice" modified="2010-12-08 10:21:26Z" handle="2">
+        <Input name="where" ref="77" created="2009-01-31 14:17:41Z" user="msdmgr" />
+        <Input name="where" ref="81" created="2009-02-03 15:40:12Z" user="msdmgr" />
+        <Input name="where" ref="169" created="2010-12-08 10:09:45Z" user="brice" />
+        <Input name="where" ref="172" created="2009-02-03 15:40:12Z" user="msdmgr" />
+        <Input name="table" ref="91" created="2009-01-30 14:41:02Z" user="msdmgr" />
+        <Output name="fetchPage" ref="83" created="2009-01-30 14:41:45Z" user="msdmgr" />
+        <Output name="fetchRows" ref="83" created="2009-01-30 14:41:53Z" user="msdmgr" />
+        <Output name="out:syncTime" ref="83" created="2009-01-30 14:42:30Z" user="msdmgr" />
+        <Output name="below" ref="84" created="2009-01-30 14:44:50Z" user="msdmgr" />
+      </Widget>
+    </Widget>
+    <Widget type="Diagram" name="LineSelected" ID="95" created="2009-01-30 14:51:21Z" user="brice" modified="2010-12-02 09:59:44Z" handle="6">
+      <Widget type="Template" name="CBSelect:CostBookUIDColumn" ID="96" created="2009-01-30 14:51:46Z" user="brice" modified="2010-12-02 10:18:04Z" handle="1">
+        <Input name="value" ref="97" created="2009-01-31 17:03:51Z" user="msdmgr" />
+        <Input name="clickValue" ref="85" created="2009-01-30 14:53:40Z" user="msdmgr" />
+        <Output name="CBUIDOut:value" ref="107" created="2010-12-02 10:18:04Z" user="brice" />
+        <Output name="input" ref="94" created="2009-01-30 14:52:27Z" user="msdmgr" />
+        <Output name="where" ref="112" created="2009-01-31 15:09:41Z" user="msdmgr" />
+      </Widget>
+      <Widget type="Cursor" name="acs_cost_bk_mast" ID="112" created="2009-01-31 15:09:34Z" user="brice" modified="2010-12-02 10:08:31Z" handle="2">
+        <Input name="where" ref="96" created="2009-01-31 15:09:41Z" user="msdmgr" />
+        <Output name="select" ref="108" created="2009-01-31 15:09:47Z" user="msdmgr" />
+        <Output name="status" ref="127" created="2009-02-03 16:45:37Z" user="msdmgr" />
+      </Widget>
+      <Widget type="Template" name="CostBookIDColumn" ID="108" created="2009-01-31 14:52:40Z" user="brice" modified="2010-12-02 09:59:42Z" handle="3">
+        <Input name="select" ref="112" created="2009-01-31 15:09:47Z" user="msdmgr" />
+        <Output name="CostBookID:value" ref="107" created="2010-12-02 09:59:42Z" user="brice" />
+      </Widget>
+      <Widget type="Template" name="SuccessColumn" ID="127" created="2009-02-03 16:45:30Z" user="brice" modified="2010-12-02 09:59:53Z" handle="4">
+        <Input name="status" ref="112" created="2009-02-03 16:45:37Z" user="msdmgr" />
+        <Output name="CBValid:input" ref="128" created="2010-12-02 09:59:53Z" user="brice" />
+      </Widget>
+    </Widget>
+    <Attribute name="borderWidth" value="1" created="2009-02-03 14:33:55Z" user="msdmgr" />
+    <Output name="below" ref="23" created="2009-02-03 14:35:16Z" user="msdmgr" />
+  </Widget>
+  <Widget type="Template" name="DoneTimeColumn" ID="153" created="2009-02-25 09:33:03Z" user="kbhatia" modified="2009-02-25 09:38:08Z" handle="6">
+    <Attribute name="name" value="clickTime1" created="2009-02-25 09:33:24Z" user="kbhatia" />
+    <Input name="status" ref="85" created="2009-02-25 09:38:08Z" user="kbhatia" />
+    <Output name="done:value" ref="107" created="2009-02-25 09:33:59Z" user="kbhatia" />
+  </Widget>
+  <Revisions created="2009-02-05 12:23:34Z" user="msdmgr">12/10/10   BRN   Initial Release</Revisions>
+</Application>

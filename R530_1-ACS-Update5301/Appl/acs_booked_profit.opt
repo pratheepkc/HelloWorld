@@ -1,0 +1,1479 @@
+<Application type="Application" name="acs_booked_profit" ID="1" Directory="Appl" grid_width="1" grid_height="4" lastCheckin="2003-09-24 15:33:47Z" lastID="1145" command="acs acsbook" environment="ARRAYSIZE=20" modified="2010-12-14 18:18:48Z" user="brice">
+  <Widget type="Diagram" name="Constants" ID="1004" created="2009-04-28 13:52:45Z" user="E731650" modified="2009-04-28 13:54:05Z" handle="1">
+    <Widget type="Template" name="ARRAYSIZE" ID="1005" created="2009-04-28 13:52:52Z" user="E731650" modified="2009-04-28 13:53:13Z" handle="1">
+      <Output name="input" ref="1006" created="2009-04-28 13:53:13Z" user="E731650" />
+    </Widget>
+    <Widget type="InternalField" name="DefArraySize" ID="953" created="2009-04-27 15:34:48Z" user="E731650" modified="2009-04-28 13:54:31Z" handle="2">
+      <Attribute name="default" value="10" created="2009-04-27 15:35:11Z" user="E731650" />
+      <Output name="input" ref="1006" created="2009-04-28 13:53:13Z" user="E731650" />
+    </Widget>
+  </Widget>
+  <Widget type="Template" ID="2" handle="2" name="StandardTitleForm" modified="2009-04-21 18:51:47Z" user="E731650">
+  </Widget>
+  <Widget type="Form" ID="10" handle="3" name="FiltersForm" grid_width="3" grid_height="3" modified="2009-04-21 19:35:21Z" user="E731650">
+    <Widget type="Template" ID="11" handle="1" name="KeyFieldText" />
+    <Widget type="AutoHeader" ID="12" handle="2" name="AutoHeader">
+      <Input name="headerForm" ref="13" />
+    </Widget>
+    <Widget type="Form" ID="13" handle="3" name="TheFilters" grid_width="5" grid_height="7" modified="2009-07-29 10:17:57Z" user="msdmgr">
+      <Widget type="Template" ID="14" handle="1" name="SalesmanIDEntry" modified="2009-04-27 15:37:49Z" user="E731650">
+        <Attribute name="prefix" value="&quot;&quot;" />
+        <Attribute name="required" value="False" />
+        <Attribute name="suffix" value="&quot; **&quot;" />
+        <Output name="input" ref="15" />
+        <Output name="validation" ref="16" />
+        <Output name="input" ref="17" />
+        <Output name="input" ref="940" created="2009-04-21 19:52:39Z" user="E731650" />
+        <Output name="where" ref="928" created="2009-04-21 19:27:16Z" user="E731650" />
+        <Output name="where" ref="951" created="2009-04-27 15:37:49Z" user="E731650" />
+        <Input name="value" ref="15" />
+        <Input name="whereOperator" ref="17" />
+      </Widget>
+      <Widget type="Calculation" ID="15" handle="2" name="ClipSalesman" modified="2009-04-21 18:59:16Z" user="E731650">
+        <Attribute name="calculation" value="Clip(SalesmanIDEntry)" modified="2009-04-21 18:59:16Z" user="E731650" />
+        <Input name="input" ref="14" />
+        <Output name="value" ref="14" />
+      </Widget>
+      <Widget type="Template" ID="16" handle="3" name="SalesmanDMenu" modified="2009-04-21 18:59:29Z" user="E731650">
+        <Input name="validation" ref="14" />
+      </Widget>
+      <Widget type="Calculation" ID="17" handle="4" name="WhereOp" modified="2009-04-21 18:59:47Z" user="E731650">
+        <Attribute name="calculation" value="TruthToArg(SalesmanIDEntry &lt;&gt; '', 'ALL', '=')" modified="2009-04-21 18:59:47Z" user="E731650" />
+        <Input name="input" ref="14" />
+        <Output name="whereOperator" ref="14" />
+      </Widget>
+      <Widget type="Template" ID="19" handle="5" name="MktSegIDEntry" modified="2009-04-27 15:52:07Z" user="E731650">
+        <Attribute name="prefix" value="&quot;&quot;" />
+        <Attribute name="required" value="False" />
+        <Attribute name="suffix" value="&quot; **&quot;" />
+        <Output name="input" ref="20" />
+        <Output name="validation" ref="21" />
+        <Output name="input" ref="22" />
+        <Output name="where" ref="25" />
+        <Output name="where" ref="858" created="2009-04-21 19:08:32Z" user="E731650" />
+        <Output name="input" ref="940" created="2009-04-21 19:52:39Z" user="E731650" />
+        <Output name="where" ref="928" created="2009-04-21 19:27:16Z" user="E731650" />
+        <Output name="where" ref="951" created="2009-04-27 15:37:49Z" user="E731650" />
+        <Input name="value" ref="20" />
+        <Input name="whereOperator" ref="22" />
+      </Widget>
+      <Widget type="Calculation" ID="20" handle="6" name="ClipMktSeg" modified="2009-04-21 19:00:57Z" user="E731650">
+        <Attribute name="calculation" value="Clip(MktSegIDEntry)" modified="2009-04-21 19:00:57Z" user="E731650" />
+        <Input name="input" ref="19" />
+        <Output name="value" ref="19" />
+      </Widget>
+      <Widget type="Template" ID="21" handle="7" name="MktSegDMenu" modified="2009-04-21 19:01:11Z" user="E731650">
+        <Input name="validation" ref="19" />
+      </Widget>
+      <Widget type="Calculation" ID="22" handle="8" name="WhereOp" modified="2009-04-21 19:01:31Z" user="E731650">
+        <Attribute name="calculation" value="TruthToArg(MktSegIDEntry &lt;&gt; '', 'ALL', '=')" modified="2009-04-21 19:01:31Z" user="E731650" />
+        <Input name="input" ref="19" />
+        <Output name="whereOperator" ref="19" />
+      </Widget>
+      <Widget type="Template" ID="23" handle="9" name="MktSubIDEntry" modified="2009-04-27 15:52:09Z" user="E731650">
+        <Attribute name="prefix" value="&quot;&quot;" />
+        <Attribute name="required" value="False" />
+        <Attribute name="suffix" value="&quot; **&quot;" />
+        <Output name="input" ref="24" />
+        <Output name="validation" ref="25" />
+        <Output name="input" ref="26" />
+        <Output name="where" ref="858" created="2009-04-21 19:08:32Z" user="E731650" />
+        <Output name="input" ref="940" created="2009-04-21 19:52:39Z" user="E731650" />
+        <Output name="where" ref="928" created="2009-04-21 19:27:16Z" user="E731650" />
+        <Output name="where" ref="951" created="2009-04-27 15:37:49Z" user="E731650" />
+        <Input name="value" ref="24" />
+        <Input name="whereOperator" ref="26" />
+      </Widget>
+      <Widget type="Calculation" ID="24" handle="10" name="ClipMktSub" modified="2009-04-21 19:02:18Z" user="E731650">
+        <Attribute name="calculation" value="Clip(MktSubIDEntry)" modified="2009-04-21 19:02:18Z" user="E731650" />
+        <Input name="input" ref="23" />
+        <Output name="value" ref="23" />
+      </Widget>
+      <Widget type="Template" ID="25" handle="11" name="MktSubDMenu" modified="2009-04-21 19:03:17Z" user="E731650">
+        <Input name="where" ref="19" />
+        <Input name="validation" ref="23" />
+      </Widget>
+      <Widget type="Calculation" ID="26" handle="12" name="WhereOp" modified="2009-04-21 19:03:35Z" user="E731650">
+        <Attribute name="calculation" value="TruthToArg(MktSubIDEntry &lt;&gt; '', 'ALL', '=')" modified="2009-04-21 19:03:35Z" user="E731650" />
+        <Input name="input" ref="23" />
+        <Output name="whereOperator" ref="23" />
+      </Widget>
+      <Widget type="Template" name="CustomerIDEntry" ID="854" created="2006-02-28 13:34:26Z" user="E731650" modified="2009-04-27 15:37:49Z" handle="13">
+        <Attribute name="prefix" value="&quot;&quot;" created="2006-02-28 13:34:43Z" user="E731650" />
+        <Attribute name="suffix" value="&quot; **&quot;" created="2006-02-28 13:34:50Z" user="E731650" />
+        <Attribute name="required" value="False" created="2006-02-28 13:35:04Z" user="E731650" />
+        <Output name="input" ref="855" created="2006-02-28 13:35:49Z" user="E731650" />
+        <Output name="input" ref="48" created="2009-04-21 19:11:14Z" user="E731650" />
+        <Output name="validation" ref="858" created="2006-02-28 13:39:39Z" user="E731650" />
+        <Output name="where" ref="916" created="2009-04-21 19:18:31Z" user="E731650" />
+        <Output name="input" ref="940" created="2009-04-21 19:52:39Z" user="E731650" />
+        <Output name="where" ref="928" created="2009-04-21 19:27:16Z" user="E731650" />
+        <Output name="where" ref="951" created="2009-04-27 15:37:49Z" user="E731650" />
+        <Input name="value" ref="855" created="2006-02-28 13:35:57Z" user="E731650" />
+        <Input name="whereOperator" ref="48" created="2009-04-21 19:34:45Z" user="E731650" />
+        <Input name="CustomerID:value" ref="913" created="2009-04-21 19:10:47Z" user="E731650" />
+      </Widget>
+      <Widget type="Calculation" name="ClipCustomerID" ID="855" created="2006-02-28 13:35:31Z" user="E731650" modified="2009-04-21 19:05:31Z" handle="14">
+        <Attribute name="calculation" value="Clip(CustomerIDEntry)" created="2006-02-28 13:36:05Z" user="E731650" modified="2009-04-21 19:05:31Z" />
+        <Input name="input" ref="854" created="2006-02-28 13:35:49Z" user="E731650" />
+        <Output name="value" ref="854" created="2006-02-28 13:35:57Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="DefCust:CustomerIDColumn" ID="941" created="2009-04-21 19:53:37Z" user="E731650" modified="2009-04-21 19:55:16Z" handle="15">
+        <Output name="input" ref="48" created="2009-04-21 19:53:43Z" user="E731650" />
+        <Output name="input" ref="940" created="2009-04-21 19:55:16Z" user="E731650" />
+      </Widget>
+      <Widget type="Calculation" ID="48" handle="16" name="WhereOp" modified="2009-04-21 20:14:23Z" user="E731650">
+        <Attribute name="calculation" value="TruthToArg(CustomerIDEntry &lt;&gt; '' and CustomerIDEntry &lt;&gt; DefCust and CustomerIDEntry &lt;&gt; '00000000', 'ALL', '=')" modified="2009-04-21 20:14:23Z" user="E731650" />
+        <Input name="input" ref="854" created="2009-04-21 19:11:14Z" user="E731650" />
+        <Input name="input" ref="941" created="2009-04-21 19:53:43Z" user="E731650" />
+        <Output name="whereOperator" ref="854" created="2009-04-21 19:34:45Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="CustomerDMenu" ID="858" created="2006-02-28 13:39:27Z" user="E731650" modified="2009-04-21 19:08:32Z" handle="17">
+        <Input name="where" ref="19" created="2009-04-21 19:08:32Z" user="E731650" />
+        <Input name="where" ref="23" created="2009-04-21 19:08:32Z" user="E731650" />
+        <Input name="validation" ref="854" created="2006-02-28 13:39:39Z" user="E731650" />
+      </Widget>
+      <Widget type="Option" name="ADDSMENU" ID="909" created="2009-04-21 19:08:51Z" user="E731650" modified="2009-04-21 19:09:33Z" handle="18">
+        <Widget type="Diagram" name="Y" ID="910" created="2009-04-21 19:09:01Z" user="E731650" modified="2009-04-21 19:09:55Z" handle="1">
+          <Widget type="Template" name="CustSMenuButton" ID="912" created="2009-04-21 19:09:31Z" user="E731650" modified="2009-04-21 19:10:33Z" handle="1">
+            <Output name="displayed" ref="913" created="2009-04-21 19:10:07Z" user="E731650" />
+            <Input name="done:value" ref="913" created="2009-04-21 19:10:33Z" user="E731650" />
+          </Widget>
+          <Widget type="Template" name="CustomerSMenu()" ID="913" created="2009-04-21 19:09:55Z" user="E731650" modified="2009-04-27 15:52:09Z" handle="2">
+            <Input name="displayed" ref="912" created="2009-04-21 19:10:07Z" user="E731650" />
+            <Output name="CustomerID:value" ref="854" created="2009-04-21 19:10:47Z" user="E731650" />
+            <Output name="done:value" ref="912" created="2009-04-21 19:10:33Z" user="E731650" />
+          </Widget>
+        </Widget>
+        <Widget type="Diagram" name="DEFAULT" ID="911" created="2009-04-21 19:09:09Z" user="E731650" handle="2" />
+      </Widget>
+      <Widget type="Template" ID="27" handle="19" name="GradeSpecEntry" modified="2009-04-27 15:37:49Z" user="E731650">
+        <Attribute name="prefix" value="&quot;&quot;" />
+        <Attribute name="required" value="False" />
+        <Output name="input" ref="28" />
+        <Output name="where" ref="30" />
+        <Output name="input" ref="33" />
+        <Output name="input" ref="39" />
+        <Output name="where" ref="916" created="2009-04-21 19:18:31Z" user="E731650" />
+        <Output name="input" ref="940" created="2009-04-21 19:52:39Z" user="E731650" />
+        <Output name="where" ref="928" created="2009-04-21 19:27:16Z" user="E731650" />
+        <Output name="where" ref="951" created="2009-04-27 15:37:49Z" user="E731650" />
+        <Input name="value" ref="28" />
+        <Input name="state" ref="33" />
+        <Input name="GradeSpec:value" ref="37" />
+        <Input name="suffix" ref="38" />
+        <Input name="whereOperator" ref="39" />
+      </Widget>
+      <Widget type="Calculation" ID="28" handle="20" name="ClipGradeSpec">
+        <Attribute name="calculation" value="Clip(GradeSpecEntry)" />
+        <Input name="input" ref="27" />
+        <Output name="value" ref="27" />
+      </Widget>
+      <Widget type="Diagram" ID="29" handle="21" name="ValidateGradeSpec" grid_width="7" grid_height="7">
+        <Widget type="Cursor" ID="30" handle="1" name="grade_spec" modified="2009-04-21 19:18:44Z" user="E731650">
+          <Attribute name="verify" value="False" created="2009-04-21 19:18:44Z" user="E731650" />
+          <Input name="where" ref="27" />
+          <Output name="select" ref="31" />
+          <Output name="status" ref="32" />
+        </Widget>
+        <Widget type="Template" ID="31" handle="2" name="GradeSpecColumn">
+          <Input name="select" ref="30" />
+        </Widget>
+        <Widget type="Template" ID="32" handle="3" name="SuccessColumn">
+          <Input name="status" ref="30" />
+          <Output name="input" ref="33" />
+        </Widget>
+        <Widget type="Calculation" ID="33" handle="4" name="BlankOrPartial">
+          <Attribute name="calculation" value="TruthToArg(success or GradeSpecEntry = &quot;&quot;, 'Error', 'Normal')" />
+          <Input name="input" ref="27" />
+          <Input name="input" ref="32" />
+          <Output name="state" ref="27" />
+        </Widget>
+      </Widget>
+      <Widget type="Option" ID="34" handle="22" name="ADDSMENU" grid_width="4" grid_height="1">
+        <Widget type="Diagram" ID="35" handle="1" name="Y" grid_width="6" grid_height="1">
+          <Widget type="Template" ID="36" handle="1" name="GradeSpecSMenuButton" modified="2009-04-21 19:12:32Z" user="E731650">
+            <Attribute name="prefix" value="&quot;&quot;" />
+            <Attribute name="header" value="&quot; &quot;" created="2005-08-05 20:01:49Z" user="E731650" />
+            <Output name="displayed" ref="37" />
+            <Input name="done:value" ref="37" />
+          </Widget>
+          <Widget type="Template" ID="37" handle="2" name="GradeSpecSMenu()">
+            <Input name="displayed" ref="36" />
+            <Output name="GradeSpec:value" ref="27" />
+            <Output name="done:value" ref="36" />
+          </Widget>
+          <Widget type="InternalField" ID="38" handle="3" name="ClearSuffix">
+            <Attribute name="default" value="''" />
+            <Output name="suffix" ref="27" />
+          </Widget>
+        </Widget>
+      </Widget>
+      <Widget type="Calculation" ID="39" handle="23" name="WhereOp">
+        <Attribute name="calculation" value="TruthToArg(GradeSpecEntry &lt;&gt; '', 'ALL', 'LIKE')" />
+        <Input name="input" ref="27" />
+        <Output name="whereOperator" ref="27" />
+      </Widget>
+      <Widget type="Template" ID="41" handle="24" name="OrderIDEntry" modified="2009-07-29 10:19:54Z" user="msdmgr">
+        <Attribute name="prefix" value="&quot;&quot;" />
+        <Attribute name="required" value="False" />
+        <Output name="input" ref="42" />
+        <Output name="input" ref="44" />
+        <Output name="where" ref="916" created="2009-04-21 19:18:31Z" user="E731650" />
+        <Output name="input" ref="919" created="2009-04-21 19:20:03Z" user="E731650" />
+        <Output name="value" ref="924" created="2009-04-21 19:22:43Z" user="E731650" />
+        <Output name="input" ref="940" created="2009-04-21 19:52:39Z" user="E731650" />
+        <Output name="where" ref="928" created="2009-04-21 19:27:16Z" user="E731650" />
+        <Output name="where" ref="951" created="2009-04-27 15:37:49Z" user="E731650" />
+        <Input name="value" ref="42" />
+        <Input name="whereOperator" ref="44" />
+        <Input name="state" ref="919" created="2009-04-21 19:20:09Z" user="E731650" />
+      </Widget>
+      <Widget type="Calculation" ID="42" handle="25" name="ClipOrderID" modified="2009-04-21 19:14:01Z" user="E731650">
+        <Attribute name="calculation" value="Clip(OrderIDEntry)" modified="2009-04-21 19:14:01Z" user="E731650" />
+        <Input name="input" ref="41" />
+        <Output name="value" ref="41" />
+      </Widget>
+      <Widget type="Calculation" ID="44" handle="26" name="WhereOp" modified="2009-04-21 19:16:11Z" user="E731650">
+        <Attribute name="calculation" value="TruthToArg(OrderIDEntry &lt;&gt; '', 'ALL', '=')" modified="2009-04-21 19:16:11Z" user="E731650" />
+        <Input name="input" ref="41" />
+        <Output name="whereOperator" ref="41" />
+      </Widget>
+      <Widget type="Diagram" name="ValidateOrderID" ID="915" created="2009-04-21 19:17:40Z" user="E731650" modified="2009-04-21 19:19:56Z" handle="27">
+        <Widget type="Cursor" name="oitem_view" ID="916" created="2009-04-21 19:17:58Z" user="E731650" modified="2009-04-28 15:07:42Z" handle="1">
+          <Attribute name="verify" value="False" created="2009-04-21 19:18:50Z" user="E731650" />
+          <Input name="where" ref="854" created="2009-04-21 19:18:31Z" user="E731650" />
+          <Input name="where" ref="27" created="2009-04-21 19:18:31Z" user="E731650" />
+          <Input name="where" ref="41" created="2009-04-21 19:18:31Z" user="E731650" />
+          <Output name="select" ref="917" created="2009-04-21 19:19:05Z" user="E731650" />
+          <Output name="status" ref="918" created="2009-04-21 19:19:19Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="OrderIDColumn" ID="917" created="2009-04-21 19:19:00Z" user="E731650" modified="2009-04-21 19:19:05Z" handle="2">
+          <Input name="select" ref="916" created="2009-04-21 19:19:05Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="SuccessColumn" ID="918" created="2009-04-21 19:19:13Z" user="E731650" modified="2009-04-21 19:20:03Z" handle="3">
+          <Input name="status" ref="916" created="2009-04-21 19:19:19Z" user="E731650" />
+          <Output name="input" ref="919" created="2009-04-21 19:20:03Z" user="E731650" />
+        </Widget>
+        <Widget type="Calculation" name="BlankOrFound" ID="919" created="2009-04-21 19:19:56Z" user="E731650" modified="2009-04-21 19:20:21Z" handle="4">
+          <Attribute name="calculation" value="TruthToArg(success or OrderIDEntry = &quot;&quot;, 'Error', 'Normal')" created="2009-04-21 19:20:21Z" user="E731650" />
+          <Input name="input" ref="41" created="2009-04-21 19:20:03Z" user="E731650" />
+          <Input name="input" ref="918" created="2009-04-21 19:20:03Z" user="E731650" />
+          <Output name="state" ref="41" created="2009-04-21 19:20:09Z" user="E731650" />
+        </Widget>
+      </Widget>
+      <Widget type="Template" ID="46" handle="28" name="ItemNumEntry" modified="2009-07-29 10:22:52Z" user="msdmgr">
+        <Attribute name="prefix" value="&quot;&quot;" />
+        <Attribute name="required" value="False" />
+        <Attribute name="validationString" value="me &gt;= 0" created="2009-04-21 19:51:42Z" user="E731650" />
+        <Output name="input" ref="914" created="2009-04-21 19:16:55Z" user="E731650" />
+        <Output name="input" ref="925" created="2009-04-21 19:23:21Z" user="E731650" />
+        <Output name="input" ref="1095" created="2009-07-29 10:13:08Z" user="msdmgr" />
+        <Output name="input" ref="940" created="2009-04-21 19:52:39Z" user="E731650" />
+        <Output name="where" ref="928" created="2009-04-21 19:27:16Z" user="E731650" />
+        <Output name="where" ref="951" created="2009-04-27 15:38:08Z" user="E731650" />
+        <Input name="whereOperator" ref="914" created="2009-04-21 19:16:37Z" user="E731650" />
+      </Widget>
+      <Widget type="Calculation" name="WhereOp" ID="914" created="2009-04-21 19:16:29Z" user="msdmgr" modified="2009-07-29 10:12:55Z" handle="29">
+        <Attribute name="calculation" value="TruthToArg(ItemNumEntry &gt; 0, 'ALL', '=')" created="2009-04-21 19:17:10Z" user="E731650" />
+        <Input name="input" ref="46" created="2009-04-21 19:16:55Z" user="E731650" />
+        <Output name="whereOperator" ref="46" created="2009-04-21 19:16:37Z" user="E731650" />
+      </Widget>
+      <Widget type="Diagram" name="ValidateItemNum" ID="920" created="2009-04-21 19:20:53Z" user="E731650" modified="2009-04-21 19:23:03Z" handle="30">
+        <Widget type="Template" name="OrderIDColumn" ID="924" created="2009-04-21 19:22:29Z" user="E731650" modified="2009-04-21 19:22:43Z" handle="1">
+          <Input name="value" ref="41" created="2009-04-21 19:22:43Z" user="E731650" />
+          <Output name="where" ref="921" created="2009-04-21 19:22:36Z" user="E731650" />
+        </Widget>
+        <Widget type="Cursor" name="order_item" ID="921" created="2009-04-21 19:21:02Z" user="E731650" modified="2009-04-21 19:22:36Z" handle="2">
+          <Attribute name="verify" value="False" created="2009-04-21 19:21:10Z" user="E731650" />
+          <Input name="where" ref="924" created="2009-04-21 19:22:36Z" user="E731650" />
+          <Output name="select" ref="922" created="2009-04-21 19:22:15Z" user="E731650" />
+          <Output name="status" ref="923" created="2009-04-21 19:22:20Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="ItemNumColumn" ID="922" created="2009-04-21 19:21:46Z" user="E731650" modified="2009-04-21 19:22:15Z" handle="3">
+          <Input name="select" ref="921" created="2009-04-21 19:22:15Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="SuccessColumn" ID="923" created="2009-04-21 19:22:10Z" user="E731650" modified="2009-04-21 19:23:21Z" handle="4">
+          <Input name="status" ref="921" created="2009-04-21 19:22:20Z" user="E731650" />
+          <Output name="input" ref="925" created="2009-04-21 19:23:21Z" user="E731650" />
+        </Widget>
+        <Widget type="Calculation" name="ZeroOrSuccess" ID="925" created="2009-04-21 19:23:03Z" user="msdmgr" modified="2009-07-29 10:19:28Z" handle="5">
+          <Attribute name="calculation" value="TruthToArg(success or ItemNumEntry = 0, 'Error', 'Normal')" created="2009-04-21 19:23:38Z" user="E731650" />
+          <Input name="input" ref="46" created="2009-04-21 19:23:21Z" user="E731650" />
+          <Input name="input" ref="923" created="2009-04-21 19:23:21Z" user="E731650" />
+        </Widget>
+      </Widget>
+      <Widget type="Template" ID="1088" handle="31" name="StatusEntry" user="msdmgr" created="2009-07-29 10:11:41Z" modified="2009-07-29 10:33:43Z">
+        <Attribute name="prefix" value="&quot;&quot;" />
+        <Attribute name="required" value="False" />
+        <Attribute name="suffix" value="&quot; **&quot;" created="2009-07-29 10:33:43Z" user="msdmgr" />
+        <Output name="input" ref="1097" created="2009-07-29 10:16:29Z" user="msdmgr" />
+        <Output name="input" ref="1089" created="2009-07-29 10:11:48Z" user="msdmgr" />
+        <Output name="validation" ref="1098" created="2009-07-29 10:27:29Z" user="msdmgr" />
+        <Output name="input" ref="1095" created="2009-07-29 10:13:08Z" user="msdmgr" />
+        <Output name="input" ref="940" created="2009-04-21 19:52:39Z" user="E731650" />
+        <Output name="where" ref="928" created="2009-04-21 19:27:16Z" user="E731650" />
+        <Output name="where" ref="951" created="2009-04-27 15:38:08Z" user="E731650" />
+        <Input name="value" ref="1097" created="2009-07-29 10:16:38Z" user="msdmgr" />
+        <Input name="whereOperator" ref="1089" created="2009-07-29 10:11:41Z" user="msdmgr" />
+      </Widget>
+      <Widget type="Calculation" name="ClipStatus" ID="1097" created="2009-07-29 10:16:13Z" user="msdmgr" modified="2009-07-29 10:32:57Z" handle="32">
+        <Attribute name="calculation" value="Clip(StatusEntry)" created="2009-07-29 10:16:55Z" user="msdmgr" modified="2009-07-29 10:32:57Z" />
+        <Input name="input" ref="1088" created="2009-07-29 10:16:29Z" user="msdmgr" />
+        <Output name="value" ref="1088" created="2009-07-29 10:16:38Z" user="msdmgr" />
+      </Widget>
+      <Widget type="Calculation" name="WhereOp" ID="1089" created="2009-07-29 10:11:48Z" user="msdmgr" handle="33" modified="2009-07-29 10:15:44Z">
+        <Attribute name="calculation" value="TruthToArg(StatusEntry &lt;&gt; '', 'ALL', '=')" created="2009-04-21 19:17:10Z" user="msdmgr" modified="2009-07-29 10:15:44Z" />
+        <Input name="input" ref="1088" created="2009-07-29 10:11:48Z" user="msdmgr" />
+        <Output name="whereOperator" ref="1088" created="2009-07-29 10:11:41Z" user="msdmgr" />
+      </Widget>
+      <Widget type="Diagram" name="ValidateStatus" ID="1090" created="2009-07-29 10:13:08Z" user="msdmgr" handle="34" modified="2009-07-29 10:27:44Z">
+        <Widget type="Template" name="TableNameColumn" ID="1096" created="2009-07-29 10:13:54Z" user="msdmgr" handle="1" modified="2009-07-29 10:27:44Z">
+          <Attribute name="default" value="&quot;order_item&quot;" created="2009-07-29 10:22:49Z" user="msdmgr" />
+          <Output name="where" ref="1098" created="2009-07-29 10:27:01Z" user="msdmgr" />
+        </Widget>
+        <Widget type="Template" name="UnitStatusDMenu" ID="1098" created="2009-07-29 10:25:15Z" user="msdmgr" modified="2009-07-29 10:29:50Z" handle="2">
+          <Input name="validation" ref="1088" created="2009-07-29 10:27:29Z" user="msdmgr" />
+          <Input name="where" ref="1096" created="2009-07-29 10:27:01Z" user="msdmgr" />
+          <Output name="StatusDesc:value" ref="1093" created="2009-07-29 10:29:50Z" user="msdmgr" />
+        </Widget>
+        <Widget type="Template" name="StatusDescColumn" ID="1093" created="2009-07-29 10:13:08Z" user="msdmgr" handle="3" modified="2009-07-29 10:29:50Z">
+          <Input name="StatusDesc:value" ref="1098" created="2009-07-29 10:29:50Z" user="msdmgr" />
+          <Output name="input" ref="1095" created="2009-07-29 10:23:31Z" user="msdmgr" />
+        </Widget>
+        <Widget type="Template" name="SuccessColumn" ID="1094" created="2009-07-29 10:13:08Z" user="msdmgr" handle="4" modified="2009-07-29 10:27:44Z">
+          <Output name="input" ref="1095" created="2009-04-21 19:23:21Z" user="E731650" />
+        </Widget>
+        <Widget type="Calculation" name="ZeroOrSuccess" ID="1095" created="2009-07-29 10:13:08Z" user="msdmgr" handle="5" modified="2009-07-29 10:24:12Z">
+          <Attribute name="calculation" value="TruthToArg(success or StatusDescColumn = '', 'Error', 'Normal')" created="2009-04-21 19:23:38Z" user="msdmgr" modified="2009-07-29 10:24:12Z" />
+          <Input name="input" ref="46" created="2009-07-29 10:13:08Z" user="msdmgr" />
+          <Input name="input" ref="1088" created="2009-07-29 10:13:08Z" user="msdmgr" />
+          <Input name="input" ref="1093" created="2009-07-29 10:23:31Z" user="msdmgr" />
+          <Input name="input" ref="1094" created="2009-04-21 19:23:21Z" user="E731650" />
+        </Widget>
+      </Widget>
+      <Widget type="Calculation" name="SomethingEntered" ID="940" created="2009-04-21 19:52:07Z" user="msdmgr" modified="2009-07-29 10:11:41Z" handle="35">
+        <Attribute name="calculation" value="SalesmanIDEntry &lt;&gt; &quot;&quot; or MktSegIDEntry &lt;&gt; &quot;&quot; or MktSubIDEntry &lt;&gt; &quot;&quot; or CustomerIDEntry &lt;&gt; '00000000' or GradeSpecEntry &lt;&gt; &quot;&quot; or OrderIDEntry &lt;&gt; &quot;&quot;" created="2009-04-21 19:55:09Z" user="E731650" modified="2009-04-21 20:15:28Z" />
+        <Input name="input" ref="14" created="2009-04-21 19:52:39Z" user="E731650" />
+        <Input name="input" ref="19" created="2009-04-21 19:52:39Z" user="E731650" />
+        <Input name="input" ref="23" created="2009-04-21 19:52:39Z" user="E731650" />
+        <Input name="input" ref="854" created="2009-04-21 19:52:39Z" user="E731650" />
+        <Input name="input" ref="941" created="2009-04-21 19:55:16Z" user="E731650" />
+        <Input name="input" ref="27" created="2009-04-21 19:52:39Z" user="E731650" />
+        <Input name="input" ref="41" created="2009-04-21 19:52:39Z" user="E731650" />
+        <Input name="input" ref="46" created="2009-04-21 19:52:39Z" user="E731650" />
+        <Input name="input" ref="1088" created="2009-04-21 19:52:39Z" user="E731650" />
+        <Output name="activate" ref="928" created="2009-04-21 19:52:17Z" user="E731650" />
+      </Widget>
+      <Attribute name="defaultDistance" value="1" modified="2005-08-05 20:01:10Z" user="E731650" />
+      <Output name="headerForm" ref="12" />
+    </Widget>
+    <Attribute name="defaultDistance" value="1" modified="2006-02-23 19:10:01Z" user="E731650" />
+    <Attribute name="orientation" value="Vertical" />
+    <Attribute name="borderWidth" value="2" />
+    <Attribute name="fromTop" value="2" created="2009-04-21 19:35:08Z" user="E731650" />
+    <Attribute name="fromLeft" value="2" created="2009-04-21 19:35:21Z" user="E731650" />
+    <Input name="right" ref="214" />
+  </Widget>
+  <Widget type="Form" name="DataForm" ID="926" created="2009-04-21 19:24:11Z" user="gvg" modified="2009-11-05 16:43:55Z" handle="4">
+    <Widget type="Form" name="SelectAllToggle" ID="956" created="2009-04-27 20:21:26Z" user="E731650" modified="2009-04-28 13:50:40Z" handle="1">
+      <Widget type="Template" name="SelectAllToggle" ID="957" created="2009-04-27 20:22:01Z" user="pkc" modified="2009-05-29 22:35:14Z" handle="1">
+        <Output name="value" ref="955" created="2009-05-29 22:35:09Z" user="pkc" />
+      </Widget>
+      <Attribute name="fromTop" value="1" created="2009-04-27 20:21:34Z" user="E731650" />
+      <Attribute name="defaultDistance" value="1" created="2009-04-27 20:21:54Z" user="E731650" />
+      <Input name="displayed" ref="1003" created="2009-04-28 13:50:40Z" user="E731650" />
+    </Widget>
+    <Widget type="AutoHeader" name="AutoHeader" ID="927" created="2009-04-21 19:24:36Z" user="E731650" handle="2" modified="2009-04-27 20:21:39Z">
+      <Attribute name="fromTop" value="1" created="2009-04-27 20:21:39Z" user="E731650" />
+      <Input name="headerForm" ref="930" created="2009-04-21 20:16:26Z" user="E731650" />
+    </Widget>
+    <Widget type="Cursor" name="acs_bk_profit_view" ID="928" created="2009-04-21 19:25:02Z" user="msdmgr" modified="2009-07-29 11:00:18Z" handle="3">
+      <Input name="where" ref="14" created="2009-04-21 19:27:16Z" user="E731650" />
+      <Input name="where" ref="19" created="2009-04-21 19:27:16Z" user="E731650" />
+      <Input name="where" ref="23" created="2009-04-21 19:27:16Z" user="E731650" />
+      <Input name="where" ref="854" created="2009-04-21 19:27:16Z" user="E731650" />
+      <Input name="where" ref="27" created="2009-04-21 19:27:16Z" user="E731650" />
+      <Input name="where" ref="41" created="2009-04-21 19:27:16Z" user="E731650" />
+      <Input name="where" ref="46" created="2009-04-21 19:27:16Z" user="E731650" />
+      <Input name="where" ref="1088" created="2009-04-21 19:27:16Z" user="E731650" />
+      <Input name="activate" ref="940" created="2009-04-21 19:52:17Z" user="E731650" />
+      <Output name="select" ref="950" created="2009-04-27 15:31:29Z" user="E731650" />
+      <Output name="select" ref="933" created="2009-04-21 19:30:08Z" user="E731650" />
+      <Output name="select" ref="934" created="2009-04-21 19:30:08Z" user="E731650" />
+      <Output name="select" ref="935" created="2009-04-21 19:30:08Z" user="E731650" />
+      <Output name="select" ref="936" created="2009-04-21 19:30:08Z" user="E731650" />
+      <Output name="select" ref="937" created="2009-04-21 19:30:08Z" user="E731650" />
+      <Output name="select" ref="931" created="2009-04-21 19:30:08Z" user="E731650" />
+      <Output name="select" ref="932" created="2009-04-21 19:30:08Z" user="E731650" />
+      <Output name="select" ref="1100" created="2009-07-29 11:00:18Z" user="msdmgr" />
+      <Output name="select" ref="942" created="2009-04-21 20:27:22Z" user="E731650" />
+      <Output name="select" ref="943" created="2009-04-21 20:28:01Z" user="E731650" />
+      <Output name="select" ref="944" created="2009-04-27 15:30:57Z" user="E731650" />
+      <Output name="select" ref="945" created="2009-04-27 15:30:57Z" user="E731650" />
+      <Output name="select" ref="946" created="2009-04-27 15:30:57Z" user="E731650" />
+      <Output name="select" ref="947" created="2009-04-27 15:30:57Z" user="E731650" />
+      <Output name="select" ref="948" created="2009-04-27 15:30:57Z" user="E731650" />
+      <Output name="select" ref="949" created="2009-04-27 15:30:57Z" user="E731650" />
+      <Output name="select" ref="1086" created="2009-05-29 22:54:17Z" user="pkc" />
+      <Output name="doneFlag" ref="929" created="2009-04-21 19:27:55Z" user="E731650" />
+      <Output name="fetchFlag" ref="929" created="2009-04-21 19:27:40Z" user="E731650" />
+      <Output name="resetFlag" ref="929" created="2009-04-21 19:27:47Z" user="E731650" />
+      <Output name="status" ref="1002" created="2009-04-28 13:50:12Z" user="E731650" />
+      <Input name="fetchPage" ref="951" created="2009-04-27 15:52:25Z" user="E731650" />
+      <Input name="fetchRows" ref="951" created="2009-04-27 15:52:31Z" user="E731650" />
+      <Input name="out:syncTime" ref="951" created="2009-04-27 15:36:35Z" user="E731650" />
+      <Input name="syncTime" ref="1009" created="2009-04-28 14:05:20Z" user="E731650" />
+    </Widget>
+    <Widget type="Form" name="OrderArray" ID="929" created="2009-04-21 19:27:32Z" user="E731650" modified="2009-04-28 13:54:31Z" handle="4">
+      <Widget type="Form" name="EachOrderItem" ID="930" created="2009-04-21 19:28:22Z" user="gvg" modified="2009-11-05 19:04:27Z" handle="1">
+        <Widget type="Template" name="SelectToggle" ID="955" created="2009-04-27 20:20:36Z" user="pkc" modified="2009-05-29 22:35:14Z" handle="1">
+          <Attribute name="name" value="select_toggle" created="2009-04-27 20:20:44Z" user="E731650" />
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-04-27 20:22:48Z" user="E731650" />
+          <Input name="value" ref="957" created="2009-05-29 22:35:09Z" user="pkc" />
+          <Output name="input" ref="959" created="2009-04-27 20:24:16Z" user="E731650" />
+          <Output name="from" ref="960" created="2009-04-27 20:25:55Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="FreezeFlagColumn" ID="950" created="2009-04-27 15:31:24Z" user="pkc" modified="2009-05-29 22:35:14Z" handle="2">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-04-27 15:31:35Z" user="E731650" />
+          <Input name="select" ref="928" created="2009-04-27 15:31:29Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="SalesmanIDField" ID="933" created="2009-04-21 19:29:15Z" user="E731650" modified="2009-04-21 19:32:22Z" handle="3">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-04-21 19:30:38Z" user="E731650" />
+          <Input name="select" ref="928" created="2009-04-21 19:30:08Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="MktSegIDField" ID="934" created="2009-04-21 19:29:24Z" user="E731650" modified="2009-04-21 19:30:42Z" handle="4">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-04-21 19:30:42Z" user="E731650" />
+          <Input name="select" ref="928" created="2009-04-21 19:30:08Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="MktSubIDField" ID="935" created="2009-04-21 19:29:33Z" user="E731650" modified="2009-04-21 19:30:45Z" handle="5">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-04-21 19:30:45Z" user="E731650" />
+          <Input name="select" ref="928" created="2009-04-21 19:30:08Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="CustomerIDField" ID="936" created="2009-04-21 19:29:45Z" user="E731650" modified="2009-04-21 19:30:50Z" handle="6">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-04-21 19:30:50Z" user="E731650" />
+          <Input name="select" ref="928" created="2009-04-21 19:30:08Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="GradeSpecField" ID="937" created="2009-04-21 19:29:54Z" user="E731650" modified="2009-04-21 19:30:54Z" handle="7">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-04-21 19:30:54Z" user="E731650" />
+          <Input name="select" ref="928" created="2009-04-21 19:30:08Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="OrderIDColumn" ID="931" created="2009-04-21 19:28:31Z" user="gvg" modified="2009-11-05 19:04:08Z" handle="8">
+          <Input name="select" ref="928" created="2009-04-21 19:30:08Z" user="E731650" />
+          <Output name="input" ref="939" created="2009-04-21 19:31:17Z" user="E731650" />
+          <Output name="where" ref="1138" created="2009-11-05 19:04:08Z" user="gvg" />
+          <Output name="from" ref="1036" created="2009-05-04 13:01:41Z" user="E731650" />
+          <Output name="from" ref="1114" created="2009-11-05 16:27:45Z" user="gvg" />
+          <Output name="from" ref="960" created="2009-04-27 20:25:55Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="ItemNumColumn" ID="932" created="2009-04-21 19:28:42Z" user="gvg" modified="2009-11-05 19:04:08Z" handle="9">
+          <Input name="select" ref="928" created="2009-04-21 19:30:08Z" user="E731650" />
+          <Output name="input" ref="939" created="2009-04-21 19:31:17Z" user="E731650" />
+          <Output name="where" ref="1138" created="2009-11-05 19:04:08Z" user="gvg" />
+          <Output name="from" ref="1036" created="2009-05-04 13:01:41Z" user="E731650" />
+          <Output name="from" ref="1114" created="2009-11-05 16:27:45Z" user="gvg" />
+          <Output name="from" ref="960" created="2009-04-27 20:25:55Z" user="E731650" />
+        </Widget>
+        <Widget type="Calculation" name="ConcatAndSqueeze" ID="939" created="2009-04-21 19:31:10Z" user="E731650" modified="2009-04-21 19:31:43Z" handle="10">
+          <Attribute name="calculation" value="Concat(OrderIDColumn, &quot;-&quot;, ItemNumColumn:'&amp;&amp;')" created="2009-04-21 19:31:43Z" user="E731650" />
+          <Input name="input" ref="931" created="2009-04-21 19:31:17Z" user="E731650" />
+          <Input name="input" ref="932" created="2009-04-21 19:31:17Z" user="E731650" />
+          <Output name="value" ref="938" created="2009-04-21 19:31:23Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="OrderItemSqueezeField" ID="938" created="2009-04-21 19:30:21Z" user="E731650" modified="2009-04-21 19:33:34Z" handle="11">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-04-21 19:30:35Z" user="E731650" />
+          <Input name="value" ref="939" created="2009-04-21 19:31:23Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="StatusField" ID="1100" created="2009-07-29 11:00:18Z" user="msdmgr" handle="12" modified="2009-07-29 11:00:26Z">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-04-21 20:27:16Z" user="E731650" />
+          <Attribute name="suffix" value="&quot;&quot;" created="2009-04-21 20:33:49Z" user="E731650" />
+          <Input name="select" ref="928" created="2009-07-29 11:00:18Z" user="msdmgr" />
+        </Widget>
+        <Widget type="Template" name="WgtOrdField" ID="942" created="2009-04-21 20:27:09Z" user="E731650" modified="2009-04-21 20:33:49Z" handle="13">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-04-21 20:27:16Z" user="E731650" />
+          <Attribute name="suffix" value="&quot;&quot;" created="2009-04-21 20:33:49Z" user="E731650" />
+          <Input name="select" ref="928" created="2009-04-21 20:27:22Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="PriceField" ID="943" created="2009-04-21 20:27:46Z" user="E731650" modified="2009-04-21 20:28:01Z" handle="14">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-04-21 20:27:54Z" user="E731650" />
+          <Input name="select" ref="928" created="2009-04-21 20:28:01Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="CostVariableField" ID="944" created="2009-04-21 20:41:59Z" user="pkc" modified="2009-05-29 22:33:55Z" handle="15">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-04-21 20:43:05Z" user="E731650" />
+          <Input name="select" ref="928" created="2009-04-27 15:30:57Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="AmtContributionField" ID="945" created="2009-04-21 20:42:10Z" user="E731650" modified="2009-05-04 12:54:58Z" handle="16">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-04-21 20:43:09Z" user="E731650" />
+          <Input name="select" ref="928" created="2009-04-27 15:30:57Z" user="E731650" />
+          <Output name="input" ref="1027" created="2009-05-04 12:54:58Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="PercMarginField" ID="946" created="2009-04-21 20:42:21Z" user="brice" modified="2010-12-15 10:41:00Z" handle="17">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-04-21 20:43:14Z" user="E731650" />
+          <Attribute name="name" value="perc_contribution" created="2009-04-27 20:17:33Z" user="E731650" />
+          <Attribute name="format" value="---,--&amp;.&amp;&amp;" created="2010-12-15 10:41:00Z" user="brice" />
+          <Input name="select" ref="928" created="2009-04-27 15:30:57Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="CostFixedField" ID="947" created="2009-04-21 20:42:35Z" user="pkc" modified="2009-05-29 22:33:55Z" handle="18">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-04-21 20:43:19Z" user="E731650" />
+          <Input name="select" ref="928" created="2009-04-27 15:30:57Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="AmtProfitField" ID="948" created="2009-04-21 20:42:44Z" user="E731650" modified="2009-05-04 12:54:58Z" handle="19">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-04-21 20:43:23Z" user="E731650" />
+          <Input name="select" ref="928" created="2009-04-27 15:30:57Z" user="E731650" />
+          <Output name="input" ref="1027" created="2009-05-04 12:54:58Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="PercProfitField" ID="949" created="2009-04-21 20:42:53Z" user="E731650" modified="2009-04-27 15:30:57Z" handle="20">
+          <Attribute name="prefix" value="&quot;&quot;" created="2009-04-21 20:43:28Z" user="E731650" />
+          <Input name="select" ref="928" created="2009-04-27 15:30:57Z" user="E731650" />
+        </Widget>
+        <Widget type="Calculation" name="ProfitCalculated" ID="1027" created="2009-05-04 12:54:35Z" user="brice" modified="2010-12-15 10:59:13Z" handle="21">
+          <Attribute name="calculation" value="AmtProfitField &lt;&gt; 0 or AmtContributionField &lt;&gt; 0" created="2009-05-04 12:55:24Z" user="brice" modified="2010-12-15 10:59:13Z" />
+          <Input name="input" ref="945" created="2009-05-04 12:54:58Z" user="E731650" />
+          <Input name="input" ref="948" created="2009-05-04 12:54:58Z" user="E731650" />
+          <Output name="sensitive" ref="1019" created="2009-05-04 12:54:41Z" user="E731650" />
+        </Widget>
+        <Widget type="Cursor" name="acs_bk_ord_det" ID="1138" created="2009-11-05 19:03:55Z" user="gvg" modified="2009-11-05 19:04:50Z" handle="22">
+          <Input name="where" ref="931" created="2009-11-05 19:04:08Z" user="gvg" />
+          <Input name="where" ref="932" created="2009-11-05 19:04:08Z" user="gvg" />
+          <Output name="select" ref="1139" created="2009-11-05 19:04:37Z" user="gvg" />
+          <Output name="status" ref="1140" created="2009-11-05 19:04:50Z" user="gvg" />
+        </Widget>
+        <Widget type="Template" name="OrderIDColumn" ID="1139" created="2009-11-05 19:04:17Z" user="gvg" modified="2009-11-05 19:04:37Z" handle="23">
+          <Input name="select" ref="1138" created="2009-11-05 19:04:37Z" user="gvg" />
+        </Widget>
+        <Widget type="Template" name="SuccessColumn" ID="1140" created="2009-11-05 19:04:27Z" user="gvg" modified="2009-11-05 19:05:05Z" handle="24">
+          <Input name="status" ref="1138" created="2009-11-05 19:04:50Z" user="gvg" />
+          <Output name="sensitive" ref="1112" created="2009-11-05 19:05:05Z" user="gvg" />
+        </Widget>
+        <Widget type="Template" name="ContributionHrField" ID="1086" created="2009-05-29 22:53:29Z" user="pkc" modified="2009-05-29 22:56:57Z" handle="25">
+          <Attribute name="prefix" value="''" created="2009-05-29 22:54:00Z" user="pkc" />
+          <Attribute name="format" value="-,---,--&amp;.&amp;&amp;" created="2009-05-29 22:56:10Z" user="pkc" modified="2009-05-29 22:56:57Z" />
+          <Input name="select" ref="928" created="2009-05-29 22:54:17Z" user="pkc" />
+        </Widget>
+        <Widget type="Template" name="DetailRadio" ID="1019" created="2009-05-04 12:41:53Z" user="pkc" modified="2009-11-06 18:43:04Z" handle="26">
+          <Attribute name="name" value="detail_radio" created="2009-05-04 12:42:04Z" user="E731650" />
+          <Attribute name="clickOff" value="True" created="2009-05-04 14:58:32Z" user="E731650" />
+          <Input name="sensitive" ref="1027" created="2009-05-04 12:54:41Z" user="E731650" />
+          <Output name="input" ref="1021" created="2009-05-04 12:44:13Z" user="E731650" />
+          <Output name="fetch" ref="1036" created="2009-05-04 13:01:57Z" user="E731650" />
+          <Output name="from" ref="1036" created="2009-05-04 13:01:41Z" user="E731650" />
+          <Input name="Done:value" ref="1084" created="2009-05-04 14:59:18Z" user="E731650" />
+          <Input name="value" ref="1141" created="2009-11-06 18:43:04Z" user="pkc" />
+        </Widget>
+        <Widget type="Template" name="CostDetailRadio" ID="1112" created="2009-11-05 16:24:47Z" user="gvg" modified="2009-11-05 19:32:26Z" handle="27">
+          <Attribute name="name" value="cost_detail" created="2009-11-05 16:26:51Z" user="gvg" />
+          <Attribute name="clickOff" value="true" created="2009-11-05 18:57:55Z" user="gvg" />
+          <Attribute name="siblingLevel" value="1" created="2009-11-05 18:59:47Z" user="gvg" />
+          <Input name="sensitive" ref="1140" created="2009-11-05 19:05:05Z" user="gvg" />
+          <Output name="input" ref="1137" created="2009-11-05 16:44:32Z" user="gvg" />
+          <Output name="fetch" ref="1114" created="2009-11-05 16:28:28Z" user="gvg" />
+          <Output name="from" ref="1114" created="2009-11-05 16:28:09Z" user="gvg" />
+          <Input name="value" ref="1142" created="2009-11-05 19:32:26Z" user="gvg" />
+        </Widget>
+        <Attribute name="defaultDistance" value="1" created="2009-04-21 20:21:16Z" user="E731650" />
+        <Output name="headerForm" ref="927" created="2009-04-21 20:16:26Z" user="E731650" />
+      </Widget>
+      <Attribute name="defaultDistance" value="0" created="2009-04-21 19:28:05Z" user="E731650" />
+      <Attribute name="orientation" value="Vertical" created="2009-04-21 19:28:12Z" user="E731650" />
+      <Attribute name="fromTop" value="2" created="2009-04-27 20:21:45Z" user="E731650" />
+      <Input name="doneFlag" ref="928" created="2009-04-21 19:27:55Z" user="E731650" />
+      <Input name="fetchFlag" ref="928" created="2009-04-21 19:27:40Z" user="E731650" />
+      <Input name="resetFlag" ref="928" created="2009-04-21 19:27:47Z" user="E731650" />
+      <Input name="displayElements" ref="1006" created="2009-04-28 13:54:31Z" user="E731650" />
+    </Widget>
+    <Widget type="Template" name="SuccessColumn" ID="1002" created="2009-04-28 13:50:06Z" user="E731650" modified="2009-04-28 13:50:25Z" handle="5">
+      <Input name="status" ref="928" created="2009-04-28 13:50:12Z" user="E731650" />
+      <Output name="input" ref="1003" created="2009-04-28 13:50:25Z" user="E731650" />
+    </Widget>
+    <Widget type="Calculation" name="OnSuccess" ID="1003" created="2009-04-28 13:50:20Z" user="E731650" modified="2009-04-28 13:50:55Z" handle="6">
+      <Attribute name="calculation" value="success" created="2009-04-28 13:50:31Z" user="E731650" modified="2009-04-28 13:50:55Z" />
+      <Input name="input" ref="1002" created="2009-04-28 13:50:25Z" user="E731650" />
+      <Output name="displayed" ref="956" created="2009-04-28 13:50:40Z" user="E731650" />
+    </Widget>
+    <Widget type="Template" name="TableNameColumn" ID="952" created="2009-04-27 15:33:01Z" user="njn" modified="2009-05-14 05:14:48Z" handle="7">
+      <Attribute name="default" value="acs_bk_profit_view" created="2009-04-27 15:33:14Z" user="njn" modified="2009-05-14 05:14:48Z" />
+      <Output name="table" ref="951" created="2009-04-27 15:34:32Z" user="E731650" />
+    </Widget>
+    <Widget type="Calculation" name="SetArraySize" ID="1006" created="2009-04-28 13:53:01Z" user="E731650" modified="2009-04-28 13:54:31Z" handle="8">
+      <Attribute name="calculation" value="TruthToArg(ARRAYSIZE &gt; 0 and ARRAYSIZE &lt; 21, DefArraySize, ARRAYSIZE)" created="2009-04-28 13:53:55Z" user="E731650" />
+      <Input name="input" ref="1005" created="2009-04-28 13:53:13Z" user="E731650" />
+      <Input name="input" ref="953" created="2009-04-28 13:53:13Z" user="E731650" />
+      <Output name="displayElements" ref="929" created="2009-04-28 13:54:31Z" user="E731650" />
+      <Output name="ArraySize:value" ref="951" created="2009-04-28 13:54:21Z" user="E731650" />
+    </Widget>
+    <Widget type="InternalField" name="ArraySizeEntry" ID="954" created="2009-04-27 15:35:45Z" user="E731650" modified="2009-04-27 15:35:58Z" handle="9">
+      <Attribute name="default" value="0" created="2009-04-27 15:35:50Z" user="E731650" />
+      <Output name="ArraySizeEntry:value" ref="951" created="2009-04-27 15:35:58Z" user="E731650" />
+    </Widget>
+    <Widget type="Template" name="ArrayControl()" ID="951" created="2009-04-27 15:32:53Z" user="msdmgr" modified="2009-07-29 10:20:49Z" handle="10">
+      <Input name="where" ref="14" created="2009-04-27 15:37:49Z" user="E731650" />
+      <Input name="where" ref="19" created="2009-04-27 15:37:49Z" user="E731650" />
+      <Input name="where" ref="23" created="2009-04-27 15:37:49Z" user="E731650" />
+      <Input name="where" ref="854" created="2009-04-27 15:37:49Z" user="E731650" />
+      <Input name="where" ref="27" created="2009-04-27 15:37:49Z" user="E731650" />
+      <Input name="where" ref="41" created="2009-04-27 15:37:49Z" user="E731650" />
+      <Input name="where" ref="46" created="2009-04-27 15:38:08Z" user="E731650" />
+      <Input name="where" ref="1088" created="2009-04-27 15:38:08Z" user="E731650" />
+      <Input name="table" ref="952" created="2009-04-27 15:34:32Z" user="E731650" />
+      <Input name="ArraySize:value" ref="1006" created="2009-04-28 13:54:21Z" user="E731650" />
+      <Input name="ArraySizeEntry:value" ref="954" created="2009-04-27 15:35:58Z" user="E731650" />
+      <Output name="fetchPage" ref="928" created="2009-04-27 15:52:25Z" user="E731650" />
+      <Output name="fetchRows" ref="928" created="2009-04-27 15:52:31Z" user="E731650" />
+      <Output name="out:syncTime" ref="928" created="2009-04-27 15:36:35Z" user="E731650" />
+    </Widget>
+    <Widget type="Calculation" name="SomeSelected" ID="1021" created="2009-05-04 12:43:54Z" user="E731650" modified="2009-05-04 12:44:27Z" handle="11">
+      <Attribute name="calculation" value="Sum('DetailRadio')" created="2009-05-04 12:44:27Z" user="E731650" />
+      <Input name="input" ref="1019" created="2009-05-04 12:44:13Z" user="E731650" />
+      <Output name="displayed" ref="1020" created="2009-05-04 12:44:03Z" user="E731650" />
+    </Widget>
+    <Widget type="ApplicationForm" name="DetailForm" ID="1020" created="2009-05-04 12:43:21Z" user="gvg" modified="2009-11-05 19:31:23Z" handle="12">
+      <Widget type="Diagram" name="Constants" ID="1028" created="2009-05-04 12:56:15Z" user="msdmgr" modified="2009-07-29 11:24:21Z" handle="1">
+        <Widget type="Diagram" name="PriceFormat" ID="1102" created="2009-07-29 11:23:50Z" user="msdmgr" modified="2009-07-29 11:24:03Z" handle="1">
+          <Widget type="Template" name="MXLANG" ID="1023" created="2009-05-04 12:48:49Z" user="E731650" modified="2009-05-04 12:49:08Z" handle="1">
+            <Output name="value" ref="1024" created="2009-05-04 12:49:08Z" user="E731650" />
+          </Widget>
+          <Widget type="Template" name="LanguageIDColumn" ID="1024" created="2009-05-04 12:49:01Z" user="E731650" modified="2009-05-04 14:13:26Z" handle="2">
+            <Input name="value" ref="1023" created="2009-05-04 12:49:08Z" user="E731650" />
+            <Output name="where" ref="1030" created="2009-05-04 12:57:50Z" user="E731650" />
+            <Output name="where" ref="1039" created="2009-05-04 13:04:58Z" user="E731650" />
+            <Output name="where" ref="1025" created="2009-05-04 12:49:25Z" user="E731650" />
+            <Output name="where" ref="1059" created="2009-05-04 13:57:08Z" user="E731650" />
+            <Output name="where" ref="1062" created="2009-05-04 14:07:37Z" user="E731650" />
+            <Output name="where" ref="1067" created="2009-05-04 14:13:26Z" user="E731650" />
+            <Output name="where" ref="1069" created="2009-05-04 14:13:10Z" user="E731650" />
+          </Widget>
+          <Widget type="Template" name="ColumnCodeColumn" ID="1029" created="2009-05-04 12:56:34Z" user="E731650" modified="2009-05-04 12:57:50Z" handle="3">
+            <Attribute name="default" value="Price" created="2009-05-04 12:57:22Z" user="E731650" />
+            <Output name="where" ref="1030" created="2009-05-04 12:57:50Z" user="E731650" />
+          </Widget>
+          <Widget type="Cursor" name="dict_columns" ID="1030" created="2009-05-04 12:57:44Z" user="E731650" modified="2009-05-04 12:58:12Z" handle="4">
+            <Attribute name="verify" value="False" created="2009-05-04 12:57:56Z" user="E731650" />
+            <Input name="where" ref="1024" created="2009-05-04 12:57:50Z" user="E731650" />
+            <Input name="where" ref="1029" created="2009-05-04 12:57:50Z" user="E731650" />
+            <Output name="select" ref="1031" created="2009-05-04 12:58:12Z" user="E731650" />
+          </Widget>
+          <Widget type="Template" name="FormatColumn" ID="1031" created="2009-05-04 12:58:06Z" user="E731650" modified="2009-05-04 14:32:58Z" handle="5">
+            <Input name="select" ref="1030" created="2009-05-04 12:58:12Z" user="E731650" />
+            <Output name="format" ref="1037" created="2009-05-04 13:37:06Z" user="E731650" />
+            <Output name="format" ref="1055" created="2009-05-04 13:37:06Z" user="E731650" />
+            <Output name="format" ref="1060" created="2009-05-04 14:32:58Z" user="E731650" />
+            <Output name="format" ref="1064" created="2009-05-04 14:32:58Z" user="E731650" />
+            <Output name="format" ref="1056" created="2009-05-04 13:37:06Z" user="E731650" />
+            <Output name="format" ref="1074" created="2009-05-04 14:32:58Z" user="E731650" />
+            <Output name="format" ref="1072" created="2009-05-04 14:32:58Z" user="E731650" />
+          </Widget>
+        </Widget>
+        <Widget type="Diagram" name="PercentFormat" ID="1103" created="2009-07-29 11:24:19Z" user="msdmgr" modified="2009-07-29 11:24:33Z" handle="2">
+          <Widget type="Template" name="MXLANG" ID="1104" created="2009-07-29 11:24:19Z" user="msdmgr" handle="1">
+            <Output name="value" ref="1105" created="2009-05-04 12:49:08Z" user="E731650" />
+          </Widget>
+          <Widget type="Template" name="LanguageIDColumn" ID="1105" created="2009-07-29 11:24:19Z" user="msdmgr" handle="2" modified="2009-07-29 11:24:59Z">
+            <Input name="value" ref="1104" created="2009-05-04 12:49:08Z" user="E731650" />
+            <Output name="where" ref="1107" created="2009-05-04 12:57:50Z" user="E731650" />
+          </Widget>
+          <Widget type="Template" name="ColumnCodeColumn" ID="1106" created="2009-07-29 11:24:19Z" user="msdmgr" handle="3" modified="2009-07-29 11:25:09Z">
+            <Attribute name="default" value="Percent" created="2009-05-04 12:57:22Z" user="msdmgr" modified="2009-07-29 11:25:09Z" />
+            <Output name="where" ref="1107" created="2009-05-04 12:57:50Z" user="E731650" />
+          </Widget>
+          <Widget type="Cursor" name="dict_columns" ID="1107" created="2009-07-29 11:24:19Z" user="msdmgr" handle="4">
+            <Attribute name="verify" value="False" created="2009-05-04 12:57:56Z" user="E731650" />
+            <Input name="where" ref="1105" created="2009-05-04 12:57:50Z" user="E731650" />
+            <Input name="where" ref="1106" created="2009-05-04 12:57:50Z" user="E731650" />
+            <Output name="select" ref="1108" created="2009-05-04 12:58:12Z" user="E731650" />
+          </Widget>
+          <Widget type="Template" name="FormatColumn" ID="1108" created="2009-07-29 11:24:19Z" user="msdmgr" handle="5" modified="2009-07-29 11:31:19Z">
+            <Input name="select" ref="1107" created="2009-05-04 12:58:12Z" user="E731650" />
+            <Output name="format" ref="1080" created="2009-07-29 11:26:13Z" user="msdmgr" />
+            <Output name="format" ref="1065" created="2009-07-29 11:26:13Z" user="msdmgr" />
+            <Output name="format" ref="1083" created="2009-07-29 11:27:07Z" user="msdmgr" />
+            <Output name="format" ref="1073" created="2009-07-29 11:26:47Z" user="msdmgr" />
+          </Widget>
+        </Widget>
+        <Widget type="InternalField" name="TextFormat" ID="1075" created="2009-05-04 14:18:57Z" user="E731650" modified="2009-05-04 14:21:37Z" handle="3">
+          <Attribute name="default" value="20U" created="2009-05-04 14:19:10Z" user="E731650" modified="2009-05-04 14:21:37Z" />
+          <Output name="format" ref="1026" created="2009-05-04 14:19:44Z" user="E731650" />
+          <Output name="format" ref="1057" created="2009-05-04 14:19:44Z" user="E731650" />
+          <Output name="format" ref="1063" created="2009-05-04 14:19:44Z" user="E731650" />
+          <Output name="format" ref="1070" created="2009-05-04 14:19:44Z" user="E731650" />
+          <Output name="format" ref="1071" created="2009-05-04 14:19:44Z" user="E731650" />
+        </Widget>
+        <Widget type="InternalField" name="TextPositioning" ID="1076" created="2009-05-04 14:22:07Z" user="E731650" modified="2009-05-04 14:23:00Z" handle="4">
+          <Attribute name="default" value="12" created="2009-05-04 14:22:16Z" user="E731650" />
+          <Output name="fromTop" ref="1026" created="2009-05-04 14:23:00Z" user="E731650" />
+          <Output name="fromTop" ref="1048" created="2009-05-04 14:23:00Z" user="E731650" />
+          <Output name="fromTop" ref="1063" created="2009-05-04 14:23:00Z" user="E731650" />
+          <Output name="fromTop" ref="1047" created="2009-05-04 14:23:00Z" user="E731650" />
+          <Output name="fromTop" ref="1071" created="2009-05-04 14:23:00Z" user="E731650" />
+        </Widget>
+      </Widget>
+      <Widget type="InternalField" name="DetailRadio" ID="1035" created="2009-05-04 13:00:38Z" user="pkc" modified="2009-11-06 18:43:04Z" handle="2">
+        <Attribute name="name" value="detail_radio" created="2009-05-04 13:00:52Z" user="E731650" />
+        <Attribute name="value" value="1" created="2009-05-04 13:00:58Z" user="E731650" />
+        <Output name="where" ref="1036" created="2009-05-04 13:01:16Z" user="E731650" />
+      </Widget>
+      <Widget type="FormCursor" name="GetOrder" ID="1036" created="2009-05-04 13:01:09Z" user="E731650" modified="2009-05-04 13:01:57Z" handle="3">
+        <Input name="from" ref="931" created="2009-05-04 13:01:41Z" user="E731650" />
+        <Input name="from" ref="932" created="2009-05-04 13:01:41Z" user="E731650" />
+        <Input name="fetch" ref="1019" created="2009-05-04 13:01:57Z" user="E731650" />
+        <Input name="from" ref="1019" created="2009-05-04 13:01:41Z" user="E731650" />
+        <Input name="where" ref="1035" created="2009-05-04 13:01:16Z" user="E731650" />
+        <Output name="select" ref="1033" created="2009-05-04 13:01:22Z" user="E731650" />
+        <Output name="select" ref="1034" created="2009-05-04 13:01:22Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="OrderIDColumn" ID="1033" created="2009-05-04 13:00:06Z" user="E731650" modified="2009-05-04 13:31:31Z" handle="4">
+        <Input name="select" ref="1036" created="2009-05-04 13:01:22Z" user="E731650" />
+        <Output name="where" ref="1032" created="2009-05-04 13:00:28Z" user="E731650" />
+        <Output name="input" ref="1042" created="2009-05-04 13:06:32Z" user="E731650" />
+        <Output name="where" ref="1043" created="2009-05-04 13:31:31Z" user="E731650" />
+        <Output name="where" ref="1044" created="2009-05-04 13:31:31Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="ItemNumColumn" ID="1034" created="2009-05-04 13:00:22Z" user="E731650" modified="2009-05-04 13:31:38Z" handle="5">
+        <Input name="select" ref="1036" created="2009-05-04 13:01:22Z" user="E731650" />
+        <Output name="where" ref="1032" created="2009-05-04 13:00:28Z" user="E731650" />
+        <Output name="input" ref="1042" created="2009-05-04 13:06:32Z" user="E731650" />
+        <Output name="where" ref="1043" created="2009-05-04 13:31:38Z" user="E731650" />
+        <Output name="where" ref="1044" created="2009-05-04 13:31:38Z" user="E731650" />
+      </Widget>
+      <Widget type="Cursor" name="acs_bk_ord_profit" ID="1032" created="2009-05-04 12:59:04Z" user="E731650" modified="2009-05-04 14:25:42Z" handle="6">
+        <Input name="where" ref="1033" created="2009-05-04 13:00:28Z" user="E731650" />
+        <Input name="where" ref="1034" created="2009-05-04 13:00:28Z" user="E731650" />
+        <Output name="select" ref="1037" created="2009-05-04 13:03:18Z" user="E731650" />
+        <Output name="select" ref="1060" created="2009-05-04 13:59:32Z" user="E731650" />
+        <Output name="select" ref="1064" created="2009-05-04 14:25:42Z" user="E731650" />
+        <Output name="select" ref="1065" created="2009-05-04 14:25:42Z" user="E731650" />
+        <Output name="select" ref="1074" created="2009-05-04 14:25:42Z" user="E731650" />
+        <Output name="select" ref="1072" created="2009-05-04 14:25:42Z" user="E731650" />
+        <Output name="select" ref="1073" created="2009-05-04 14:25:42Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="MessNumColumn" ID="1038" created="2009-05-04 13:04:17Z" user="E731650" modified="2009-05-04 13:04:58Z" handle="7">
+        <Attribute name="default" value="956" created="2009-05-04 13:04:31Z" user="E731650" />
+        <Output name="where" ref="1039" created="2009-05-04 13:04:58Z" user="E731650" />
+      </Widget>
+      <Widget type="Cursor" name="language_msgs" ID="1039" created="2009-05-04 13:04:43Z" user="msdmgr" modified="2009-07-29 11:24:49Z" handle="8">
+        <Attribute name="verify" value="False" created="2009-05-04 13:04:49Z" user="E731650" />
+        <Input name="where" ref="1024" created="2009-05-04 13:04:58Z" user="E731650" />
+        <Input name="where" ref="1038" created="2009-05-04 13:04:58Z" user="E731650" />
+        <Output name="select" ref="1040" created="2009-05-04 13:05:23Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="ForOrder:MessTextColumn" ID="1040" created="2009-05-04 13:05:16Z" user="E731650" modified="2009-05-04 14:01:10Z" handle="9">
+        <Input name="select" ref="1039" created="2009-05-04 13:05:23Z" user="E731650" />
+        <Output name="input" ref="1042" created="2009-05-04 13:09:54Z" user="E731650" />
+      </Widget>
+      <Widget type="Calculation" name="ConcatAndSqueeze" ID="1042" created="2009-05-04 13:06:18Z" user="E731650" modified="2009-05-04 13:10:06Z" handle="10">
+        <Attribute name="calculation" value="Concat(ForOrder, &quot; &quot;, OrderIDColumn, &quot;-&quot;, ItemNumColumn:'&amp;&amp;')" created="2009-05-04 13:06:51Z" user="E731650" modified="2009-05-04 13:10:06Z" />
+        <Input name="input" ref="1033" created="2009-05-04 13:06:32Z" user="E731650" />
+        <Input name="input" ref="1034" created="2009-05-04 13:06:32Z" user="E731650" />
+        <Input name="input" ref="1040" created="2009-05-04 13:09:54Z" user="E731650" />
+        <Output name="value" ref="1041" created="2009-05-04 13:06:25Z" user="E731650" />
+      </Widget>
+      <Widget type="DisplayField" name="OrderItemTitle" ID="1041" created="2009-05-04 13:05:45Z" user="E731650" modified="2009-05-04 14:46:41Z" handle="11">
+        <Attribute name="format" value="50A" created="2009-05-04 13:09:47Z" user="E731650" modified="2009-05-04 14:46:41Z" />
+        <Input name="value" ref="1042" created="2009-05-04 13:06:25Z" user="E731650" />
+        <Input name="below" ref="1026" created="2009-05-04 14:03:41Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="MessNumColumn" ID="1022" created="2009-05-04 12:48:38Z" user="E731650" modified="2009-05-04 12:51:07Z" handle="12">
+        <Attribute name="default" value="304" created="2009-05-04 12:51:07Z" user="E731650" />
+        <Output name="where" ref="1025" created="2009-05-04 12:49:25Z" user="E731650" />
+      </Widget>
+      <Widget type="Cursor" name="language_msgs" ID="1025" created="2009-05-04 12:49:18Z" user="msdmgr" modified="2009-07-29 11:24:52Z" handle="13">
+        <Attribute name="verify" value="False" created="2009-05-04 12:49:31Z" user="E731650" />
+        <Input name="where" ref="1024" created="2009-05-04 12:49:25Z" user="E731650" />
+        <Input name="where" ref="1022" created="2009-05-04 12:49:25Z" user="E731650" />
+        <Output name="select" ref="1026" created="2009-05-04 12:50:01Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="Price:MessTextField" ID="1026" created="2009-05-04 12:49:48Z" user="E731650" modified="2009-05-04 14:23:04Z" handle="14">
+        <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 12:49:56Z" user="E731650" />
+        <Input name="format" ref="1075" created="2009-05-04 14:19:44Z" user="E731650" />
+        <Input name="fromTop" ref="1076" created="2009-05-04 14:23:00Z" user="E731650" />
+        <Input name="select" ref="1025" created="2009-05-04 12:50:01Z" user="E731650" />
+        <Output name="below" ref="1041" created="2009-05-04 14:03:41Z" user="E731650" />
+        <Input name="below" ref="1048" created="2009-05-04 14:03:51Z" user="E731650" />
+        <Input name="leftAlign" ref="1057" created="2009-05-04 14:04:15Z" user="E731650" />
+        <Input name="leftAlign" ref="1070" created="2009-05-04 14:15:26Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="PriceField" ID="1037" created="2009-05-04 13:03:12Z" user="msdmgr" modified="2009-07-29 11:25:37Z" handle="15">
+        <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 13:03:32Z" user="E731650" />
+        <Input name="format" ref="1031" created="2009-05-04 13:37:06Z" user="E731650" />
+        <Input name="select" ref="1032" created="2009-05-04 13:03:18Z" user="E731650" />
+        <Output name="input" ref="1081" created="2009-05-04 14:48:52Z" user="E731650" />
+        <Output name="input" ref="1082" created="2009-05-04 14:50:24Z" user="E731650" />
+        <Input name="rightAlign" ref="1055" created="2009-05-04 13:45:09Z" user="E731650" />
+        <Input name="rightAlign" ref="1060" created="2009-05-04 14:27:38Z" user="E731650" />
+        <Input name="rightAlign" ref="1064" created="2009-05-04 14:27:38Z" user="E731650" />
+        <Input name="rightAlign" ref="1056" created="2009-05-04 13:45:19Z" user="E731650" />
+        <Input name="rightAlign" ref="1074" created="2009-05-04 14:27:38Z" user="E731650" />
+        <Input name="rightAlign" ref="1072" created="2009-05-04 14:27:38Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="TypeCodeColumn" ID="1045" created="2009-05-04 13:30:46Z" user="E731650" modified="2009-05-04 13:31:14Z" handle="16">
+        <Attribute name="default" value="V" created="2009-05-04 13:30:53Z" user="E731650" />
+        <Output name="where" ref="1043" created="2009-05-04 13:31:14Z" user="E731650" />
+      </Widget>
+      <Widget type="Cursor" name="acs_cost_view" ID="1043" created="2009-05-04 13:30:27Z" user="pkc" modified="2009-05-29 17:05:19Z" handle="17">
+        <Input name="where" ref="1033" created="2009-05-04 13:31:31Z" user="E731650" />
+        <Input name="where" ref="1034" created="2009-05-04 13:31:38Z" user="E731650" />
+        <Input name="where" ref="1045" created="2009-05-04 13:31:14Z" user="E731650" />
+        <Output name="select" ref="1051" created="2009-05-04 13:36:18Z" user="E731650" />
+        <Output name="select" ref="1055" created="2009-05-04 13:36:18Z" user="E731650" />
+        <Output name="doneFlag" ref="1048" created="2009-05-04 13:32:33Z" user="E731650" />
+        <Output name="fetchFlag" ref="1048" created="2009-05-04 13:32:08Z" user="E731650" />
+        <Output name="resetFlag" ref="1048" created="2009-05-04 13:32:25Z" user="E731650" />
+      </Widget>
+      <Widget type="Form" name="VariableCosts" ID="1048" created="2009-05-04 13:32:00Z" user="E731650" modified="2009-05-04 14:35:00Z" handle="18">
+        <Widget type="Form" name="EachCostGroup" ID="1049" created="2009-05-04 13:33:11Z" user="pkc" modified="2009-05-29 17:05:19Z" handle="1">
+          <Widget type="Template" name="CostTypeNameField" ID="1051" created="2009-05-04 13:34:00Z" user="pkc" modified="2009-05-29 17:08:47Z" handle="1">
+            <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 13:35:54Z" user="E731650" />
+            <Attribute name="fromLeft" value="10" created="2009-05-04 14:35:08Z" user="E731650" />
+            <Attribute name="fromTop" value="2" created="2009-05-04 14:42:41Z" user="E731650" />
+            <Input name="select" ref="1043" created="2009-05-04 13:36:18Z" user="E731650" />
+          </Widget>
+          <Widget type="Template" name="CostField" ID="1055" created="2009-05-04 13:35:35Z" user="msdmgr" modified="2009-07-29 11:25:38Z" handle="2">
+            <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 13:36:00Z" user="E731650" />
+            <Attribute name="fromLeft" value="-2" created="2009-05-04 14:55:06Z" user="E731650" />
+            <Input name="format" ref="1031" created="2009-05-04 13:37:06Z" user="E731650" />
+            <Input name="select" ref="1043" created="2009-05-04 13:36:18Z" user="E731650" />
+            <Output name="rightAlign" ref="1037" created="2009-05-04 13:45:09Z" user="E731650" />
+          </Widget>
+          <Attribute name="defaultDistance" value="0" created="2009-05-04 14:42:22Z" user="E731650" />
+        </Widget>
+        <Attribute name="orientation" value="Vertical" created="2009-05-04 13:32:54Z" user="E731650" />
+        <Attribute name="defaultDistance" value="0" created="2009-05-04 13:33:30Z" user="E731650" />
+        <Input name="fromTop" ref="1076" created="2009-05-04 14:23:00Z" user="E731650" />
+        <Input name="doneFlag" ref="1043" created="2009-05-04 13:32:33Z" user="E731650" />
+        <Input name="fetchFlag" ref="1043" created="2009-05-04 13:32:08Z" user="E731650" />
+        <Input name="resetFlag" ref="1043" created="2009-05-04 13:32:25Z" user="E731650" />
+        <Output name="below" ref="1026" created="2009-05-04 14:03:51Z" user="E731650" />
+        <Input name="below" ref="1057" created="2009-05-04 13:46:18Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="MessNumColumn" ID="1058" created="2009-05-04 13:56:37Z" user="E731650" modified="2009-05-04 13:57:08Z" handle="19">
+        <Attribute name="default" value="950" created="2009-05-04 13:56:45Z" user="E731650" />
+        <Output name="where" ref="1059" created="2009-05-04 13:57:08Z" user="E731650" />
+      </Widget>
+      <Widget type="Cursor" name="language_msgs" ID="1059" created="2009-05-04 13:56:55Z" user="msdmgr" modified="2009-07-29 11:24:53Z" handle="20">
+        <Attribute name="verify" value="False" created="2009-05-04 13:57:34Z" user="E731650" />
+        <Input name="where" ref="1024" created="2009-05-04 13:57:08Z" user="E731650" />
+        <Input name="where" ref="1058" created="2009-05-04 13:57:08Z" user="E731650" />
+        <Output name="select" ref="1057" created="2009-05-04 13:57:22Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="VariableCosts:MessTextField" ID="1057" created="2009-05-04 13:46:04Z" user="E731650" modified="2009-05-04 14:19:44Z" handle="21">
+        <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 13:46:12Z" user="E731650" />
+        <Input name="format" ref="1075" created="2009-05-04 14:19:44Z" user="E731650" />
+        <Input name="select" ref="1059" created="2009-05-04 13:57:22Z" user="E731650" />
+        <Output name="leftAlign" ref="1026" created="2009-05-04 14:04:15Z" user="E731650" />
+        <Output name="below" ref="1048" created="2009-05-04 13:46:18Z" user="E731650" />
+        <Input name="below" ref="1063" created="2009-05-04 14:08:50Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="CostVariableField" ID="1060" created="2009-05-04 13:58:06Z" user="msdmgr" modified="2009-07-29 11:31:19Z" handle="22">
+        <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 13:58:13Z" user="E731650" />
+        <Input name="format" ref="1031" created="2009-05-04 14:32:58Z" user="E731650" />
+        <Input name="select" ref="1032" created="2009-05-04 13:59:32Z" user="E731650" />
+        <Output name="rightAlign" ref="1037" created="2009-05-04 14:27:38Z" user="E731650" />
+        <Output name="input" ref="1081" created="2009-05-04 14:48:52Z" user="E731650" />
+      </Widget>
+      <Widget type="Calculation" name="CalcPercVariable" ID="1081" created="2009-05-04 14:48:31Z" user="E731650" modified="2009-05-04 14:49:11Z" handle="23">
+        <Attribute name="calculation" value="CostVariableField / PriceField * 100" created="2009-05-04 14:49:11Z" user="E731650" />
+        <Input name="input" ref="1037" created="2009-05-04 14:48:52Z" user="E731650" />
+        <Input name="input" ref="1060" created="2009-05-04 14:48:52Z" user="E731650" />
+        <Output name="value" ref="1080" created="2009-05-04 14:48:38Z" user="E731650" />
+      </Widget>
+      <Widget type="DisplayField" name="Spacer" ID="1110" created="2009-07-29 11:33:36Z" user="msdmgr" modified="2009-07-29 11:37:51Z" handle="24">
+        <Attribute name="format" value="2A" created="2009-07-29 11:33:46Z" user="msdmgr" modified="2009-07-29 11:37:51Z" />
+      </Widget>
+      <Widget type="Template" name="PercVariable:PercProfitField" ID="1080" created="2009-05-04 14:48:02Z" user="msdmgr" modified="2009-07-29 11:27:15Z" handle="25">
+        <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 14:48:21Z" user="E731650" />
+        <Input name="format" ref="1108" created="2009-07-29 11:26:13Z" user="msdmgr" />
+        <Input name="value" ref="1081" created="2009-05-04 14:48:38Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="MessNumColumn" ID="1061" created="2009-05-04 14:06:47Z" user="E731650" modified="2009-05-04 14:07:37Z" handle="26">
+        <Attribute name="default" value="951" created="2009-05-04 14:07:15Z" user="E731650" />
+        <Output name="where" ref="1062" created="2009-05-04 14:07:37Z" user="E731650" />
+      </Widget>
+      <Widget type="Cursor" name="language_msgs" ID="1062" created="2009-05-04 14:07:24Z" user="msdmgr" modified="2009-07-29 11:24:55Z" handle="27">
+        <Attribute name="verify" value="False" created="2009-05-04 14:07:44Z" user="E731650" />
+        <Input name="where" ref="1024" created="2009-05-04 14:07:37Z" user="E731650" />
+        <Input name="where" ref="1061" created="2009-05-04 14:07:37Z" user="E731650" />
+        <Output name="select" ref="1063" created="2009-05-04 14:08:37Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="ContributionMargin:MessTextField" ID="1063" created="2009-05-04 14:08:16Z" user="E731650" modified="2009-05-04 14:23:00Z" handle="28">
+        <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 14:08:23Z" user="E731650" />
+        <Input name="format" ref="1075" created="2009-05-04 14:19:44Z" user="E731650" />
+        <Input name="fromTop" ref="1076" created="2009-05-04 14:23:00Z" user="E731650" />
+        <Input name="select" ref="1062" created="2009-05-04 14:08:37Z" user="E731650" />
+        <Output name="below" ref="1057" created="2009-05-04 14:08:50Z" user="E731650" />
+        <Input name="below" ref="1047" created="2009-05-04 14:08:43Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="AmtContributionField" ID="1064" created="2009-05-04 14:09:17Z" user="msdmgr" modified="2009-07-29 11:25:43Z" handle="29">
+        <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 14:10:27Z" user="E731650" />
+        <Input name="format" ref="1031" created="2009-05-04 14:32:58Z" user="E731650" />
+        <Input name="select" ref="1032" created="2009-05-04 14:25:42Z" user="E731650" />
+        <Output name="rightAlign" ref="1037" created="2009-05-04 14:27:38Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="PercContributionField" ID="1065" created="2009-05-04 14:10:07Z" user="msdmgr" modified="2009-07-29 11:26:13Z" handle="30">
+        <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 14:10:33Z" user="E731650" />
+        <Attribute name="fromLeft" value="30" created="2009-05-04 14:51:51Z" user="E731650" />
+        <Input name="format" ref="1108" created="2009-07-29 11:26:13Z" user="msdmgr" />
+        <Input name="select" ref="1032" created="2009-05-04 14:25:42Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="TypeCodeColumn" ID="1046" created="2009-05-04 13:31:01Z" user="E731650" modified="2009-05-04 13:31:21Z" handle="31">
+        <Attribute name="default" value="F" created="2009-05-04 13:31:07Z" user="E731650" />
+        <Output name="where" ref="1044" created="2009-05-04 13:31:21Z" user="E731650" />
+      </Widget>
+      <Widget type="Cursor" name="acs_cost_view" ID="1044" created="2009-05-04 13:30:37Z" user="pkc" modified="2009-05-29 17:05:26Z" handle="32">
+        <Input name="where" ref="1033" created="2009-05-04 13:31:31Z" user="E731650" />
+        <Input name="where" ref="1034" created="2009-05-04 13:31:38Z" user="E731650" />
+        <Input name="where" ref="1046" created="2009-05-04 13:31:21Z" user="E731650" />
+        <Output name="select" ref="1052" created="2009-05-04 13:36:27Z" user="E731650" />
+        <Output name="select" ref="1056" created="2009-05-04 13:36:27Z" user="E731650" />
+        <Output name="doneFlag" ref="1047" created="2009-05-04 13:32:38Z" user="E731650" />
+        <Output name="fetchFlag" ref="1047" created="2009-05-04 13:32:14Z" user="E731650" />
+        <Output name="resetFlag" ref="1047" created="2009-05-04 13:32:21Z" user="E731650" />
+      </Widget>
+      <Widget type="Form" name="FixedCosts" ID="1047" created="2009-05-04 13:31:51Z" user="E731650" modified="2009-05-04 14:35:23Z" handle="33">
+        <Widget type="Form" name="EachCostGroup" ID="1050" created="2009-05-04 13:33:22Z" user="pkc" modified="2009-05-29 17:05:26Z" handle="1">
+          <Widget type="Template" name="CostTypeNameField" ID="1052" created="2009-05-04 13:34:10Z" user="pkc" modified="2009-05-29 17:09:08Z" handle="1">
+            <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 13:36:04Z" user="E731650" />
+            <Attribute name="fromLeft" value="10" created="2009-05-04 14:35:40Z" user="E731650" />
+            <Attribute name="fromTop" value="2" created="2009-05-04 14:42:46Z" user="E731650" />
+            <Input name="select" ref="1044" created="2009-05-04 13:36:27Z" user="E731650" />
+          </Widget>
+          <Widget type="Template" name="CostField" ID="1056" created="2009-05-04 13:35:42Z" user="msdmgr" modified="2009-07-29 11:25:40Z" handle="2">
+            <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 13:36:09Z" user="E731650" />
+            <Attribute name="fromLeft" value="-2" created="2009-05-04 14:55:15Z" user="E731650" />
+            <Input name="format" ref="1031" created="2009-05-04 13:37:06Z" user="E731650" />
+            <Input name="select" ref="1044" created="2009-05-04 13:36:27Z" user="E731650" />
+            <Output name="rightAlign" ref="1037" created="2009-05-04 13:45:19Z" user="E731650" />
+          </Widget>
+          <Attribute name="defaultDistance" value="0" created="2009-05-04 14:42:27Z" user="E731650" />
+        </Widget>
+        <Attribute name="orientation" value="Vertical" created="2009-05-04 13:33:01Z" user="E731650" />
+        <Attribute name="defaultDistance" value="0" created="2009-05-04 13:33:35Z" user="E731650" />
+        <Input name="fromTop" ref="1076" created="2009-05-04 14:23:00Z" user="E731650" />
+        <Input name="doneFlag" ref="1044" created="2009-05-04 13:32:38Z" user="E731650" />
+        <Input name="fetchFlag" ref="1044" created="2009-05-04 13:32:14Z" user="E731650" />
+        <Input name="resetFlag" ref="1044" created="2009-05-04 13:32:21Z" user="E731650" />
+        <Output name="below" ref="1063" created="2009-05-04 14:08:43Z" user="E731650" />
+        <Input name="below" ref="1070" created="2009-05-04 14:15:14Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="MessNumColumn" ID="1066" created="2009-05-04 14:11:28Z" user="E731650" modified="2009-05-04 14:13:26Z" handle="34">
+        <Attribute name="default" value="952" created="2009-05-04 14:11:40Z" user="E731650" />
+        <Output name="where" ref="1067" created="2009-05-04 14:13:26Z" user="E731650" />
+      </Widget>
+      <Widget type="Cursor" name="language_msgs" ID="1067" created="2009-05-04 14:11:52Z" user="msdmgr" modified="2009-07-29 11:24:57Z" handle="35">
+        <Attribute name="verify" value="False" created="2009-05-04 14:12:02Z" user="E731650" />
+        <Input name="where" ref="1024" created="2009-05-04 14:13:26Z" user="E731650" />
+        <Input name="where" ref="1066" created="2009-05-04 14:13:26Z" user="E731650" />
+        <Output name="select" ref="1070" created="2009-05-04 14:13:45Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="FixedCosts:MessTextField" ID="1070" created="2009-05-04 14:13:40Z" user="E731650" modified="2009-05-04 14:19:44Z" handle="36">
+        <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 14:13:52Z" user="E731650" />
+        <Input name="format" ref="1075" created="2009-05-04 14:19:44Z" user="E731650" />
+        <Input name="select" ref="1067" created="2009-05-04 14:13:45Z" user="E731650" />
+        <Output name="leftAlign" ref="1026" created="2009-05-04 14:15:26Z" user="E731650" />
+        <Output name="below" ref="1047" created="2009-05-04 14:15:14Z" user="E731650" />
+        <Input name="below" ref="1071" created="2009-05-04 14:15:08Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="CostFixedField" ID="1074" created="2009-05-04 14:16:11Z" user="msdmgr" modified="2009-07-29 11:25:41Z" handle="37">
+        <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 14:16:23Z" user="E731650" />
+        <Input name="format" ref="1031" created="2009-05-04 14:32:58Z" user="E731650" />
+        <Input name="select" ref="1032" created="2009-05-04 14:25:42Z" user="E731650" />
+        <Output name="rightAlign" ref="1037" created="2009-05-04 14:27:38Z" user="E731650" />
+        <Output name="input" ref="1082" created="2009-05-04 14:50:24Z" user="E731650" />
+      </Widget>
+      <Widget type="Calculation" name="CalcPercFixed" ID="1082" created="2009-05-04 14:49:34Z" user="E731650" modified="2009-05-04 14:50:44Z" handle="38">
+        <Attribute name="calculation" value="CostFixedField / PriceField * 100" created="2009-05-04 14:50:44Z" user="E731650" />
+        <Input name="input" ref="1037" created="2009-05-04 14:50:24Z" user="E731650" />
+        <Input name="input" ref="1074" created="2009-05-04 14:50:24Z" user="E731650" />
+        <Output name="value" ref="1083" created="2009-05-04 14:50:00Z" user="E731650" />
+      </Widget>
+      <Widget type="DisplayField" name="Spacer" ID="1111" created="2009-07-29 11:38:31Z" user="msdmgr" handle="39" modified="2009-07-29 11:40:06Z">
+        <Attribute name="format" value="2A" created="2009-07-29 11:33:46Z" user="msdmgr" modified="2009-07-29 11:40:06Z" />
+      </Widget>
+      <Widget type="Template" name="PercFixed:PercProfitField" ID="1083" created="2009-05-04 14:49:53Z" user="msdmgr" modified="2009-07-29 11:27:07Z" handle="40">
+        <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 14:50:07Z" user="E731650" />
+        <Input name="format" ref="1108" created="2009-07-29 11:27:07Z" user="msdmgr" />
+        <Input name="value" ref="1082" created="2009-05-04 14:50:00Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="MessNumColumn" ID="1068" created="2009-05-04 14:12:10Z" user="E731650" modified="2009-05-04 14:13:10Z" handle="41">
+        <Attribute name="default" value="953" created="2009-05-04 14:12:18Z" user="E731650" />
+        <Output name="where" ref="1069" created="2009-05-04 14:13:10Z" user="E731650" />
+      </Widget>
+      <Widget type="Cursor" name="language_msgs" ID="1069" created="2009-05-04 14:12:27Z" user="msdmgr" modified="2009-07-29 11:24:59Z" handle="42">
+        <Attribute name="verify" value="False" created="2009-05-04 14:17:52Z" user="E731650" />
+        <Input name="where" ref="1024" created="2009-05-04 14:13:10Z" user="E731650" />
+        <Input name="where" ref="1068" created="2009-05-04 14:13:10Z" user="E731650" />
+        <Output name="select" ref="1071" created="2009-05-04 14:14:47Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="NetMargin:MessTextField" ID="1071" created="2009-05-04 14:14:40Z" user="gvg" modified="2009-11-05 19:37:54Z" handle="43">
+        <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 14:14:53Z" user="E731650" />
+        <Input name="format" ref="1075" created="2009-05-04 14:19:44Z" user="E731650" />
+        <Input name="fromTop" ref="1076" created="2009-05-04 14:23:00Z" user="E731650" />
+        <Input name="select" ref="1069" created="2009-05-04 14:14:47Z" user="E731650" />
+        <Output name="below" ref="1070" created="2009-05-04 14:15:08Z" user="E731650" />
+        <Input name="below" ref="1141" created="2009-11-05 19:37:54Z" user="gvg" />
+      </Widget>
+      <Widget type="Template" name="AmtProfitField" ID="1072" created="2009-05-04 14:15:46Z" user="msdmgr" modified="2009-07-29 11:25:45Z" handle="44">
+        <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 14:16:35Z" user="E731650" />
+        <Input name="format" ref="1031" created="2009-05-04 14:32:58Z" user="E731650" />
+        <Input name="select" ref="1032" created="2009-05-04 14:25:42Z" user="E731650" />
+        <Output name="rightAlign" ref="1037" created="2009-05-04 14:27:38Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="PercProfitField" ID="1073" created="2009-05-04 14:15:55Z" user="gvg" modified="2009-11-05 19:37:47Z" handle="45">
+        <Attribute name="prefix" value="&quot;&quot;" created="2009-05-04 14:16:29Z" user="E731650" />
+        <Attribute name="fromLeft" value="30" created="2009-05-04 14:52:02Z" user="E731650" />
+        <Input name="format" ref="1108" created="2009-07-29 11:26:47Z" user="msdmgr" />
+        <Input name="select" ref="1032" created="2009-05-04 14:25:42Z" user="E731650" />
+      </Widget>
+      <Widget type="Connector" name="value" ID="1084" created="2009-05-04 14:58:53Z" user="E731650" modified="2009-05-04 14:59:18Z" handle="46">
+        <Output name="Done:value" ref="1019" created="2009-05-04 14:59:18Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="DoneButton" ID="1141" created="2009-11-05 19:31:23Z" user="pkc" modified="2009-11-06 18:43:04Z" handle="47">
+        <Output name="value" ref="1019" created="2009-11-06 18:43:04Z" user="pkc" />
+        <Output name="below" ref="1071" created="2009-11-05 19:37:54Z" user="gvg" />
+      </Widget>
+      <Attribute name="formTitle" value="Booked Profit Detail Form" created="2009-05-04 12:43:47Z" user="E731650" />
+      <Input name="displayed" ref="1021" created="2009-05-04 12:44:03Z" user="E731650" />
+    </Widget>
+    <Widget type="Calculation" name="CostDetailSelected" ID="1137" created="2009-11-05 16:43:55Z" user="gvg" modified="2009-11-05 18:51:28Z" handle="13">
+      <Attribute name="calculation" value="sum(&quot;CostDetailRadio&quot;)" created="2009-11-05 16:44:17Z" user="gvg" />
+      <Input name="input" ref="1112" created="2009-11-05 16:44:32Z" user="gvg" />
+      <Output name="displayed" ref="1113" created="2009-11-05 18:51:28Z" user="gvg" />
+    </Widget>
+    <Widget type="ApplicationForm" name="CostDetailForm" ID="1113" created="2009-11-05 16:25:48Z" user="gvg" modified="2009-11-05 19:32:03Z" handle="14">
+      <Widget type="InternalField" name="CostDetailRadio" ID="1115" created="2009-11-05 16:26:42Z" user="gvg" modified="2009-11-05 16:28:39Z" handle="1">
+        <Attribute name="name" value="cost_detail" created="2009-11-05 16:27:00Z" user="gvg" />
+        <Attribute name="default" value="1" created="2009-11-05 16:27:05Z" user="gvg" />
+        <Output name="where" ref="1114" created="2009-11-05 16:28:39Z" user="gvg" />
+      </Widget>
+      <Widget type="FormCursor" name="SelectOrder" ID="1114" created="2009-11-05 16:26:27Z" user="gvg" modified="2009-11-05 16:34:15Z" handle="2">
+        <Input name="from" ref="931" created="2009-11-05 16:27:45Z" user="gvg" />
+        <Input name="from" ref="932" created="2009-11-05 16:27:45Z" user="gvg" />
+        <Input name="fetch" ref="1112" created="2009-11-05 16:28:28Z" user="gvg" />
+        <Input name="from" ref="1112" created="2009-11-05 16:28:09Z" user="gvg" />
+        <Input name="where" ref="1115" created="2009-11-05 16:28:39Z" user="gvg" />
+        <Output name="select" ref="1119" created="2009-11-05 16:34:09Z" user="gvg" />
+        <Output name="select" ref="1120" created="2009-11-05 16:34:09Z" user="gvg" />
+      </Widget>
+      <Widget type="Form" name="HeaderInfo" ID="1118" created="2009-11-05 16:33:23Z" user="gvg" modified="2009-11-05 16:34:43Z" handle="3">
+        <Widget type="Template" name="OrderIDField" ID="1119" created="2009-11-05 16:33:32Z" user="gvg" modified="2009-11-05 16:35:36Z" handle="1">
+          <Input name="select" ref="1114" created="2009-11-05 16:34:09Z" user="gvg" />
+          <Output name="where" ref="1123" created="2009-11-05 16:35:36Z" user="gvg" />
+        </Widget>
+        <Widget type="Template" name="ItemNumField" ID="1120" created="2009-11-05 16:33:45Z" user="gvg" modified="2009-11-05 16:35:36Z" handle="2">
+          <Input name="select" ref="1114" created="2009-11-05 16:34:09Z" user="gvg" />
+          <Output name="where" ref="1123" created="2009-11-05 16:35:36Z" user="gvg" />
+        </Widget>
+        <Input name="below" ref="1121" created="2009-11-05 16:34:43Z" user="gvg" />
+      </Widget>
+      <Widget type="Form" name="DetailForm" ID="1121" created="2009-11-05 16:34:31Z" user="gvg" modified="2009-11-05 19:34:17Z" handle="4">
+        <Widget type="AutoHeader" name="Header" ID="1122" created="2009-11-05 16:34:55Z" user="gvg" modified="2009-11-05 16:43:14Z" handle="1">
+          <Input name="headerForm" ref="1125" created="2009-11-05 16:42:57Z" user="gvg" />
+          <Input name="below" ref="1124" created="2009-11-05 16:43:14Z" user="gvg" />
+        </Widget>
+        <Widget type="Cursor" name="acs_bk_ord_det, acs_cost_group, acs_cost_type" ID="1123" created="2009-11-05 16:35:22Z" user="brice" modified="2010-12-14 18:40:24Z" handle="2">
+          <Attribute name="joinWhere" value="acs_cost_group.cost_group_id = acs_cost_type.cost_group_id  and acs_cost_type.cost_group_id = acs_bk_ord_det.cost_group_id  and acs_cost_type.cost_type_id = acs_bk_ord_det.cost_type_id" created="2010-12-14 18:38:23Z" user="brice" />
+          <Input name="where" ref="1119" created="2009-11-05 16:35:36Z" user="gvg" />
+          <Input name="where" ref="1120" created="2009-11-05 16:35:36Z" user="gvg" />
+          <Output name="select" ref="1126" created="2009-11-05 16:41:32Z" user="gvg" />
+          <Output name="select" ref="1127" created="2009-11-05 16:41:32Z" user="gvg" />
+          <Output name="select" ref="1128" created="2009-11-05 16:41:32Z" user="gvg" />
+          <Output name="select" ref="1129" created="2009-11-05 16:41:32Z" user="gvg" />
+          <Output name="select" ref="1130" created="2009-11-05 16:41:32Z" user="gvg" />
+          <Output name="select" ref="1131" created="2009-11-05 16:41:32Z" user="gvg" />
+          <Output name="select" ref="1132" created="2009-11-05 16:41:32Z" user="gvg" />
+          <Output name="select" ref="1136" created="2009-11-05 16:41:32Z" user="gvg" />
+          <Output name="select" ref="1133" created="2009-11-05 16:41:32Z" user="gvg" />
+          <Output name="select" ref="1134" created="2009-11-05 16:41:32Z" user="gvg" />
+          <Output name="select" ref="1143" created="2010-12-14 18:19:23Z" user="brice" />
+          <Output name="select" ref="1144" created="2010-12-14 18:38:36Z" user="brice" />
+          <Output name="select" ref="1145" created="2010-12-14 18:40:24Z" user="brice" />
+          <Output name="select" ref="1135" created="2009-11-05 16:41:32Z" user="gvg" />
+          <Output name="doneFlag" ref="1124" created="2009-11-05 16:42:28Z" user="gvg" />
+          <Output name="fetchFlag" ref="1124" created="2009-11-05 16:42:19Z" user="gvg" />
+          <Output name="resetFlag" ref="1124" created="2009-11-05 16:42:39Z" user="gvg" />
+          <Input name="order" ref="1145" created="2010-12-14 18:38:58Z" user="brice" />
+          <Input name="order" ref="1135" created="2010-12-14 18:38:58Z" user="brice" />
+        </Widget>
+        <Widget type="Form" name="OuterForm" ID="1124" created="2009-11-05 16:35:49Z" user="gvg" modified="2009-11-05 18:52:00Z" handle="3">
+          <Widget type="Form" name="InnerForm" ID="1125" created="2009-11-05 16:36:00Z" user="brice" modified="2010-12-14 18:40:24Z" handle="1">
+            <Widget type="Template" name="CostGroupIDField" ID="1126" created="2009-11-05 16:36:25Z" user="brice" modified="2010-12-14 18:40:06Z" handle="1">
+              <Attribute name="prefix" value="&quot;&quot;" created="2009-11-05 16:39:04Z" user="gvg" />
+              <Attribute name="name" value="acs_cost_group.cost_group_id" created="2010-12-14 18:40:06Z" user="brice" />
+              <Input name="select" ref="1123" created="2009-11-05 16:41:32Z" user="gvg" />
+            </Widget>
+            <Widget type="Template" name="CostTypeIDField" ID="1127" created="2009-11-05 16:36:56Z" user="brice" modified="2010-12-14 18:40:18Z" handle="2">
+              <Attribute name="prefix" value="&quot;&quot;" created="2009-11-05 16:39:20Z" user="gvg" />
+              <Attribute name="name" value="acs_cost_type.cost_type_id" created="2010-12-14 18:40:18Z" user="brice" />
+              <Input name="select" ref="1123" created="2009-11-05 16:41:32Z" user="gvg" />
+            </Widget>
+            <Widget type="Template" name="MillIDField" ID="1128" created="2009-11-05 16:37:12Z" user="gvg" modified="2009-11-05 16:41:32Z" handle="3">
+              <Attribute name="prefix" value="&quot;&quot;" created="2009-11-05 16:39:28Z" user="gvg" />
+              <Input name="select" ref="1123" created="2009-11-05 16:41:32Z" user="gvg" />
+            </Widget>
+            <Widget type="Template" name="MachTypeField" ID="1129" created="2009-11-05 16:37:22Z" user="gvg" modified="2009-11-05 16:41:32Z" handle="4">
+              <Attribute name="prefix" value="&quot;&quot;" created="2009-11-05 16:39:35Z" user="gvg" />
+              <Input name="select" ref="1123" created="2009-11-05 16:41:32Z" user="gvg" />
+            </Widget>
+            <Widget type="Template" name="MachIDField" ID="1130" created="2009-11-05 16:37:35Z" user="gvg" modified="2009-11-05 16:41:32Z" handle="5">
+              <Attribute name="prefix" value="&quot;&quot;" created="2009-11-05 16:39:42Z" user="gvg" />
+              <Input name="select" ref="1123" created="2009-11-05 16:41:32Z" user="gvg" />
+            </Widget>
+            <Widget type="Template" name="CostField" ID="1131" created="2009-11-05 16:37:45Z" user="gvg" modified="2009-11-05 16:41:32Z" handle="6">
+              <Attribute name="prefix" value="&quot;&quot;" created="2009-11-05 16:39:50Z" user="gvg" />
+              <Input name="select" ref="1123" created="2009-11-05 16:41:32Z" user="gvg" />
+            </Widget>
+            <Widget type="Template" name="CostPerUnitField" ID="1132" created="2009-11-05 16:38:00Z" user="gvg" modified="2009-11-05 16:41:32Z" handle="7">
+              <Attribute name="prefix" value="&quot;&quot;" created="2009-11-05 16:40:07Z" user="gvg" />
+              <Input name="select" ref="1123" created="2009-11-05 16:41:32Z" user="gvg" />
+            </Widget>
+            <Widget type="Template" name="UnitMeasField" ID="1136" created="2009-11-05 16:38:48Z" user="gvg" modified="2009-11-05 16:41:32Z" handle="8">
+              <Attribute name="prefix" value="&quot;&quot;" created="2009-11-05 16:41:08Z" user="gvg" />
+              <Input name="select" ref="1123" created="2009-11-05 16:41:32Z" user="gvg" />
+            </Widget>
+            <Widget type="Template" name="WgtRMNetField" ID="1133" created="2009-11-05 16:38:16Z" user="gvg" modified="2009-11-05 16:41:32Z" handle="9">
+              <Attribute name="prefix" value="&quot;&quot;" created="2009-11-05 16:40:13Z" user="gvg" />
+              <Attribute name="suffix" value="&quot;&quot;" created="2009-11-05 16:40:28Z" user="gvg" />
+              <Input name="select" ref="1123" created="2009-11-05 16:41:32Z" user="gvg" />
+            </Widget>
+            <Widget type="Template" name="AreaNetField" ID="1134" created="2009-11-05 16:38:28Z" user="gvg" modified="2009-11-05 16:41:32Z" handle="10">
+              <Attribute name="suffix" value="&quot;&quot;" created="2009-11-05 16:40:42Z" user="gvg" />
+              <Attribute name="prefix" value="&quot;&quot;" created="2009-11-05 16:40:49Z" user="gvg" />
+              <Input name="select" ref="1123" created="2009-11-05 16:41:32Z" user="gvg" />
+            </Widget>
+            <Widget type="Template" name="UnitsOrdField" ID="1143" created="2010-12-14 18:19:23Z" user="brice" handle="11">
+              <Attribute name="prefix" value="&quot;&quot;" created="2009-11-05 16:40:57Z" user="gvg" />
+              <Input name="select" ref="1123" created="2010-12-14 18:19:23Z" user="brice" />
+            </Widget>
+            <Widget type="Template" name="SecOnMachField" ID="1144" created="2010-12-14 18:38:36Z" user="brice" handle="12">
+              <Attribute name="prefix" value="&quot;&quot;" created="2009-11-05 16:40:57Z" user="gvg" />
+              <Input name="select" ref="1123" created="2010-12-14 18:38:36Z" user="brice" />
+            </Widget>
+            <Widget type="Template" name="SeqNumColumn" ID="1145" created="2010-12-14 18:40:24Z" user="brice" handle="13">
+              <Attribute name="name" value="acs_cost_group.seq_num" created="2010-12-14 18:39:14Z" user="brice" />
+              <Input name="select" ref="1123" created="2010-12-14 18:40:24Z" user="brice" />
+              <Output name="order" ref="1123" created="2010-12-14 18:38:58Z" user="brice" />
+            </Widget>
+            <Widget type="Template" name="SeqNumColumn" ID="1135" created="2009-11-05 16:38:39Z" user="brice" modified="2010-12-14 18:40:32Z" handle="14">
+              <Attribute name="name" value="acs_cost_type.seq_num" created="2010-12-14 18:39:14Z" user="brice" modified="2010-12-14 18:40:32Z" />
+              <Input name="select" ref="1123" created="2009-11-05 16:41:32Z" user="gvg" />
+              <Output name="order" ref="1123" created="2010-12-14 18:38:58Z" user="brice" />
+            </Widget>
+            <Output name="headerForm" ref="1122" created="2009-11-05 16:42:57Z" user="gvg" />
+          </Widget>
+          <Attribute name="orientation" value="vertical" created="2009-11-05 18:52:00Z" user="gvg" />
+          <Input name="doneFlag" ref="1123" created="2009-11-05 16:42:28Z" user="gvg" />
+          <Input name="fetchFlag" ref="1123" created="2009-11-05 16:42:19Z" user="gvg" />
+          <Input name="resetFlag" ref="1123" created="2009-11-05 16:42:39Z" user="gvg" />
+          <Output name="below" ref="1122" created="2009-11-05 16:43:14Z" user="gvg" />
+        </Widget>
+        <Output name="below" ref="1118" created="2009-11-05 16:34:43Z" user="gvg" />
+        <Input name="below" ref="1142" created="2009-11-05 19:34:17Z" user="gvg" />
+      </Widget>
+      <Widget type="Template" name="DoneButton" ID="1142" created="2009-11-05 19:32:03Z" user="gvg" modified="2009-11-05 19:34:17Z" handle="5">
+        <Output name="value" ref="1112" created="2009-11-05 19:32:26Z" user="gvg" />
+        <Output name="below" ref="1121" created="2009-11-05 19:34:17Z" user="gvg" />
+      </Widget>
+      <Input name="displayed" ref="1137" created="2009-11-05 18:51:28Z" user="gvg" />
+    </Widget>
+    <Attribute name="orientation" value="Vertical" created="2009-04-21 19:24:25Z" user="E731650" />
+    <Attribute name="fromTop" value="2" created="2009-04-21 19:35:13Z" user="E731650" />
+    <Attribute name="defaultDistance" value="0" created="2009-04-27 20:21:12Z" user="E731650" />
+  </Widget>
+  <Widget type="Form" ID="214" handle="5" name="ButtonForm" grid_width="2" grid_height="2" modified="2009-04-28 15:36:30Z" user="E731650">
+    <Widget type="Template" ID="215" handle="1" name="ModifyButton" modified="2009-04-27 20:23:53Z" user="E731650">
+      <Attribute name="prefix" value="Calc Margin" created="2009-04-21 20:28:49Z" user="E731650" modified="2009-04-21 20:32:56Z" />
+      <Output name="start" ref="958" created="2009-04-27 20:23:53Z" user="E731650" />
+    </Widget>
+    <Widget type="Calculation" name="SomeSelected" ID="959" created="2009-04-27 20:24:01Z" user="E731650" modified="2009-04-27 20:24:34Z" handle="2">
+      <Attribute name="calculation" value="sum('SelectToggle')" created="2009-04-27 20:24:34Z" user="E731650" />
+      <Input name="input" ref="955" created="2009-04-27 20:24:16Z" user="E731650" />
+      <Output name="activate" ref="958" created="2009-04-27 20:24:08Z" user="E731650" />
+    </Widget>
+    <Widget type="Transaction" name="CalcMargin" ID="958" created="2009-04-27 20:23:40Z" user="E731650" modified="2009-04-28 14:05:11Z" handle="3">
+      <Widget type="Calculation" name="TimeModified" ID="990" created="2009-04-27 20:37:50Z" user="E731650" modified="2009-04-27 20:38:19Z" handle="1">
+        <Attribute name="calculation" value="Now(0)" created="2009-04-27 20:38:00Z" user="E731650" />
+        <Output name="value" ref="991" created="2009-04-27 20:38:19Z" user="E731650" />
+      </Widget>
+      <Widget type="Template" name="TimeModifiedColumn" ID="991" created="2009-04-27 20:38:11Z" user="E731650" modified="2009-04-27 20:38:27Z" handle="2">
+        <Input name="value" ref="990" created="2009-04-27 20:38:19Z" user="E731650" />
+        <Output name="update" ref="976" created="2009-04-27 20:38:27Z" user="E731650" />
+      </Widget>
+      <Widget type="InternalField" name="SelectToggle" ID="961" created="2009-04-27 20:25:26Z" user="E731650" modified="2009-04-27 20:25:44Z" handle="3">
+        <Attribute name="name" value="select_toggle" created="2009-04-27 20:25:34Z" user="E731650" />
+        <Attribute name="value" value="1" created="2009-04-27 20:25:38Z" user="E731650" />
+        <Output name="where" ref="960" created="2009-04-27 20:25:44Z" user="E731650" />
+      </Widget>
+      <Widget type="FormCursor" name="EachOrder" ID="960" created="2009-04-27 20:25:17Z" user="E731650" modified="2009-04-27 20:28:28Z" handle="4">
+        <Input name="from" ref="955" created="2009-04-27 20:25:55Z" user="E731650" />
+        <Input name="from" ref="931" created="2009-04-27 20:25:55Z" user="E731650" />
+        <Input name="from" ref="932" created="2009-04-27 20:25:55Z" user="E731650" />
+        <Input name="where" ref="961" created="2009-04-27 20:25:44Z" user="E731650" />
+        <Output name="select" ref="963" created="2009-04-27 20:28:28Z" user="E731650" />
+        <Output name="select" ref="964" created="2009-04-27 20:28:28Z" user="E731650" />
+        <Output name="fetchFlag" ref="962" created="2009-04-27 20:26:11Z" user="E731650" />
+      </Widget>
+      <Widget type="Transaction" name="EachOrder" ID="962" created="2009-04-27 20:26:05Z" user="msdmgr" modified="2009-07-29 10:49:49Z" handle="5">
+        <Widget type="Template" name="OrderIDColumn" ID="963" created="2009-04-27 20:26:24Z" user="E731650" modified="2009-04-28 13:44:16Z" handle="1">
+          <Input name="select" ref="960" created="2009-04-27 20:28:28Z" user="E731650" />
+          <Output name="where" ref="965" created="2009-04-27 20:28:34Z" user="E731650" />
+          <Output name="where" ref="981" created="2009-04-27 20:34:39Z" user="E731650" />
+          <Output name="input" ref="992" created="2009-04-28 13:44:16Z" user="E731650" />
+          <Output name="where" ref="976" created="2009-04-27 20:32:07Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="ItemNumColumn" ID="964" created="2009-04-27 20:26:39Z" user="E731650" modified="2009-04-28 13:44:16Z" handle="2">
+          <Input name="select" ref="960" created="2009-04-27 20:28:28Z" user="E731650" />
+          <Output name="where" ref="965" created="2009-04-27 20:28:34Z" user="E731650" />
+          <Output name="input" ref="992" created="2009-04-28 13:44:16Z" user="E731650" />
+          <Output name="where" ref="976" created="2009-04-27 20:32:07Z" user="E731650" />
+        </Widget>
+        <Widget type="Cursor" name="order_item" ID="965" created="2009-04-27 20:28:21Z" user="msdmgr" modified="2009-07-29 10:49:47Z" handle="3">
+          <Input name="where" ref="963" created="2009-04-27 20:28:34Z" user="E731650" />
+          <Input name="where" ref="964" created="2009-04-27 20:28:34Z" user="E731650" />
+          <Output name="select" ref="966" created="2009-04-27 20:31:07Z" user="E731650" />
+          <Output name="select" ref="967" created="2009-04-27 20:31:07Z" user="E731650" />
+          <Output name="select" ref="968" created="2009-04-27 20:31:07Z" user="E731650" />
+          <Output name="select" ref="969" created="2009-04-27 20:31:07Z" user="E731650" />
+          <Output name="select" ref="970" created="2009-04-27 20:31:07Z" user="E731650" />
+          <Output name="select" ref="971" created="2009-04-27 20:31:07Z" user="E731650" />
+          <Output name="select" ref="985" created="2009-04-27 20:36:58Z" user="E731650" />
+          <Output name="select" ref="973" created="2009-04-27 20:31:07Z" user="E731650" />
+          <Output name="select" ref="1099" created="2009-07-29 10:49:47Z" user="msdmgr" />
+          <Output name="select" ref="986" created="2009-04-27 20:37:21Z" user="E731650" />
+          <Output name="select" ref="977" created="2009-04-27 20:33:29Z" user="E731650" />
+          <Output name="select" ref="978" created="2009-04-27 20:33:29Z" user="E731650" />
+          <Output name="select" ref="987" created="2009-04-27 20:36:58Z" user="E731650" />
+          <Output name="select" ref="988" created="2009-04-27 20:36:58Z" user="E731650" />
+          <Output name="select" ref="989" created="2009-04-27 20:36:58Z" user="E731650" />
+          <Output name="select" ref="980" created="2009-04-27 20:33:29Z" user="E731650" />
+          <Output name="select" ref="979" created="2009-04-27 20:33:29Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="MillIDColumn" ID="966" created="2009-04-27 20:28:45Z" user="E731650" modified="2009-04-27 20:32:21Z" handle="4">
+          <Input name="select" ref="965" created="2009-04-27 20:31:07Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:32:21Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="MachTypeColumn" ID="967" created="2009-04-27 20:28:58Z" user="E731650" modified="2009-04-27 20:32:21Z" handle="5">
+          <Input name="select" ref="965" created="2009-04-27 20:31:07Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:32:21Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="MachIDColumn" ID="968" created="2009-04-27 20:29:06Z" user="E731650" modified="2009-04-27 20:32:21Z" handle="6">
+          <Input name="select" ref="965" created="2009-04-27 20:31:07Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:32:21Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="ProdRouteIDColumn" ID="969" created="2009-04-27 20:29:19Z" user="E731650" modified="2009-04-27 20:32:21Z" handle="7">
+          <Input name="select" ref="965" created="2009-04-27 20:31:07Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:32:21Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="YearNumColumn" ID="970" created="2009-04-27 20:29:28Z" user="E731650" modified="2009-04-27 20:32:21Z" handle="8">
+          <Input name="select" ref="965" created="2009-04-27 20:31:07Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:32:21Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="AcctPeriodColumn" ID="971" created="2009-04-27 20:29:38Z" user="E731650" modified="2009-04-27 20:32:21Z" handle="9">
+          <Input name="select" ref="965" created="2009-04-27 20:31:07Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:32:21Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="TimeDelivPromColumn" ID="985" created="2009-04-27 20:35:29Z" user="E731650" modified="2009-04-27 20:37:10Z" handle="10">
+          <Input name="select" ref="965" created="2009-04-27 20:36:58Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:37:10Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="GradeSpecColumn" ID="973" created="2009-04-27 20:30:16Z" user="E731650" modified="2009-04-27 20:32:21Z" handle="11">
+          <Input name="select" ref="965" created="2009-04-27 20:31:07Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:32:21Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="StatusColumn" ID="1099" created="2009-07-29 10:49:47Z" user="msdmgr" handle="12" modified="2009-07-29 10:49:58Z">
+          <Input name="select" ref="965" created="2009-07-29 10:49:47Z" user="msdmgr" />
+          <Output name="update" ref="976" created="2009-04-27 20:32:21Z" user="E731650" />
+        </Widget>
+        <Widget type="Cursor" name="grade_spec" ID="974" created="2009-04-27 20:30:56Z" user="E731650" modified="2009-04-27 20:31:24Z" handle="13">
+          <Output name="select" ref="975" created="2009-04-27 20:31:24Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="CommodIDColumn" ID="975" created="2009-04-27 20:31:18Z" user="E731650" modified="2009-04-27 20:44:30Z" handle="14">
+          <Input name="select" ref="974" created="2009-04-27 20:31:24Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="TypeCodeColumn" ID="986" created="2009-04-27 20:36:08Z" user="E731650" modified="2009-04-27 20:37:21Z" handle="15">
+          <Input name="select" ref="965" created="2009-04-27 20:37:21Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:37:10Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="ArticleIDColumn" ID="977" created="2009-04-27 20:32:50Z" user="E731650" modified="2009-04-27 20:33:29Z" handle="16">
+          <Input name="select" ref="965" created="2009-04-27 20:33:29Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:33:21Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="RevNumColumn" ID="978" created="2009-04-27 20:32:57Z" user="E731650" modified="2009-04-27 20:33:29Z" handle="17">
+          <Input name="select" ref="965" created="2009-04-27 20:33:29Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:33:21Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="DiamOrdColumn" ID="987" created="2009-04-27 20:36:20Z" user="E731650" modified="2009-04-27 20:37:10Z" handle="18">
+          <Input name="select" ref="965" created="2009-04-27 20:36:58Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:37:10Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="WidthOrdColumn" ID="988" created="2009-04-27 20:36:28Z" user="E731650" modified="2009-04-27 20:37:10Z" handle="19">
+          <Input name="select" ref="965" created="2009-04-27 20:36:58Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:37:10Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="DiamCoreColumn" ID="989" created="2009-04-27 20:36:44Z" user="E731650" modified="2009-04-27 20:37:10Z" handle="20">
+          <Input name="select" ref="965" created="2009-04-27 20:36:58Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:37:10Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="WgtOrdColumn" ID="980" created="2009-04-27 20:33:14Z" user="E731650" modified="2009-04-27 20:33:29Z" handle="21">
+          <Input name="select" ref="965" created="2009-04-27 20:33:29Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:33:21Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="PriceColumn" ID="979" created="2009-04-27 20:33:06Z" user="E731650" modified="2009-04-27 20:33:29Z" handle="22">
+          <Input name="select" ref="965" created="2009-04-27 20:33:29Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:33:21Z" user="E731650" />
+        </Widget>
+        <Widget type="Cursor" name="order_mast" ID="981" created="2009-04-27 20:33:42Z" user="E731650" modified="2009-04-27 20:42:40Z" handle="23">
+          <Input name="where" ref="963" created="2009-04-27 20:34:39Z" user="E731650" />
+          <Output name="select" ref="972" created="2009-04-27 20:42:40Z" user="E731650" />
+          <Output name="select" ref="982" created="2009-04-27 20:34:33Z" user="E731650" />
+          <Output name="select" ref="983" created="2009-04-27 20:34:33Z" user="E731650" />
+          <Output name="select" ref="984" created="2009-04-27 20:34:33Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="TimeOrdColumn" ID="972" created="2009-04-27 20:29:50Z" user="E731650" modified="2009-04-27 20:42:40Z" handle="24">
+          <Input name="select" ref="981" created="2009-04-27 20:42:40Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:32:21Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="CustomerIDColumn" ID="982" created="2009-04-27 20:34:04Z" user="E731650" modified="2009-04-27 20:34:47Z" handle="25">
+          <Input name="select" ref="981" created="2009-04-27 20:34:33Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:34:47Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="MktSegIDColumn" ID="983" created="2009-04-27 20:34:13Z" user="E731650" modified="2009-04-27 20:34:47Z" handle="26">
+          <Input name="select" ref="981" created="2009-04-27 20:34:33Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:34:47Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="MktSubIDColumn" ID="984" created="2009-04-27 20:34:22Z" user="E731650" modified="2009-04-27 20:34:47Z" handle="27">
+          <Input name="select" ref="981" created="2009-04-27 20:34:33Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-27 20:34:47Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="ActionCodeColumn" ID="1007" created="2009-04-28 13:57:25Z" user="E731650" modified="2009-04-28 13:57:44Z" handle="28">
+          <Attribute name="value" value="CALC" created="2009-04-28 13:57:39Z" user="E731650" />
+          <Output name="input" ref="992" created="2009-04-28 13:57:44Z" user="E731650" />
+        </Widget>
+        <Widget type="MxUpdate" name="calc_margin_booked" ID="992" created="2009-04-28 13:43:58Z" user="njn" modified="2009-05-14 07:20:47Z" handle="29">
+          <Attribute name="rules" value="acs_calc_margin_booked" created="2009-04-28 13:44:09Z" user="njn" modified="2009-05-14 07:20:47Z" />
+          <Input name="input" ref="963" created="2009-04-28 13:44:16Z" user="E731650" />
+          <Input name="input" ref="964" created="2009-04-28 13:44:16Z" user="E731650" />
+          <Input name="input" ref="1007" created="2009-04-28 13:57:44Z" user="E731650" />
+          <Output name="output" ref="993" created="2009-04-28 13:48:15Z" user="E731650" />
+          <Output name="output" ref="997" created="2009-04-28 13:48:15Z" user="E731650" />
+          <Output name="output" ref="998" created="2009-04-28 13:48:15Z" user="E731650" />
+          <Output name="output" ref="999" created="2009-04-28 13:48:15Z" user="E731650" />
+          <Output name="output" ref="1000" created="2009-04-28 13:48:15Z" user="E731650" />
+          <Output name="output" ref="1008" created="2009-04-28 14:03:08Z" user="E731650" />
+          <Output name="output" ref="995" created="2009-04-28 13:48:15Z" user="E731650" />
+          <Output name="output" ref="996" created="2009-04-28 13:48:15Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="AmtAllowanceColumn" ID="993" created="2009-04-28 13:44:37Z" user="E731650" modified="2009-04-28 13:48:24Z" handle="30">
+          <Input name="output" ref="992" created="2009-04-28 13:48:15Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-28 13:48:24Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="AmtContributionColumn" ID="997" created="2009-04-28 13:46:25Z" user="E731650" modified="2009-04-28 13:48:24Z" handle="31">
+          <Input name="output" ref="992" created="2009-04-28 13:48:15Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-28 13:48:24Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="PercMarginColumn" ID="998" created="2009-04-28 13:46:37Z" user="E731650" modified="2009-04-28 13:48:24Z" handle="32">
+          <Attribute name="name" value="perc_contribution" created="2009-04-28 13:46:48Z" user="E731650" />
+          <Input name="output" ref="992" created="2009-04-28 13:48:15Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-28 13:48:24Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="AmtProfitColumn" ID="999" created="2009-04-28 13:46:59Z" user="E731650" modified="2009-04-28 13:48:24Z" handle="33">
+          <Input name="output" ref="992" created="2009-04-28 13:48:15Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-28 13:48:24Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="PercProfitColumn" ID="1000" created="2009-04-28 13:47:11Z" user="E731650" modified="2009-04-28 13:48:24Z" handle="34">
+          <Input name="output" ref="992" created="2009-04-28 13:48:15Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-28 13:48:24Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="ContributionHrColumn" ID="1008" created="2009-04-28 14:03:04Z" user="njn" modified="2009-05-14 11:59:09Z" handle="35">
+          <Input name="output" ref="992" created="2009-04-28 14:03:08Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-28 14:03:13Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="CostVariableColumn" ID="995" created="2009-04-28 13:45:26Z" user="E731650" modified="2009-04-28 13:48:24Z" handle="36">
+          <Input name="output" ref="992" created="2009-04-28 13:48:15Z" user="E731650" />
+          <Output name="input" ref="1001" created="2009-04-28 13:47:47Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-28 13:48:24Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="CostFixedColumn" ID="996" created="2009-04-28 13:45:34Z" user="E731650" modified="2009-04-28 13:48:24Z" handle="37">
+          <Input name="output" ref="992" created="2009-04-28 13:48:15Z" user="E731650" />
+          <Output name="input" ref="1001" created="2009-04-28 13:47:47Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-28 13:48:24Z" user="E731650" />
+        </Widget>
+        <Widget type="Calculation" name="CalcTotalCosts" ID="1001" created="2009-04-28 13:47:35Z" user="E731650" modified="2009-04-28 13:48:01Z" handle="38">
+          <Attribute name="calculation" value="CostVariableColumn + CostFixedColumn" created="2009-04-28 13:48:01Z" user="E731650" />
+          <Input name="input" ref="995" created="2009-04-28 13:47:47Z" user="E731650" />
+          <Input name="input" ref="996" created="2009-04-28 13:47:47Z" user="E731650" />
+          <Output name="value" ref="994" created="2009-04-28 13:47:42Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="CostTotalColumn" ID="994" created="2009-04-28 13:45:16Z" user="E731650" modified="2009-04-28 13:48:24Z" handle="39">
+          <Input name="value" ref="1001" created="2009-04-28 13:47:42Z" user="E731650" />
+          <Output name="update" ref="976" created="2009-04-28 13:48:24Z" user="E731650" />
+        </Widget>
+        <Widget type="Template" name="FreezeFlagColumn" ID="1085" created="2009-05-29 22:49:43Z" user="pkc" modified="2009-05-29 22:50:02Z" handle="40">
+          <Attribute name="default" value="N" created="2009-05-29 22:49:54Z" user="pkc" />
+          <Output name="update" ref="976" created="2009-05-29 22:50:02Z" user="pkc" />
+        </Widget>
+        <Widget type="Cursor" name="acs_bk_ord_profit" ID="976" created="2009-04-27 20:31:59Z" user="msdmgr" modified="2009-07-29 10:49:47Z" handle="41">
+          <Attribute name="autoInsert" value="True" created="2009-04-27 20:32:35Z" user="E731650" />
+          <Input name="update" ref="991" created="2009-04-27 20:38:27Z" user="E731650" />
+          <Input name="where" ref="963" created="2009-04-27 20:32:07Z" user="E731650" />
+          <Input name="where" ref="964" created="2009-04-27 20:32:07Z" user="E731650" />
+          <Input name="update" ref="966" created="2009-04-27 20:32:21Z" user="E731650" />
+          <Input name="update" ref="967" created="2009-04-27 20:32:21Z" user="E731650" />
+          <Input name="update" ref="968" created="2009-04-27 20:32:21Z" user="E731650" />
+          <Input name="update" ref="969" created="2009-04-27 20:32:21Z" user="E731650" />
+          <Input name="update" ref="970" created="2009-04-27 20:32:21Z" user="E731650" />
+          <Input name="update" ref="971" created="2009-04-27 20:32:21Z" user="E731650" />
+          <Input name="update" ref="985" created="2009-04-27 20:37:10Z" user="E731650" />
+          <Input name="update" ref="973" created="2009-04-27 20:32:21Z" user="E731650" />
+          <Input name="update" ref="1099" created="2009-04-27 20:32:21Z" user="E731650" />
+          <Input name="update" ref="986" created="2009-04-27 20:37:10Z" user="E731650" />
+          <Input name="update" ref="977" created="2009-04-27 20:33:21Z" user="E731650" />
+          <Input name="update" ref="978" created="2009-04-27 20:33:21Z" user="E731650" />
+          <Input name="update" ref="987" created="2009-04-27 20:37:10Z" user="E731650" />
+          <Input name="update" ref="988" created="2009-04-27 20:37:10Z" user="E731650" />
+          <Input name="update" ref="989" created="2009-04-27 20:37:10Z" user="E731650" />
+          <Input name="update" ref="980" created="2009-04-27 20:33:21Z" user="E731650" />
+          <Input name="update" ref="979" created="2009-04-27 20:33:21Z" user="E731650" />
+          <Input name="update" ref="972" created="2009-04-27 20:32:21Z" user="E731650" />
+          <Input name="update" ref="982" created="2009-04-27 20:34:47Z" user="E731650" />
+          <Input name="update" ref="983" created="2009-04-27 20:34:47Z" user="E731650" />
+          <Input name="update" ref="984" created="2009-04-27 20:34:47Z" user="E731650" />
+          <Input name="update" ref="993" created="2009-04-28 13:48:24Z" user="E731650" />
+          <Input name="update" ref="997" created="2009-04-28 13:48:24Z" user="E731650" />
+          <Input name="update" ref="998" created="2009-04-28 13:48:24Z" user="E731650" />
+          <Input name="update" ref="999" created="2009-04-28 13:48:24Z" user="E731650" />
+          <Input name="update" ref="1000" created="2009-04-28 13:48:24Z" user="E731650" />
+          <Input name="update" ref="1008" created="2009-04-28 14:03:13Z" user="E731650" />
+          <Input name="update" ref="995" created="2009-04-28 13:48:24Z" user="E731650" />
+          <Input name="update" ref="996" created="2009-04-28 13:48:24Z" user="E731650" />
+          <Input name="update" ref="994" created="2009-04-28 13:48:24Z" user="E731650" />
+          <Input name="update" ref="1085" created="2009-05-29 22:50:02Z" user="pkc" />
+        </Widget>
+        <Input name="fetchFlag" ref="960" created="2009-04-27 20:26:11Z" user="E731650" />
+      </Widget>
+      <Input name="start" ref="215" created="2009-04-27 20:23:53Z" user="E731650" />
+      <Input name="activate" ref="959" created="2009-04-27 20:24:08Z" user="E731650" />
+      <Output name="status" ref="1009" created="2009-04-28 14:05:11Z" user="E731650" />
+    </Widget>
+    <Widget type="Template" name="DoneTimeColumn" ID="1009" created="2009-04-28 14:05:05Z" user="E731650" modified="2009-04-28 14:05:20Z" handle="4">
+      <Input name="status" ref="958" created="2009-04-28 14:05:11Z" user="E731650" />
+      <Output name="syncTime" ref="928" created="2009-04-28 14:05:20Z" user="E731650" />
+    </Widget>
+    <Attribute name="defaultDistance" value="0" />
+    <Attribute name="fromLeft" value="2" created="2009-04-21 19:35:27Z" user="E731650" />
+    <Output name="right" ref="10" />
+  </Widget>
+  <History>
+Date      Who   Description of change
+--------  ----  --------------------------------------------------------------
+02/27/06   DMS  Change code so that totals below Detail Array align using new
+                tools.
+03/03/06   DMS  Recalculate accumulated costs whenever the user clicks Modify
+                in Variance Analysis or Inventory Valuation tabs.
+  </History>
+  <Attribute name="orientation" value="Vertical" created="2009-04-21 18:51:12Z" user="E731650" />
+  <Attribute name="defaultDistance" value="0" created="2009-04-21 19:35:00Z" user="E731650" />
+  <Revisions created="2009-05-29 23:12:42Z" user="pkc">05/15/09    DMS Initial Release
+05/29/09    PKC  Rework
+07/29/09    NJN  Added Status in filter and tweaked formats for percentage fields
+11/05/09    GVG  Added Cost Detail radio button and popup form
+02/09/10  BRN  Change WgtNet and WgtGross in WgtRMNet and WgtRMGross
+14/12/10  BRN   Add the By Time unit of measure management </Revisions>
+</Application>

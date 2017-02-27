@@ -1,0 +1,46 @@
+<Application type="Application" name="acs_costtypeDmenu" ID="1" Directory="Templates" grid_width="5" grid_height="4" lastCheckin="2002-08-19 13:05:29Z" lastID="11" modified="2008-12-04 16:59:24Z" user="msdmgr">
+  <Widget type="Diagram" ID="2" handle="1" name="This document contains proprietary information and trade secrets which are the property of Measurex Corporation." />
+  <Widget type="Connector" ID="3" handle="2" name="INPUT">
+    <Attribute name="description" value="Template input/output connector" />
+    <Output name="INPUT" ref="5" />
+  </Widget>
+  <Widget type="Cursor" ID="5" handle="3" name="acs_cost_type" modified="2008-12-04 16:59:24Z" user="msdmgr">
+    <Attribute name="verify" value="False" />
+    <Attribute name="from" value="acs_cost_type" modified="2008-12-04 16:57:08Z" user="msdmgr" />
+    <Input name="INPUT" ref="3" />
+    <Output name="select" ref="6" />
+    <Output name="select" ref="10" created="2008-12-04 16:58:09Z" user="msdmgr" />
+    <Output name="select" ref="11" created="2008-12-04 16:58:23Z" user="msdmgr" />
+    <Output name="OUTPUT" ref="8" />
+    <Input name="order" ref="6" />
+    <Input name="order" ref="10" />
+    <Input name="order" ref="11" />
+  </Widget>
+  <Widget type="Template" ID="6" handle="4" name="CostTypeIDColumn" modified="2008-12-04 16:57:18Z" user="msdmgr">
+    <Input name="select" ref="5" />
+    <Output name="order" ref="5" />
+  </Widget>
+  <Widget type="Template" ID="10" handle="5" name="CostTypeNameColumn" user="msdmgr" created="2008-12-04 16:58:09Z" modified="2008-12-04 16:59:08Z">
+    <Input name="select" ref="5" created="2008-12-04 16:58:09Z" user="msdmgr" />
+    <Output name="order" ref="5" />
+    <Output name="CostTypeName:value" ref="9" created="2008-12-04 16:59:08Z" user="msdmgr" />
+  </Widget>
+  <Widget type="Template" ID="11" handle="6" name="CostGroupIDColumn" user="msdmgr" created="2008-12-04 16:58:23Z" modified="2008-12-04 16:58:31Z">
+    <Input name="select" ref="5" created="2008-12-04 16:58:23Z" user="msdmgr" />
+    <Output name="order" ref="5" />
+  </Widget>
+  <Widget type="Connector" ID="8" handle="7" name="OUTPUT">
+    <Attribute name="description" value="Template input/output connector" />
+    <Input name="OUTPUT" ref="5" />
+  </Widget>
+  <Widget type="Connector" ID="9" handle="8" name="value" modified="2008-12-04 16:59:08Z" user="msdmgr">
+    <Attribute name="description" value="Template input/output connector" />
+    <Input name="CostTypeName:value" ref="10" created="2008-12-04 16:59:08Z" user="msdmgr" />
+  </Widget>
+  <History>(C) Copyright 1990-94, Measurex Corporation. This document contains proprietary
+  information and trade secrets which are the property of Measurex Corporation.
+
+  Date     Who   Description of change
+--------   ----  --------------------------------------------------------------
+</History>
+</Application>

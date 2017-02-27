@@ -1,0 +1,229 @@
+DEFINE curr_time long;
+DEFINE go_on long;
+DEFINE log_unit_id string;
+DEFINE log_type_code string;
+DEFINE log_ts_create long;
+#  MxUpdate Rules for acs_unit_cost calculations.
+#
+#  REV     DATE     WHO      DESCRIPTION
+# -----  --------  -----    ------------------------------------------------
+#   1.0  15/10/09   BRN      Initial release 
+#==============================================================================================
+# ERROR RULE, DO EVERY TIME AN ERROR OCCURS
+#==============================================================================================
+
+NO * EXECUTE
+#       Run selects in this rule to prepare the variables only
+        select * from act_cost;
+        select * from invent;
+        select * from jumbo;
+        select * from acs_unit_route;
+        select * from acs_direct_cost;
+        select * from acs_unit_cost;
+        select * from acs_cost_trans_log;
+
+MX * ER 
+	echo "Rule error";
+#
+
+MX * ST
+	echo Startup rule;
+
+	let go_on = 1;
+# Loop while there are records on the log table
+	while ($go_on = 1);
+	let go_on = 0;
+
+################################ GET RECORDS TO BE PROCESSED ###########################
+	let curr_time = {time};
+# Sort the records from the older unit so that it follows the acs genealogy sequence
+# Use the created date of the unit from the acs_unit_route with the specific action code
+	foreach select at.unit_id log_unit_id, at.type_code log_type_code, at.ts_create log_ts_create
+			from acs_cost_trans_log at left join acs_unit_route au
+			on at.unit_id = au.unit_id and at.type_code = au.type_code and au.mx_action_code in ('TURNUP','PALLETIZE')
+			where at.stat = 'N' and at.unit_id <> ' ' and at.type_code <> ' '
+			and (at.ts_create < $curr_time or at.ts_create = $curr_time)
+			order by au.ts_transaction;
+
+	echo ########### processing $log_unit_id, $log_type_code ############################;
+		let go_on = 1;
+
+# Re-init the existing UnitID data
+		Call InitCosts();
+
+# Compute the cost records for the unit
+		Call ComputeDirectCosts();
+		Call ComputeGenealogyCosts();
+
+# Close the log record
+		Call CloseLogRecord();
+
+	End foreach
+
+# Update the temporary records into acs_cost_trans_log
+	select count(*) cnt
+		from acs_cost_trans_log
+		where stat = 'T';
+	if ($cnt > 0) then
+		Update acs_cost_trans_log
+			set stat = 'N'
+			where stat = 'T';
+	end if
+
+	end while
+
+######################################### Re-init the existing UnitID data
+SUBROUTINE InitCosts();
+
+# Insert a record into acs_cost_trans_log for each children for them to be re-processed as well
+# Get children from acs_genealogy
+	Foreach select distinct unit_id, type_code
+			from acs_genealogy
+			where parent_id = $log_unit_id
+			and type_code_parent = $log_type_code
+			and unit_id <> ' ';
+		Call InsertCostTransLog();
+	End foreach
+
+# Get children from existing acs_unit_cost in case of 'zombi'
+	Foreach select distinct unit_id, type_code
+			from acs_unit_cost
+			where cost_carrier_id = $log_unit_id
+			and cost_carrier_type = $log_type_code
+			and unit_id <> ' ';
+		Call InsertCostTransLog();
+	End foreach
+
+# Delete the existing cost records for this unit
+	Delete from acs_unit_cost
+		where unit_id = $log_unit_id
+		and type_code = $log_type_code;
+
+END SUBROUTINE
+
+######################################### Insert into acs_cost_trans_log
+SUBROUTINE  InsertCostTransLog()
+
+	select count(*) cnt
+		from acs_cost_trans_log
+		where unit_id = $unit_id
+		and type_code = $type_code
+		and stat in ('N','T');
+	if ($cnt = 0) then
+# Get the mill
+		select mill_id
+			from acs_unit_route
+			where unit_id = $unit_id
+			and type_code = $type_code
+			and mx_action_code in ('TURNUP','PALLETIZE');
+# Set stat = T for temporary, they will be updated with N at the end of the process
+		insert into acs_cost_trans_log (unit_id, type_code, stat, ts_create, ts_modified, mill_id, stat_std)
+			values ($unit_id,$type_code,'T',$curr_time,0,$mill_id,'P');
+	end if
+
+END SUBROUTINE
+
+
+######################################### Close the acs_cost_trans_log record
+SUBROUTINE CloseLogRecord();
+
+# Update acs_cost_trans_log record on successful update of each unit to P for Processed
+     	update acs_cost_trans_log
+		set stat = 'P'
+		where unit_id = $log_unit_id
+		and type_code = $log_type_code
+		and ts_create = $log_ts_create
+		and stat = 'N';
+
+END SUBROUTINE
+
+######################################### Compute Direct Costs
+SUBROUTINE ComputeDirectCosts();
+
+# Default values
+		let direct_flag = "Y";
+		let unit_id = $log_unit_id;
+		let type_code = $log_type_code;
+		let cost_carrier_id = " ";
+		let cost_carrier_type = " ";
+		let cost_origin_id = " ";
+		let cost_origin_type = " ";
+		let genealogy_type = " ";
+
+		foreach select type_code, cost_id, cost_group_id, cost_type_id, mill_id, machine_type, machine_id,
+				quantity, unit_meas, cost, currency_id 
+				from acs_direct_cost
+				where unit_id = $log_unit_id
+				and type_code = $log_type_code;
+
+				let act_cost = $cost;
+				call InsertUnitCost();
+
+		end foreach
+
+END SUBROUTINE
+
+######################################### Compute Genealogy Costs
+SUBROUTINE ComputeGenealogyCosts();
+
+# Default values
+		let direct_flag = "N";
+
+# Get the data from the acs_genealogy
+		foreach select parent_id, type_code_parent, type_code_src, percentage
+				from acs_genealogy
+				where unit_id = $log_unit_id
+				and type_code = $log_type_code;
+
+			let cost_carrier_id = $parent_id;
+			let cost_carrier_type = $type_code_parent;
+			let genealogy_type = $type_code_src;
+# Compute data found from the parents
+			foreach select cost_origin_id, cost_origin_type, cost_id, mill_id, machine_type, machine_id, unit_meas,
+					currency_id, cost_group_id, cost_type_id,
+					sum(act_cost) sum_cost, sum(quantity) sum_quantity
+					from acs_unit_cost
+					where unit_id = $cost_carrier_id
+					and type_code = $cost_carrier_type
+					group by cost_origin_id, cost_origin_type, cost_id, mill_id, machine_type, machine_id, unit_meas,
+					currency_id, cost_group_id, cost_type_id;
+
+				if ($cost_origin_id = " ") then
+					let cost_origin_id = $cost_carrier_id;
+					let cost_origin_type = $cost_carrier_type;
+				end if
+
+				let act_cost = $sum_cost * ($percentage / 100);
+				let quantity = $sum_quantity * ($percentage / 100);
+
+				let unit_id = $log_unit_id;
+				let type_code = $log_type_code;
+				call InsertUnitCost();	
+
+			end foreach
+		end foreach
+
+END SUBROUTINE
+
+######################################### Insert acs_unit_cost
+SUBROUTINE InsertUnitCost();
+
+# Get the UID Key
+	if ($direct_flag = "Y") then
+		let unit_cost_uid = $unit_id,$type_code,"-",$mill_id,$machine_type,$machine_id,"-",$cost_id;
+	else
+		let unit_cost_uid = $unit_id,$type_code,"-",$mill_id,$machine_type,$machine_id,"-",$cost_id,"-",$cost_carrier_id,$cost_carrier_type,$genealogy_type;
+	end if
+
+	echo unit_cost_uid = $unit_cost_uid;
+
+	insert into acs_unit_cost(unit_cost_uid, unit_id, type_code, cost_carrier_id, cost_carrier_type, cost_id, direct_flag,
+		 mill_id, machine_type, machine_id, quantity, unit_meas, act_cost, currency_id,
+		 cost_group_id, cost_type_id, cost_origin_id, cost_origin_type, genealogy_type, ts_modified, ts_create)
+	values ($unit_cost_uid, $unit_id, $type_code, $cost_carrier_id, $cost_carrier_type, $cost_id, $direct_flag, 
+		  $mill_id, $machine_type, $machine_id, $quantity, $unit_meas, $act_cost, $currency_id,
+		  $cost_group_id, $cost_type_id, $cost_origin_id, $cost_origin_type, $genealogy_type, 0, $curr_time);
+
+END SUBROUTINE
+
+

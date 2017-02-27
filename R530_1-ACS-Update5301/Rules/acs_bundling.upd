@@ -1,0 +1,432 @@
+#  MxUpdate Rules for acs_bundling
+#
+#  REV     DATE     WHO      DESCRIPTION
+# -----  --------  -----    ------------------------------------------------
+#   1.0  17/04/09  PHH       Initial release
+#   2.0  10-Jan-11 PHH       Rename acs_unit_route_std_h acs_unit_rte_std_h
+#==============================================================================================
+# ERROR RULE, DO EVERY TIME AN ERROR OCCURS
+#==============================================================================================
+#
+define acs_percentage double; 
+define acs_area_net double ;
+#
+SUBROUTINE ACSBundle() 
+
+#	Save the acs _reocrd for the lead roll into hist tables and do not delete
+	let hist_unit_id = $unit_id;
+	call ACSCopyRecordsToHist();
+
+#     acs_unit_route : Accumulate for the ActionCode of the bundle wgt_net, area_net, seconds_on_machine, seconds_down
+	foreach 
+		select sum ( aur.wgt_net) wgt_net , sum (aur.area_net) area_net , 
+		       sum ( aur.seconds_on_machine) seconds_on_machine , sum(seconds_down) seconds_down , 
+			 aur.mill_id acs_mill , aur.machine_type acs_machtype  , aur.machine_id acs_machid  
+		from acs_unit_route aur , invent_hist i
+		where i.roll_id_lead = $unit_id and
+			i.unit_id = aur.unit_id 
+		group by aur.mill_id , aur.machine_type , aur.machine_id ;
+
+		update acs_unit_route set wgt_net = wgt_net + $wgt_net , 
+						  area_net = area_net  + $area_net ,
+						  seconds_on_machine = seconds_on_machine + $seconds_on_machine ,
+						  seconds_down = seconds_down + $seconds_down
+		where unit_id = $unit_id and mill_id = $acs_mill  and machine_type = $acs_machtype 
+			and machine_id = $acs_machid;
+	end foreach 
+
+#	acs_genealogy :  For each of the children, look into acs_genealogy and accumulate to the lead roll 
+#			     (if not part of the same parent, then create the record)
+
+	let percentage = 0;
+	let area_net = 0; 
+	foreach 
+		select sum( percentage) acs_percentage  , sum(area_net) acs_area_net ,type_code_src  ,
+			acsg.parent_id from invent i, acs_genealogy acsg
+		where i.roll_id_lead = $unit_id
+			and i.unit_id = acsg.unit_id 
+		group by type_code_src  ,acsg.parent_id 	;
+
+		update acs_genealogy set area_net   = $acs_area_net ,
+					       percentage = $acs_percentage 
+		where unit_id = $unit_id and type_code_src = $type_code_src  ;
+	end foreach 
+
+
+	let acs_type_code = "R";
+	let save_unit = $unit_id ; 
+	foreach 
+		select unit_id acs_unit_id , mill_id  from invent where roll_id_lead = $save_unit ;
+		let unit_id = $acs_unit_id  ;
+		Call ACSInsertTransLog();
+	end foreach 
+
+	let unit_id = $save_unit ;
+
+
+#	Move all reocrd of the bundle to hist tables 
+	foreach select unit_id hist_unit_id from invent where 
+		  roll_id_lead = $unit_id and unit_id <> $unit_id ; 
+		call ACSCopyRecordsToHist();
+		call ACSDeleteRecords();
+	end foreach 
+
+	foreach 
+		select distinct  unit_id unit_id_to_del  from invent where roll_id_lead =$unit_id 
+		and unit_id <> $unit_id ;
+		delete from invent where unit_id = $unit_id_to_del ; 
+	end foreach 
+
+
+END SUBROUTINE
+
+SUBROUTINE ACSUnBundle() 
+
+
+	let acs_type_code = "R";
+	let save_unit = $unit_id ; 
+
+	echo unit_id = $unit_id  ;
+
+	Call ACSRestoreRecordsFromHist();
+	Call ACSInsertTransLog();
+
+	let unit_id = $save_unit ;
+
+
+END SUBROUTINE
+
+# ----------------------------------------------------------------------------------------------
+# Function to call in the acs_log_invent service in case of LOGLEADONLY=Y for Bundle action_code
+# ----------------------------------------------------------------------------------------------
+SUBROUTINE ACSCopyRecordsToHist()
+
+	echo enter in  ACSCopyRecordsToHist unit_id : $hist_unit_id;
+	let local_unit_id = $hist_unit_id; 
+
+#	acs_unit_route records
+#     ----------------------
+	echo select * from acs_unit_route	where unit_id = $local_unit_id ;
+
+	foreach 
+		select * from acs_unit_route	where unit_id = $local_unit_id ;
+		Call ACSInsertUnitRouteHist();
+	end foreach 
+
+#	acs_unit_route_std records
+#	-------------------------
+	foreach 
+		select * from acs_unit_route_std where unit_id = $local_unit_id ;
+		Call ACSInsertUnitRouteStdHist();
+	end foreach 
+
+#	acs_cost_closure records
+# 	------------------------
+	foreach 
+		select * from acs_cost_closure where unit_id = $local_unit_id ;
+		Call ACSInsertCostClosureHist();
+	end foreach 
+
+
+#	acs_direct_cost records
+# 	------------------------
+	foreach 
+		select * from acs_direct_cost where unit_id = $local_unit_id ;
+		Call ACSInsertDirectCostHist();
+	end foreach 
+
+#	acs_genealogy records
+# 	------------------------
+	foreach 
+		select * from acs_genealogy where unit_id = $local_unit_id ;
+		Call ACSInsertGenealogyHist();
+	end foreach 
+
+
+#	acs_unit_wh_time records
+#	------------------------
+	foreach 
+		select * from acs_unit_wh_time  where unit_id = $local_unit_id ;
+		Call ACSInsertUnitWhTimeHist();
+	end foreach 
+
+	let unit_id = $local_unit_id ;
+
+END SUBROUTINE
+
+
+SUBROUTINE ACSDeleteRecords()
+
+	let local_unit_id = $hist_unit_id; 
+
+	echo enter in  ACSDeleteRecords unit_id : $local_unit_id;
+
+#	acs_unit_route records
+#     ----------------------
+	delete from acs_unit_route    where unit_id = $local_unit_id;
+
+#	acs_unit_route_std records
+#	-------------------------
+	delete from acs_unit_route_std   where unit_id = $local_unit_id;
+
+#	acs_cost_closure records
+# 	------------------------
+	delete from acs_cost_closure    where unit_id = $local_unit_id;
+
+#	acs_direct_costrecords
+# 	------------------------
+	delete from acs_direct_cost    where unit_id = $local_unit_id;
+
+#	acs_genealogy records
+#	-------------------------
+	delete from acs_genealogy   where unit_id = $local_unit_id;
+
+#	acs_unit_wh_time records
+#	------------------------
+	delete from acs_unit_wh_time   where unit_id = $local_unit_id;
+
+END SUBROUTINE
+
+# ----------------------------------------------------------------------------------------------
+# Subroutine called in the above functions to store the record into the hist tables
+# ----------------------------------------------------------------------------------------------
+
+SUBROUTINE ACSInsertUnitRouteHist()
+	let mx_priority = 0;
+	let mx_timestamp = {time};
+	
+	insert into acs_unit_route_h
+          (	mx_priority ,mx_timestamp , unit_id, type_code, ts_transaction, mx_action_code, 
+		mill_id, machine_type,	machine_id, mill_id_plan, mach_type_plan, mach_id_plan, 
+		run_num, pat_num,	wgt_net, area_net, seconds_on_machine, ts_modified, 
+		ts_create,seconds_down)
+      values ($mx_priority ,$mx_timestamp ,$unit_id, $type_code, $ts_transaction, $mx_action_code, 
+		$mill_id, $machine_type,$machine_id, $mill_id_plan, $mach_type_plan, $mach_id_plan,
+		 $run_num, $pat_num,$wgt_net, $area_net, $seconds_on_machine, $ts_modified,
+		 $ts_create,$seconds_down);
+
+END SUBROUTINE
+
+
+SUBROUTINE ACSInsertCostClosureHist()
+
+	let mx_priority = 0;
+	let mx_timestamp = {time};
+	let mx_action_code = "BUNDLE";
+
+	insert into acs_cost_closure_h
+          (	mx_priority ,mx_timestamp  ,mx_action_code ,
+		 unit_id, type_code, closure_flag, ts_closed, ts_create, ts_modified)
+      values ( $mx_priority , $mx_timestamp  , $mx_action_code ,
+		$unit_id, $type_code, $closure_flag, $ts_closed, $ts_create, $ts_modified);
+
+END SUBROUTINE
+
+
+SUBROUTINE ACSInsertDirectCostHist()
+
+	let mx_priority = 0;
+	let mx_timestamp = {time};
+	let mx_action_code = "BUNDLE";
+
+	insert into acs_direct_cost_h
+			(mx_timestamp,mx_priority ,mx_action_code ,
+			unit_id, type_code, cost_id, cost_group_id, cost_type_id, mill_id, machine_type, 
+			machine_id, quantity, unit_meas, cost, currency_id, ts_modified, ts_create, ts_transaction)
+	 values	($mx_timestamp,$mx_priority ,$mx_action_code ,
+		       $unit_id, $type_code, $cost_id, $cost_group_id, $cost_type_id, $mill_id, $machine_type, 
+			$machine_id, $quantity, $unit_meas, $cost, $currency_id, $ts_modified, $ts_create, $ts_transaction);
+
+END SUBROUTINE
+
+SUBROUTINE ACSInsertGenealogyHist()
+
+	let mx_priority = 0;
+	let mx_timestamp = {time};
+	let mx_action_code = "BUNDLE";
+
+	insert into acs_genealogy_h
+          (	mx_timestamp,mx_priority ,mx_action_code ,unit_id ,type_code ,parent_id ,
+            type_code_parent ,type_code_src , mill_id , machine_type , machine_id,
+            percentage ,ts_create,area_net,ts_modified)
+      values ( $mx_timestamp,$mx_priority ,$mx_action_code ,$unit_id ,$type_code ,$parent_id ,
+            $type_code_parent ,$type_code_src , $mill_id , $machine_type , $machine_id,
+            $percentage ,$ts_create,$area_net,$ts_modified);
+
+END SUBROUTINE
+
+SUBROUTINE ACSInsertUnitRouteStdHist()
+
+	let mx_priority = 0;
+	let mx_timestamp = {time};
+	let mx_action_code = "BUNDLE";
+
+	insert into acs_unit_rte_std_h
+	    	(mx_priority ,mx_timestamp  ,mx_action_code ,
+		unit_id, mill_id, machine_type, machine_id, prod_route_id,order_id, item_num, 
+		parent_id, type_code, route_step_num, direct_flag, ts_modified, ts_create)
+	   	values ($mx_priority , $mx_timestamp  , $mx_action_code ,
+		$unit_id, $mill_id, $machine_type, $machine_id, $prod_route_id, $order_id, $item_num, 
+		$parent_id, $type_code, $route_step_num, $direct_flag, $ts_modified, $ts_create);
+END SUBROUTINE
+
+
+SUBROUTINE ACSInsertUnitWhTimeHist()
+
+	let mx_priority = 0;
+	let mx_timestamp = {time};
+	let mx_action_code = "BUNDLE";
+	insert into acs_unit_wh_time_h ( mx_priority ,mx_timestamp  ,mx_action_code ,
+		unit_id, warehouse_id, ts_begin, ts_end, ts_modified, ts_create)
+		values ($mx_priority , $mx_timestamp  , $mx_action_code ,
+		$unit_id, $warehouse_id, $ts_begin, $ts_end, $ts_modified, $ts_create);
+
+END SUBROUTINE
+
+# ----------------------------------------------------------------------------------------------
+# Restore Subroutines 
+# ----------------------------------------------------------------------------------------------
+SUBROUTINE ACSInsertUnitRoute()
+	
+	insert into acs_unit_route
+          (	unit_id, type_code, ts_transaction, mx_action_code, 
+		mill_id, machine_type,	machine_id, mill_id_plan, mach_type_plan, mach_id_plan, 
+		run_num, pat_num,	wgt_net, area_net, seconds_on_machine, ts_modified, 
+		ts_create,seconds_down)
+      values ($unit_id, $type_code, $ts_transaction, $mx_action_code, 
+		$mill_id, $machine_type,$machine_id, $mill_id_plan, $mach_type_plan, $mach_id_plan,
+		 $run_num, $pat_num,$wgt_net, $area_net, $seconds_on_machine, $ts_modified,
+		 $ts_create,$seconds_down);
+
+END SUBROUTINE
+
+
+SUBROUTINE ACSInsertCostClosure()
+
+
+	insert into acs_cost_closure
+          (	unit_id, type_code, closure_flag, ts_closed, ts_create, ts_modified)
+      values ( $unit_id, $type_code, $closure_flag, $ts_closed, $ts_create, $ts_modified);
+
+END SUBROUTINE
+
+
+SUBROUTINE ACSInsertUnitRouteStd()
+
+	insert into acs_unit_route_std
+	    	(unit_id, mill_id, machine_type, machine_id, prod_route_id,order_id, item_num, 
+		parent_id, type_code, route_step_num, direct_flag, ts_modified, ts_create)
+	   	values ($unit_id, $mill_id, $machine_type, $machine_id, $prod_route_id, $order_id, $item_num, 
+		$parent_id, $type_code, $route_step_num, $direct_flag, $ts_modified, $ts_create);
+END SUBROUTINE
+
+SUBROUTINE ACSInsertUnitWhTime()
+
+	insert into acs_unit_wh_time ( unit_id, warehouse_id, ts_begin, ts_end, ts_modified, ts_create)
+		values ($unit_id, $warehouse_id, $ts_begin, $ts_end, $ts_modified, $ts_create);
+
+END SUBROUTINE
+
+SUBROUTINE ACSInsertDirectCost()
+
+	insert into acs_direct_cost
+			(unit_id, type_code, cost_id, cost_group_id, cost_type_id, mill_id, machine_type, 
+			machine_id, quantity, unit_meas, cost, currency_id, ts_modified, ts_create, ts_transaction)
+	 values	($unit_id, $type_code, $cost_id, $cost_group_id, $cost_type_id, $mill_id, $machine_type, 
+			$machine_id, $quantity, $unit_meas, $cost, $currency_id, $ts_modified, $ts_create, $ts_transaction);
+
+END SUBROUTINE
+
+
+SUBROUTINE ACSInsertGenealogy()
+
+	insert into acs_genealogy
+          (	unit_id ,type_code ,parent_id ,
+            type_code_parent ,type_code_src , mill_id , machine_type , machine_id,
+            percentage ,ts_create,area_net,ts_modified)
+      values ( $unit_id ,$type_code ,$parent_id ,
+            $type_code_parent ,$type_code_src , $mill_id , $machine_type , $machine_id,
+            $percentage ,$ts_create,$area_net,$ts_modified);
+
+END SUBROUTINE
+
+
+
+
+# ----------------------------------------------------------------------------------------------
+# Function to restore data to call in the unbundle subroutine in case of LOGLEADONLY=Y
+# ----------------------------------------------------------------------------------------------
+SUBROUTINE ACSRestoreRecordsFromHist()
+
+	let store_unit_id  = $unit_id ;
+
+
+	echo enter in  ACSRestoreRecordsFromHist unit_id : $store_unit_id;
+
+#	acs_unit_route records
+#     ----------------------
+	delete from acs_unit_route    where unit_id = $store_unit_id;
+	foreach 
+		select * from acs_unit_route_h where unit_id = $store_unit_id;
+		Call ACSInsertUnitRoute();
+	end foreach 
+	let unit_id = $store_unit_id ;
+	delete from acs_unit_route_h    where unit_id = $store_unit_id;
+
+#	acs_cost_closure records
+# 	------------------------
+	delete from acs_cost_closure   where unit_id = $store_unit_id;
+	foreach 
+		select * from acs_cost_closure_h where unit_id = $store_unit_id;
+		Call ACSInsertCostClosure();
+	end foreach 
+	let unit_id = $store_unit_id ;
+	delete from acs_cost_closure_h    where unit_id = $store_unit_id;
+
+
+#	acs_unit_route_std records
+#	-------------------------
+	delete from acs_unit_route_std  where unit_id = $store_unit_id;
+	foreach 
+		select * from acs_unit_rte_std_h where unit_id = $store_unit_id;
+		Call ACSInsertUnitRouteStd();
+	end foreach 
+	let unit_id = $store_unit_id ;
+	delete from acs_unit_rte_std_h   where unit_id = $store_unit_id;
+
+
+#	acs_direct_cost records
+#	------------------------
+	delete from acs_direct_cost   where unit_id = $store_unit_id;
+	foreach 
+		select * from acs_direct_cost_h where unit_id = $store_unit_id;
+		Call ACSInsertDirectCost();
+	end foreach 
+	let unit_id = $store_unit_id ;
+	delete from acs_direct_cost_h    where unit_id = $store_unit_id;
+
+#	acs_genealogy records
+#	---------------------
+	delete from acs_genealogy    where unit_id = $store_unit_id;
+	foreach 
+		select * from acs_genealogy_h where unit_id = $store_unit_id;
+		Call ACSInsertGenealogy();
+	end foreach 
+	let unit_id = $store_unit_id ;
+	delete from acs_genealogy_h    where unit_id = $store_unit_id;
+
+#	acs_unit_wh_time records
+#	------------------------
+	delete from acs_unit_wh_time   where unit_id = $store_unit_id;
+	foreach 
+		select * from acs_unit_wh_time_h  where unit_id = $store_unit_id;
+		Call ACSInsertUnitWhTime();
+	end foreach 
+	let unit_id = $store_unit_id ;
+	delete from acs_unit_wh_time_h   where unit_id = $store_unit_id;
+
+END SUBROUTINE
+
+
+
+

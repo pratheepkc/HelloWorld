@@ -1,0 +1,830 @@
+#============================================================================
+# MxUpdate rules for ACS subroutine
+#
+# NOTE: This rules file is for subroutines used in ACS project.
+#
+#============================================================================
+# Rev.  Date:     Who   Description
+# ---  --------   ----  -----------------------------------------------------
+# 01   27/01/09   RCR   Initial release
+# 02   17/04/09   GVG   Added GET_EXPENSE_ID subroutine
+# 03   12/05/09   BRN   Add stat_std into acs_cost_trans_log
+# 04   08/24/09   BRN	Add the LeadTime to the table acs_cost
+# 05   08/28/09   NJN   Get RealTimeCons
+# 06   12/18/09   JTR   Add BatchCost() BatchRollingAvg() subs
+# 07   18/12/09   PHH   define  ts_end to avoid Variable ts_end changed from String to Long in get_timeslot.upd
+# 08   01/19/10   GVG   Added acs_downtime for downtime processing
+# 09   01/21/10   BRN	Add cons_mmm into acs_cost
+# 10   28/09/10   BRN	Create serial num automatically for GET_COST_ID and GET_EXPENSE_ID
+# 11   25-Nov-10  PHH   Add ACSInsertLogBundle() Subroutine
+#============================================================================
+DEFINE continue_search long;
+DEFINE str_last_num string;
+DEFINE count_loop long;
+DEFINE ACS_MOISTURE ENV;
+DEFINE ACS_MOISTURE_VAL ENV;
+DEFINE USEMETRIC ENV;
+DEFINE ts_end		long;
+DEFINE  TonsFactor 	long;
+
+############################# Get a serial number for the cost ID ############################
+
+SUBROUTINE GET_COST_ID()
+## Input: serial_key_id  /  serial_mill_id  /  serial_informat  /  serial_prefix
+##											
+## Output: serial_cost_id  /  serial_found  						
+
+
+	let serial_key_id = $serial_key_id;
+	let serial_mill_id = $serial_mill_id;
+	let serial_informat = $serial_informat;
+	let serial_prefix = $serial_prefix;
+	
+	let serial_found=0;
+	let count_loop=0;
+	let continue_search=1;
+
+	while ($serial_found = 0) and ($continue_search=1)  do
+
+		select last_num,wrap_low,wrap_high,table_name,column_name
+			from serial_num
+			where key_id = $serial_key_id and mill_id = $serial_mill_id;
+
+		if ($success = 1) then
+			let last_num = $last_num + 1;
+			if ($last_num > $wrap_high) then
+				let last_num = $wrap_low;
+			end if
+
+			update serial_num
+				set last_num=$last_num
+				where key_id = $serial_key_id and mill_id = $serial_mill_id;
+
+		else
+#Rev 10
+			echo No Serial number find for key_id: $serial_key_id and mill: $serial_mill_id, create it;
+           		let last_num = 100000;
+		      insert into serial_num
+            		(mill_id, key_id, wrap_high, wrap_low, column_name, 
+		              table_name, last_num, serial_desc)
+		         values	
+            		($serial_mill_id, $serial_key_id , 899999, 100000, 'cost_id', 
+		              'acs_cost', $last_num, 'ACS AUTO CREATED');
+		end if
+
+## check if the record already exists in acs_cost
+		let tmp_last_num = $last_num:$serial_informat;
+		let str_last_num = $serial_prefix,$tmp_last_num;
+
+		select count(*) cnt_tmp from acs_cost where cost_id=$str_last_num;
+
+ 		if ($cnt_tmp > 0) then
+			if ($count_loop > 5000) then
+				echo Error No Serial number available for key_id: $serial_key_id and mill: $serial_mill_id;
+				let continue_search=0;
+			else
+				let count_loop=$count_loop+1;
+			end if
+		else
+			let serial_found=1;
+			let serial_cost_id = $str_last_num;
+		end if
+	 end while
+
+END SUBROUTINE
+
+SUBROUTINE GET_EXPENSE_ID()
+## Input: serial_key_id  /  serial_mill_id  /  serial_informat  /  serial_prefix
+##											
+## Output: serial_cost_id  /  serial_found  						
+
+
+	let serial_key_id = $serial_key_id;
+	let serial_mill_id = $serial_mill_id;
+	let serial_informat = $serial_informat;
+	let serial_prefix = $serial_prefix;
+	
+	let serial_found=0;
+	let count_loop=0;
+	let continue_search=1;
+
+	while ($serial_found = 0) and ($continue_search=1)  do
+
+		select last_num,wrap_low,wrap_high,table_name,column_name
+			from serial_num
+			where key_id = $serial_key_id and mill_id = $serial_mill_id;
+
+		if ($success = 1) then
+			let last_num = $last_num + 1;
+			if ($last_num > $wrap_high) then
+				let last_num = $wrap_low;
+			end if
+
+			update serial_num
+				set last_num=$last_num
+				where key_id = $serial_key_id and mill_id = $serial_mill_id;
+
+		else
+			echo No Serial number find for key_id: $serial_key_id and mill: $serial_mill_id, create it;
+           		let last_num = 100000;
+		      insert into serial_num
+            		(mill_id, key_id, wrap_high, wrap_low, column_name, 
+		              table_name, last_num, serial_desc)
+		         values	
+            		($serial_mill_id, $serial_key_id , 899999, 100000, 'acct_expense_id', 
+		              'acs_acct_expense', $last_num, 'ACS AUTO CREATED');
+		end if
+
+## check if the record already exists in acs_cost
+		let tmp_last_num = $last_num:$serial_informat;
+		let str_last_num = $serial_prefix,$tmp_last_num;
+
+		select count(*) cnt_tmp from acs_acct_expense where acct_expense_id=$str_last_num;
+
+ 		if ($cnt_tmp > 0) then
+			if ($count_loop > 5000) then
+				echo Error No Serial number available for key_id: $serial_key_id and mill: $serial_mill_id;
+				let continue_search=0;
+			else
+				let count_loop=$count_loop+1;
+			end if
+		else
+			let serial_found=1;
+			let serial_expense_id = $str_last_num;
+		end if
+	 end while
+
+END SUBROUTINE
+
+############################# Insert ACS Cost record ####################################
+
+SUBROUTINE INSERT_ACS_COST()
+
+	insert into acs_cost
+		( cost_id, cost_id_group, cost_type, mill_id, machine_type, machine_id, warehouse_id, whse_zone_id, bay_id,
+		ts_begin, ts_end, mill_id_plan, mach_type_plan, mach_id_plan, run_num, pat_num, unit_id,
+		type_code, product_code_id, raw_matl_grp_id, raw_matl_id, fin_matl_grp_id, fin_matl_id, quantity, unit_meas,
+		cost, currency_id, acct_seg_id, order_id, item_num, load_id, cost_driver_id, cost_type_id,
+		allocated_flag, ts_allocated, reason_id, user_id, appl_name, closure_flag, ts_closed, ts_modified, ts_create, sec_lead_time,
+		cons_mill_id, cons_mach_type, cons_mach_id )
+	values
+		( $cost_id, $cost_id_group, $cost_type, $mill_id, $machine_type, $machine_id, $warehouse_id, $whse_zone_id, $bay_id,
+		$ts_begin, $ts_end, $mill_id_plan, $mach_type_plan, $mach_id_plan, $run_num, $pat_num, $unit_id,
+		$type_code, $product_code_id, $raw_matl_grp_id, $raw_matl_id, $fin_matl_grp_id, $fin_matl_id, $quantity, $unit_meas,
+		$cost, $currency_id, $acct_seg_id, $order_id, $item_num, $load_id, $cost_driver_id, $cost_type_id,
+		$allocated_flag, $ts_allocated, $reason_id, $user_id, $appl_name, $closure_flag, $ts_closed, $ts_modified, $ts_create, $sec_lead_time,
+		$cons_mill_id, $cons_mach_type, $cons_mach_id );
+
+END SUBROUTINE
+
+############################# Insert ACS log record ####################################
+
+SUBROUTINE ACSInsertLogInvent()
+	insert into acs_log_invent 
+		(article_id, bales_per_unit, bay_id, blade_change_1, blade_change_2,
+		 blade_pressure_1, blade_pressure_2, block_num, bsw_act,
+		 bsw_nominal, cal_press_back, cal_press_center,
+		 cal_press_front, cartons_picked, cartons_reserved,
+		 claim_item_num, claim_num, class,class_orig, coated_side, core_id, 
+		 crew, customer_id, dandy_id, diam_act, diam_ord,
+		 dist_from_front, emb_pat_id, embossed_side, gloss_value_felt,
+		 gloss_value_wire, grade_spec, grade_spec_made,
+		 hole_punch_id, holes, inside_set, item_num, 
+		 jumbo_reverse, length_lineal, length_sheet, load_id, lot_num,
+		 mach_id_dest, mach_id_plan, mach_id_rej, mach_type_dest,
+		 mach_type_plan, mach_type_rej, machine_id, machine_type,
+		 marked_defects, mill_id, mx_action_code, mx_priority,
+		 mx_station, mx_station_id, mx_timestamp, order_id,
+		 over_wgt_flag,pallet_spec_id, parent_id, parent_len_sheet,
+		 parent_width_sheet, pat_num, pos_id, printed_side, 
+		 prod_mach_id, prod_mill_id, prod_route_id, prod_route_plan,
+		 reams_cull, reams_good, reams_hold, reams_joblot,
+		 reams_reprocess, reject_id, reject_id_2, 
+		 reject_id_breaks, reject_id_cracks, reject_id_hold,
+		 reject_id_reproc, retest_flag, revision_num, rma_id,
+		 roll_id_cust, roll_id_lead, roll_id_next, rolls_per_pack, 
+		 route_step_num, run_num, run_num_orig, security_pat_id, 
+		 segment_id, set_id, sets_prod, sheet_count, speed_mach, splices,
+		 stack_load_back, stack_load_center, stack_load_front,
+		 stat, stickers, streaks_smears, track_num,
+		 ts_loaded, ts_scaled, ts_shipped,
+		 ts_warehoused,ts_wound, type_code, unit_id, unit_id_parent1,
+		 unit_id_parent2, unit_id_parent3, carton_count,
+		 unmarked_defects, warehouse_id, cartons_per_pallet,
+		 wgt_coat1, wgt_coat2, wgt_est, wgt_scaled,
+		 wgt_scaled_last, wgt_slabbed, wgt_tare, whse_zone_id,
+		 width_act, width_ord, wire_side, wrap_id,
+		 ts_lab_upd,qual_chg_flag,user_id,wgt_airdry,price_purchase, seconds_on_machine)
+	 values ($article_id, $bales_per_unit, $bay_id, $blade_change_1, $blade_change_2,
+		 $blade_pressure_1, $blade_pressure_2, $block_num, $bsw_act,
+		 $bsw_nominal, $cal_press_back, $cal_press_center,
+		 $cal_press_front, $cartons_picked, $cartons_reserved,
+		 $claim_item_num, $claim_num, $class,$class_orig, $coated_side, 
+		 $core_id, $crew, $customer_id, $dandy_id, $diam_act, $diam_ord,
+		 $dist_from_front, $emb_pat_id, $embossed_side,
+		 $gloss_value_felt, $gloss_value_wire, $grade_spec,
+		 $grade_spec_made, $hole_punch_id, $holes, $inside_set,
+		 $item_num, $jumbo_reverse, $length_lineal, $length_sheet,
+		 $load_id, $lot_num, $mach_id_dest, $mach_id_plan, $mach_id_rej,
+		 $mach_type_dest, $mach_type_plan, $mach_type_rej, $machine_id,
+		 $machine_type, $marked_defects, $mill_id, $action_code,
+		 $priority, $station, $station_id, $mx_timestamp, $order_id, 
+		 $over_wgt_flag, $pallet_spec_id, $parent_id, $parent_len_sheet,
+		 $parent_width_sheet, $pat_num, $pos_id, $printed_side, 
+		 $prod_mach_id, $prod_mill_id, $prod_route_id, $prod_route_plan,
+		 $reams_cull, $reams_good, $reams_hold, $reams_joblot,
+		 $reams_reprocess, $reject_id, $reject_id_2,
+		 $reject_id_breaks, $reject_id_cracks, $reject_id_hold,
+		 $reject_id_reproc, $retest_flag, $revision_num,  $rma_id,
+		 $roll_id_cust, $roll_id_lead, $roll_id_next, $rolls_per_pack,
+		 $route_step_num, $run_num, $run_num_orig, $security_pat_id,
+		 $segment_id, $set_id, $sets_prod, $sheet_count, $speed_mach,
+		 $splices, $stack_load_back, $stack_load_center, $stack_load_front,
+		 $stat, $stickers, $streaks_smears, $track_num,
+		 $ts_loaded, $ts_scaled, $ts_shipped,
+		 $ts_warehoused, $ts_wound, $type_code, $unit_id, $unit_id_parent1,
+		 $unit_id_parent2, $unit_id_parent3, $carton_count,
+		 $unmarked_defects, $warehouse_id, $cartons_per_pallet,
+		 $wgt_coat1, $wgt_coat2, $wgt_est, $wgt_scaled,
+		 $wgt_scaled_last, $wgt_slabbed, $wgt_tare, $whse_zone_id,
+		 $width_act, $width_ord, $wire_side, $wrap_id,
+		 $ts_lab_upd,$qual_chg_flag,$user_id,$wgt_airdry,$price_purchase,$seconds_on_machine);
+END SUBROUTINE
+
+SUBROUTINE ACSInsertLogInventHist()
+	insert into acs_log_inv_hist 
+		(article_id, bales_per_unit, bay_id, blade_change_1, blade_change_2,
+		 blade_pressure_1, blade_pressure_2, block_num, bsw_act,
+		 bsw_nominal, cal_press_back, cal_press_center,
+		 cal_press_front, cartons_picked, cartons_reserved,
+		 claim_item_num, claim_num, class,class_orig, coated_side, core_id, 
+		 crew, customer_id, dandy_id, diam_act, diam_ord,
+		 dist_from_front, emb_pat_id, embossed_side, gloss_value_felt,
+		 gloss_value_wire, grade_spec, grade_spec_made,
+		 hole_punch_id, holes, inside_set, item_num, 
+		 jumbo_reverse, length_lineal, length_sheet, load_id, lot_num,
+		 mach_id_dest, mach_id_plan, mach_id_rej, mach_type_dest,
+		 mach_type_plan, mach_type_rej, machine_id, machine_type,
+		 marked_defects, mill_id, mx_action_code, mx_priority,
+		 mx_station, mx_station_id, mx_timestamp, order_id,
+		 over_wgt_flag,pallet_spec_id, parent_id, parent_len_sheet,
+		 parent_width_sheet, pat_num, pos_id, printed_side, 
+		 prod_mach_id, prod_mill_id, prod_route_id, prod_route_plan,
+		 reams_cull, reams_good, reams_hold, reams_joblot,
+		 reams_reprocess, reject_id, reject_id_2, 
+		 reject_id_breaks, reject_id_cracks, reject_id_hold,
+		 reject_id_reproc, retest_flag, revision_num, rma_id,
+		 roll_id_cust, roll_id_lead, roll_id_next, rolls_per_pack, 
+		 route_step_num, run_num, run_num_orig, security_pat_id, 
+		 segment_id, set_id, sets_prod, sheet_count, speed_mach, splices,
+		 stack_load_back, stack_load_center, stack_load_front,
+		 stat, stickers, streaks_smears, track_num,
+		 ts_loaded, ts_scaled, ts_shipped,
+		 ts_warehoused,ts_wound, type_code, unit_id, unit_id_parent1,
+		 unit_id_parent2, unit_id_parent3, carton_count,
+		 unmarked_defects, warehouse_id, cartons_per_pallet,
+		 wgt_coat1, wgt_coat2, wgt_est, wgt_scaled,
+		 wgt_scaled_last, wgt_slabbed, wgt_tare, whse_zone_id,
+		 width_act, width_ord, wire_side, wrap_id,
+		 ts_lab_upd,qual_chg_flag,user_id,wgt_airdry,price_purchase, seconds_on_machine)
+	 values ($article_id, $bales_per_unit, $bay_id, $blade_change_1, $blade_change_2,
+		 $blade_pressure_1, $blade_pressure_2, $block_num, $bsw_act,
+		 $bsw_nominal, $cal_press_back, $cal_press_center,
+		 $cal_press_front, $cartons_picked, $cartons_reserved,
+		 $claim_item_num, $claim_num, $class,$class_orig, $coated_side, 
+		 $core_id, $crew, $customer_id, $dandy_id, $diam_act, $diam_ord,
+		 $dist_from_front, $emb_pat_id, $embossed_side,
+		 $gloss_value_felt, $gloss_value_wire, $grade_spec,
+		 $grade_spec_made, $hole_punch_id, $holes, $inside_set,
+		 $item_num, $jumbo_reverse, $length_lineal, $length_sheet,
+		 $load_id, $lot_num, $mach_id_dest, $mach_id_plan, $mach_id_rej,
+		 $mach_type_dest, $mach_type_plan, $mach_type_rej, $machine_id,
+		 $machine_type, $marked_defects, $mill_id, $action_code,
+		 $priority, $station, $station_id, $mx_timestamp, $order_id, 
+		 $over_wgt_flag, $pallet_spec_id, $parent_id, $parent_len_sheet,
+		 $parent_width_sheet, $pat_num, $pos_id, $printed_side, 
+		 $prod_mach_id, $prod_mill_id, $prod_route_id, $prod_route_plan,
+		 $reams_cull, $reams_good, $reams_hold, $reams_joblot,
+		 $reams_reprocess, $reject_id, $reject_id_2,
+		 $reject_id_breaks, $reject_id_cracks, $reject_id_hold,
+		 $reject_id_reproc, $retest_flag, $revision_num,  $rma_id,
+		 $roll_id_cust, $roll_id_lead, $roll_id_next, $rolls_per_pack,
+		 $route_step_num, $run_num, $run_num_orig, $security_pat_id,
+		 $segment_id, $set_id, $sets_prod, $sheet_count, $speed_mach,
+		 $splices, $stack_load_back, $stack_load_center, $stack_load_front,
+		 $stat, $stickers, $streaks_smears, $track_num,
+		 $ts_loaded, $ts_scaled, $ts_shipped,
+		 $ts_warehoused, $ts_wound, $type_code, $unit_id, $unit_id_parent1,
+		 $unit_id_parent2, $unit_id_parent3, $carton_count,
+		 $unmarked_defects, $warehouse_id, $cartons_per_pallet,
+		 $wgt_coat1, $wgt_coat2, $wgt_est, $wgt_scaled,
+		 $wgt_scaled_last, $wgt_slabbed, $wgt_tare, $whse_zone_id,
+		 $width_act, $width_ord, $wire_side, $wrap_id,
+		 $ts_lab_upd,$qual_chg_flag,$user_id,$wgt_airdry,$price_purchase,$seconds_on_machine);
+END SUBROUTINE
+
+SUBROUTINE ACSInsertLogJumbo()
+            insert into acs_log_jumbo
+                (blade_change_1, blade_change_2, blade_pressure_1,
+                 blade_pressure_2, block_num, bsw_act, bsw_turnup,
+                 cal_press_back, cal_press_center, cal_press_front,
+                 children_prod, class, coated_side, coating_viscosity, crew,
+                 dcs_num, diam_act, diam_turnup, dist_from_front,
+                 gloss_value_felt, gloss_value_wire, grade_spec,
+                 grade_spec_made, gs_turnup, holes_back, holes_center,
+                 holes_front, inside_set, jumbo_id, jumbo_id_parent1,
+                 jumbo_id_parent2, jumbo_id_parent3, jumbo_id_partial,
+                 jumbo_reverse, length_lineal, length_turnup,
+                 mach_id_dest, mach_id_plan, mach_id_rej, mach_type_dest,
+                 mach_type_plan, mach_type_rej, machine_id, machine_type,
+                 mandril_id, marked_defects, mill_id, mx_action_code,
+                 mx_priority, mx_station, mx_station_id, mx_timestamp, nip_num,
+                 prod_mach_id, prod_mill_id, prod_route_id, prod_route_plan,
+                 reject_id, reject_id_2,  reject_id_breaks, reject_id_cracks,
+                 run_num, run_num_orig, seconds_on_machine, sets_plan,
+                 sets_prod, sets_slab, speed_mach, splices, stack_load_back,
+                 stack_load_center, stack_load_front, stat, steam_value_felt,
+                 steam_value_wire, stickers, streaks_smears, ts_turned_up,
+                 ts_wound, unmarked_defects, wgt_act, wgt_coat1, wgt_coat2,
+                 wgt_slabbed, wgt_turnup, width_act, width_turnup,
+                 wire_side, test_changed_flag)
+         values ($blade_change_1, $blade_change_2, $blade_pressure_1,
+                 $blade_pressure_2, $block_num, $bsw_act, $bsw_turnup,
+                 $cal_press_back, $cal_press_center, $cal_press_front,
+                 $children_prod, $class, $coated_side, $coating_viscosity,
+                 $crew, $dcs_num, $diam_act, $diam_turnup, $dist_from_front,
+                 $gloss_value_felt, $gloss_value_wire, $grade_spec,
+                 $grade_spec_made, $gs_turnup, $holes_back, $holes_center,
+                 $holes_front, $inside_set, $jumbo_id, $jumbo_id_parent1,
+                 $jumbo_id_parent2, $jumbo_id_parent3, $jumbo_id_partial,
+                 $jumbo_reverse, $length_lineal, $length_turnup,
+                 $mach_id_dest, $mach_id_plan, $mach_id_rej, $mach_type_dest,
+                 $mach_type_plan, $mach_type_rej, $machine_id, $machine_type,
+                 $mandril_id, $marked_defects, $mill_id, $mx_action_code,
+                 $mx_priority, $mx_station, $mx_station_id, $mx_timestamp,
+                 $nip_num, $prod_mach_id, $prod_mill_id, $prod_route_id,
+                 $prod_route_plan, $reject_id, $reject_id_2, $reject_id_breaks,
+                 $reject_id_cracks, $run_num, $run_num_orig,
+                 $seconds_on_machine, $sets_plan, $sets_prod, $sets_slab,
+                 $speed_mach, $splices, $stack_load_back, $stack_load_center,
+                 $stack_load_front, $stat, $steam_value_felt, $steam_value_wire,
+                 $stickers, $streaks_smears, $ts_turned_up, $ts_wound,
+                 $unmarked_defects, $wgt_act, $wgt_coat1, $wgt_coat2,
+                 $wgt_slabbed, $wgt_turnup, $width_act, $width_turnup,
+                 $wire_side, $test_changed_flag);
+END SUBROUTINE
+
+SUBROUTINE ACSInsertLogJumboHist()
+            insert into acs_log_jumbo_hist
+                (blade_change_1, blade_change_2, blade_pressure_1,
+                 blade_pressure_2, block_num, bsw_act, bsw_turnup,
+                 cal_press_back, cal_press_center, cal_press_front,
+                 children_prod, class, coated_side, coating_viscosity, crew,
+                 dcs_num, diam_act, diam_turnup, dist_from_front,
+                 gloss_value_felt, gloss_value_wire, grade_spec,
+                 grade_spec_made, gs_turnup, holes_back, holes_center,
+                 holes_front, inside_set, jumbo_id, jumbo_id_parent1,
+                 jumbo_id_parent2, jumbo_id_parent3, jumbo_id_partial,
+                 jumbo_reverse, length_lineal, length_turnup,
+                 mach_id_dest, mach_id_plan, mach_id_rej, mach_type_dest,
+                 mach_type_plan, mach_type_rej, machine_id, machine_type,
+                 mandril_id, marked_defects, mill_id, mx_action_code,
+                 mx_priority, mx_station, mx_station_id, mx_timestamp, nip_num,
+                 prod_mach_id, prod_mill_id, prod_route_id, prod_route_plan,
+                 reject_id, reject_id_2,  reject_id_breaks, reject_id_cracks,
+                 run_num, run_num_orig, seconds_on_machine, sets_plan,
+                 sets_prod, sets_slab, speed_mach, splices, stack_load_back,
+                 stack_load_center, stack_load_front, stat, steam_value_felt,
+                 steam_value_wire, stickers, streaks_smears, ts_turned_up,
+                 ts_wound, unmarked_defects, wgt_act, wgt_coat1, wgt_coat2,
+                 wgt_slabbed, wgt_turnup, width_act, width_turnup,
+                 wire_side, test_changed_flag)
+         values ($blade_change_1, $blade_change_2, $blade_pressure_1,
+                 $blade_pressure_2, $block_num, $bsw_act, $bsw_turnup,
+                 $cal_press_back, $cal_press_center, $cal_press_front,
+                 $children_prod, $class, $coated_side, $coating_viscosity,
+                 $crew, $dcs_num, $diam_act, $diam_turnup, $dist_from_front,
+                 $gloss_value_felt, $gloss_value_wire, $grade_spec,
+                 $grade_spec_made, $gs_turnup, $holes_back, $holes_center,
+                 $holes_front, $inside_set, $jumbo_id, $jumbo_id_parent1,
+                 $jumbo_id_parent2, $jumbo_id_parent3, $jumbo_id_partial,
+                 $jumbo_reverse, $length_lineal, $length_turnup,
+                 $mach_id_dest, $mach_id_plan, $mach_id_rej, $mach_type_dest,
+                 $mach_type_plan, $mach_type_rej, $machine_id, $machine_type,
+                 $mandril_id, $marked_defects, $mill_id, $mx_action_code,
+                 $mx_priority, $mx_station, $mx_station_id, $mx_timestamp,
+                 $nip_num, $prod_mach_id, $prod_mill_id, $prod_route_id,
+                 $prod_route_plan, $reject_id, $reject_id_2, $reject_id_breaks,
+                 $reject_id_cracks, $run_num, $run_num_orig,
+                 $seconds_on_machine, $sets_plan, $sets_prod, $sets_slab,
+                 $speed_mach, $splices, $stack_load_back, $stack_load_center,
+                 $stack_load_front, $stat, $steam_value_felt, $steam_value_wire,
+                 $stickers, $streaks_smears, $ts_turned_up, $ts_wound,
+                 $unmarked_defects, $wgt_act, $wgt_coat1, $wgt_coat2,
+                 $wgt_slabbed, $wgt_turnup, $width_act, $width_turnup,
+                 $wire_side, $test_changed_flag);
+END SUBROUTINE
+
+########### Return an active recipe ################################################################################
+SUBROUTINE ACSGetActiveRecipe()
+# Inputs : mill_id, machine_type, machine_id, grade_spec_name, ts_transaction
+# Output : act_recipe_prod_id, act_ts_begin, act_ts_end, act_class, act_sim_id, act_recipe_found = 0 or 1
+
+		SELECT    recipe_prod_id act_recipe_prod_id, ts_begin act_ts_begin, ts_end act_ts_end, class act_class, sim_id act_sim_id
+		FROM      acs_recipe_act
+		WHERE     mill_id = $mill_id 
+			and machine_type = $machine_type
+			and machine_id = $machine_id
+			and grade_spec_made = $grade_spec_made 
+			and (($ts_transaction>= ts_begin) and ($ts_transaction< ts_end or ts_end = 0));
+
+		let act_recipe_found = $success;
+
+END SUBROUTINE
+
+########### Return the unit cost of a RM ################################################################################
+SUBROUTINE ACSGetRMCostunit()
+# Inputs : mill_id, raw_matl_grp_id, raw_matl_id
+# Output : acs_cost_unit
+
+		select cost_unit acs_cost_unit
+			from raw_matl_mill
+			where mill_id = $mill_id 
+			and raw_matl_grp_id = $raw_matl_grp_id
+			and raw_matl_id = $raw_matl_id;
+
+END SUBROUTINE
+
+########### Return the dry weight of a Jumbo ################################################################################
+SUBROUTINE ACSGetJumboDryWeight()
+# Inputs : jumbo_id, wgt_act
+# Output : dry_wgt_act
+
+		let acs_moisture_val = 0;
+		let dry_wgt_act= 0;
+
+		if ($ACS_MOISTURE = "") then
+			let acs_moisture_val = $ACS_MOISTURE_VAL;
+		else
+# From QO table
+# Get the tag_id from the OPC table for the raw material
+# tag_machine may have multiple rows for this tag_id, 
+# but only one record in test_result_view will contain the value for moisture
+#
+#
+#			if ($QO = "Y" and $QOMISER = "Y") then
+#				foreach
+#					select tag_guidkey from tag_machine where tag_id = 'Moisture';
+#
+#						select avgd_val 
+#							from test_result_view 
+#							where hist_tag_guidkey = $tag_guidkey 
+#							and sample_source_key = $jumbo_id 
+#							and set_num='0';
+#
+#						let acs_moisture_val = $acs_moisture_val + $avgd_val;
+#				end foreach
+#			end if
+		end if
+
+# Get Dry Weight
+		let dry_wgt_act = $wgt_act * (1 - $acs_moisture_val/100);
+
+END SUBROUTINE
+
+########### Return the active quantity for a raw material ##############################################################################
+SUBROUTINE ACSGetRMActiveQuantity()
+# Inputs : dry_wgt_act, quantity
+# Output : quantity_active
+
+	if $USEMETRIC = "Y" then
+		let quantity_active = ($dry_wgt_act/1000) * $quantity;
+	else
+		let quantity_active = ($dry_wgt_act/2000) * $quantity;
+	end if
+		
+END SUBROUTINE
+
+########### Insert a record in the trans log to trigger re-calculation in .net appl #####################################################
+SUBROUTINE ACSInsertTransLog()
+
+# Don't re-enter the record if he is already created and not processed yet
+
+	select count(*) cnt
+		from acs_cost_trans_log
+		where unit_id = $unit_id
+		and stat = 'N';
+	if ($cnt = 0) then
+		let time = {time};
+		insert into acs_cost_trans_log (unit_id, type_code, stat, ts_create, ts_modified, mill_id, stat_std)
+			values ($unit_id,$acs_type_code,'N',$time,0,$mill_id,'N');
+	end if
+
+END SUBROUTINE
+
+########### Delete record/s in acs_direct_cost and acs_cost based on cost_id #####################################################
+SUBROUTINE ACSDeleteCosts()
+# Inputs : cost_id
+# Output : error
+
+	let error = 0;
+	if ($cost_id <> " " and $cost_id <> "") then
+
+		select closure_flag
+			from acs_cost
+			where cost_id = $cost_id;
+
+		if ($closure_flag = "Y") then 
+			let error = 1;
+		else	
+					
+			select unit_id, type_code 
+				from acs_direct_cost 
+				where cost_id = $cost_id;
+
+			if ($unit_id <> " " and $unit_id <> "") then
+				CALL ACSInsertTransLog();
+
+				delete from acs_direct_cost 
+					where cost_id = $cost_id;
+			end if
+		end if
+
+		if ($error = 0) then
+			delete from acs_cost 
+				where cost_id = $cost_id;
+
+		end if
+	end if
+
+END SUBROUTINE
+
+######################################### Delete if child records exists in acs unit cost
+
+########### Write TagNames into the interface table for the .NET routine to get OPC data
+
+SUBROUTINE ACSGetRealCons()
+
+	LET sav_unit_id = $unit_id;
+	LET sav_ts_turned_up = $ts_transaction;
+	LET curr_time = {time};
+
+
+	foreach
+		select server_name, prog_id, tag_name,
+			 ts_last_used, sec_lead_time, speed_ref, type_code
+		  from acs_opc_tag_mast
+		 where mill_id = $mill_id
+		  and machine_type = $machine_type
+		  and machine_id = $machine_id
+		  and active_flag = 'Y';
+
+# Get M/c speed from jumbo
+		select speed_mach actual_speed, seconds_on_machine
+		 from  jumbo
+		 where jumbo_id = $sav_unit_id;
+
+# Normalise with speed and account for Lead Time
+
+
+		if ($actual_speed > 0) then
+			LET sav_ts_end = $sav_ts_turned_up - ($sec_lead_time*$speed_ref/$actual_speed);
+			LET sav_ts_end = $sav_ts_end:"&&&&&&&&&&";
+		else
+			LET sav_ts_end = $sav_ts_turned_up ;
+		end if
+
+# what if this is the first time, the tag is being used?
+
+		if ($ts_last_used = 0) then
+			select max(ts_turned_up) ts_last_used
+			 from  jumbo
+			 where mill_id = $mill_id
+		  	 and machine_type = $machine_type
+		  	 and machine_id = $machine_id
+			 and run_num = $run_num
+			 and jumbo_id <> $sav_unit_id;	
+
+# Check when a new Tag is created for 0 ts_begin time, go back by seconds_on_machine. This is required only at startup where there are no Jumbos
+			if ($success = 0) then
+				LET ts_last_used = $sav_ts_turned_up - $seconds_on_machine;
+			end if	
+
+		end if
+
+
+			insert into acs_opti_opc_intf(
+				unit_id, tag_name, ts_turned_up, stat,
+				ts_begin, ts_end, value_act, quantity_act, prog_id, server_name,
+				quality, ts_approved, ts_modified, ts_create)
+			values ($sav_unit_id, $tag_name, $sav_ts_turned_up, 'N',
+				$ts_last_used, $sav_ts_end, 0, 0, $prog_id, $server_name,
+				' ', 0, 0, $curr_time);
+
+			update acs_opc_tag_mast
+			   set ts_last_used = $sav_ts_end
+			 where tag_name = $tag_name
+	  		  and mill_id = $mill_id
+			  and machine_type = $machine_type
+			  and machine_id = $machine_id
+			  and active_flag = 'Y';
+	end foreach
+
+END SUBROUTINE
+
+SUBROUTINE ACSDelRealCons()
+
+		delete acs_opti_opc_intf
+		 where unit_id = $unit_id;
+
+END SUBROUTINE
+
+SUBROUTINE BatchCost()
+## Input: cons_grp_id / cost_id_group / mill_id / machine_type / machine_id / grade_spec
+##											
+## Output: update acs_rm_manual_mast cost_per_ton  	
+
+	select sum(quantity) tot_quantity, sum(cost) tot_cost 
+		from acs_cost 
+	where cost_id_group=$cost_id_group and unit_id=$cons_grp_id;
+	if ($tot_cost>0) then
+		let cost_per_ton = ($tot_cost / $tot_quantity ) * $TonsFactor;
+	else
+		let cost_per_ton = 0;
+	end if
+
+	update acs_rm_manual_mast
+		set cost_per_ton = $cost_per_ton
+		where cons_grp_id = $cons_grp_id;
+
+#Calc RM Rolling Average Cost
+	call BatchRollingAvg();
+
+END SUBROUTINE
+SUBROUTINE BatchRollingAvg()
+## Input: cons_grp_id / mill_id / machine_type / machine_id / grade_spec
+##											
+## Output: update acs_raw_matl_mach cost_per_ton  	
+
+	select integer_value n_batches from constants
+		where key_value = 'ACS_NUM_BATCHES_AVG';
+	if ($success = 0) then
+		let n_batches = 10;
+	end if
+
+	select mill_id, machine_type, machine_id, grade_spec
+		from acs_rm_manual_mast
+		where cons_grp_id=$cons_grp_id;
+
+	let i = 0;
+	let tot_cost_per_ton = 0;
+	foreach
+		select cost_per_ton, wgt_airdry
+		from acs_rm_manual_mast
+		where mill_id = $mill_id and machine_type = $machine_type and machine_id = $machine_id 
+		and grade_spec = $grade_spec and type_code ='B' and stat='C' and cost_per_ton>0
+		order by ts_create desc;
+
+		if ($i = $n_batches) or ($i > $n_batches) then
+			exit foreach;
+		end if
+
+		let tot_wgt     = $tot_wgt + ($wgt_airdry/$TonsFactor);
+		let tot_wgtcost = $tot_wgtcost + (($wgt_airdry/$TonsFactor) * $cost_per_ton);
+		let i = $i + 1;
+
+	end foreach
+	if ($tot_wgt>0) then
+		let avg_cost_per_ton = $tot_wgtcost / $tot_wgt;		
+#		echo $avg_cost_per_ton = $avg_cost_per_ton = $tot_wgtcost / $tot_wgt;
+	else
+		let avg_cost_per_ton =0;
+	end if
+
+	select raw_matl_grp_id, raw_matl_id 
+		from acs_mill_mach_view
+		where  mill_id = $mill_id and machine_type = $machine_type and machine_id = $machine_id 
+			and grade_spec = $grade_spec and class = 'I' and active_flag='Y';
+
+	update acs_raw_matl_mach
+		set cost_per_ton = $avg_cost_per_ton
+		where mill_id = $mill_id and machine_type = $machine_type and machine_id = $machine_id 
+			and raw_matl_grp_id = $raw_matl_grp_id and raw_matl_id = $raw_matl_id;
+
+END SUBROUTINE
+
+SUBROUTINE AddACSDowntime()
+
+	select string_value unsched_dt from constants
+		where key_value = 'ACS_UNSCHED_DOWN';
+
+	let dt_class1 = "";
+	for i = 1; $i<4;i = $i + 1; DO
+		let dt_class1 = $dt_class1,$unsched_dt[$i];
+	end for
+	
+	let dt_class2 = "";
+	for i = 5; $i < 8; i = $i + 1; DO
+		let dt_class2 = $dt_class2,$unsched_dt[$i];
+	end for
+
+	let dt_class3 = "";
+	for i = 9; $i < 12; i = $i + 1; DO
+		let dt_class3 = $dt_class3,$unsched_dt[$i];
+	end for
+
+	IF ($dt_class_id = $dt_class1 or $dt_class_id = $dt_class2 or $dt_class_id = $dt_class3) THEN
+
+		select machine_type x
+			from acs_downtime
+			where machine_type = $machine_type
+			and mill_id = $mill_id
+			and machine_id = $machine_id
+			and type_code = $type_code
+			and ts_end = $ts_end
+			and run_num = $run_num
+			and mx_action_code = $mx_action_code
+			and mx_timestamp = $mx_timestamp;
+
+		IF ($success = 0) THEN
+			insert into acs_downtime (machine_type, mill_id, machine_id, run_num, ts_end, type_code, processed_flag, 
+				ts_processed, mx_action_code, seconds_total, mx_timestamp, ts_begin)
+			values ($machine_type, $mill_id, $machine_id, $run_num, $ts_end, $type_code, 'N', 0, 
+				$mx_action_code, $seconds_total, $mx_timestamp,$ts_begin);
+		END IF
+	END IF
+END SUBROUTINE
+
+
+SUBROUTINE ACSInsertLogBundle()
+	insert into acs_log_bundle
+		(article_id, bales_per_unit, bay_id, blade_change_1, blade_change_2,
+		 blade_pressure_1, blade_pressure_2, block_num, bsw_act,
+		 bsw_nominal, cal_press_back, cal_press_center,
+		 cal_press_front, cartons_picked, cartons_reserved,
+		 claim_item_num, claim_num, class,class_orig, coated_side, core_id, 
+		 crew, customer_id, dandy_id, diam_act, diam_ord,
+		 dist_from_front, emb_pat_id, embossed_side, gloss_value_felt,
+		 gloss_value_wire, grade_spec, grade_spec_made,
+		 hole_punch_id, holes, inside_set, item_num, 
+		 jumbo_reverse, length_lineal, length_sheet, load_id, lot_num,
+		 mach_id_dest, mach_id_plan, mach_id_rej, mach_type_dest,
+		 mach_type_plan, mach_type_rej, machine_id, machine_type,
+		 marked_defects, mill_id, mx_action_code, mx_priority,
+		 mx_station, mx_station_id, mx_timestamp, order_id,
+		 over_wgt_flag,pallet_spec_id, parent_id, parent_len_sheet,
+		 parent_width_sheet, pat_num, pos_id, printed_side, 
+		 prod_mach_id, prod_mill_id, prod_route_id, prod_route_plan,
+		 reams_cull, reams_good, reams_hold, reams_joblot,
+		 reams_reprocess, reject_id, reject_id_2, 
+		 reject_id_breaks, reject_id_cracks, reject_id_hold,
+		 reject_id_reproc, retest_flag, revision_num, rma_id,
+		 roll_id_cust, roll_id_lead, roll_id_next, rolls_per_pack, 
+		 route_step_num, run_num, run_num_orig, security_pat_id, 
+		 segment_id, set_id, sets_prod, sheet_count, speed_mach, splices,
+		 stack_load_back, stack_load_center, stack_load_front,
+		 stat, stickers, streaks_smears, track_num,
+		 ts_loaded, ts_scaled, ts_shipped,
+		 ts_warehoused,ts_wound, type_code, unit_id, unit_id_parent1,
+		 unit_id_parent2, unit_id_parent3, carton_count,
+		 unmarked_defects, warehouse_id, cartons_per_pallet,
+		 wgt_coat1, wgt_coat2, wgt_est, wgt_scaled,
+		 wgt_scaled_last, wgt_slabbed, wgt_tare, whse_zone_id,
+		 width_act, width_ord, wire_side, wrap_id,
+		 ts_lab_upd,qual_chg_flag,user_id,wgt_airdry,price_purchase, seconds_on_machine)
+	 values ($article_id, $bales_per_unit, $bay_id, $blade_change_1, $blade_change_2,
+		 $blade_pressure_1, $blade_pressure_2, $block_num, $bsw_act,
+		 $bsw_nominal, $cal_press_back, $cal_press_center,
+		 $cal_press_front, $cartons_picked, $cartons_reserved,
+		 $claim_item_num, $claim_num, $class,$class_orig, $coated_side, 
+		 $core_id, $crew, $customer_id, $dandy_id, $diam_act, $diam_ord,
+		 $dist_from_front, $emb_pat_id, $embossed_side,
+		 $gloss_value_felt, $gloss_value_wire, $grade_spec,
+		 $grade_spec_made, $hole_punch_id, $holes, $inside_set,
+		 $item_num, $jumbo_reverse, $length_lineal, $length_sheet,
+		 $load_id, $lot_num, $mach_id_dest, $mach_id_plan, $mach_id_rej,
+		 $mach_type_dest, $mach_type_plan, $mach_type_rej, $machine_id,
+		 $machine_type, $marked_defects, $mill_id, $action_code,
+		 $priority, $station, $station_id, $mx_timestamp, $order_id, 
+		 $over_wgt_flag, $pallet_spec_id, $parent_id, $parent_len_sheet,
+		 $parent_width_sheet, $pat_num, $pos_id, $printed_side, 
+		 $prod_mach_id, $prod_mill_id, $prod_route_id, $prod_route_plan,
+		 $reams_cull, $reams_good, $reams_hold, $reams_joblot,
+		 $reams_reprocess, $reject_id, $reject_id_2,
+		 $reject_id_breaks, $reject_id_cracks, $reject_id_hold,
+		 $reject_id_reproc, $retest_flag, $revision_num,  $rma_id,
+		 $roll_id_cust, $roll_id_lead, $roll_id_next, $rolls_per_pack,
+		 $route_step_num, $run_num, $run_num_orig, $security_pat_id,
+		 $segment_id, $set_id, $sets_prod, $sheet_count, $speed_mach,
+		 $splices, $stack_load_back, $stack_load_center, $stack_load_front,
+		 $stat, $stickers, $streaks_smears, $track_num,
+		 $ts_loaded, $ts_scaled, $ts_shipped,
+		 $ts_warehoused, $ts_wound, $type_code, $unit_id, $unit_id_parent1,
+		 $unit_id_parent2, $unit_id_parent3, $carton_count,
+		 $unmarked_defects, $warehouse_id, $cartons_per_pallet,
+		 $wgt_coat1, $wgt_coat2, $wgt_est, $wgt_scaled,
+		 $wgt_scaled_last, $wgt_slabbed, $wgt_tare, $whse_zone_id,
+		 $width_act, $width_ord, $wire_side, $wrap_id,
+		 $ts_lab_upd,$qual_chg_flag,$user_id,$wgt_airdry,$price_purchase,$seconds_on_machine);
+END SUBROUTINE
+

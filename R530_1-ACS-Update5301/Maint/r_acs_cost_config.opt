@@ -1,0 +1,359 @@
+<Application type="Application" name="r_acs_cost_config" ID="1" Directory="Appl" lastID="84" modified="2010-12-14 09:45:34Z" user="msdmgr" command="ACS ACSCostRpt" environment="">
+  <Widget type="Template" name="StandardTitleForm" ID="23" created="2009-02-17 10:39:18Z" user="kbhatia" modified="2009-02-17 10:39:42Z" handle="1">
+    <Output name="params" ref="24" created="2009-02-17 10:39:42Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Connector" name="params" ID="24" created="2009-02-17 10:39:29Z" user="kbhatia" modified="2009-02-25 07:15:37Z" handle="2">
+    <Input name="params" ref="23" created="2009-02-17 10:39:42Z" user="kbhatia" />
+    <Output name="titlename:params" ref="25" created="2009-02-17 10:40:08Z" user="kbhatia" />
+    <Output name="titlename:value" ref="25" created="2009-02-25 07:15:37Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Template" name="REPORTTITLE" ID="25" created="2009-02-17 10:39:56Z" user="kbhatia" modified="2009-02-25 07:15:37Z" handle="3">
+    <Input name="titlename:params" ref="24" created="2009-02-17 10:40:08Z" user="kbhatia" />
+    <Input name="titlename:value" ref="24" created="2009-02-25 07:15:37Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Template" name="PRINTSIZE" ID="67" created="2009-02-25 07:15:59Z" user="kbhatia" modified="2009-02-25 07:16:09Z" handle="4">
+    <Attribute name="default" value="landscape" created="2009-02-25 07:16:09Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Template" name="MILL" ID="72" created="2009-02-25 07:19:27Z" user="kbhatia" modified="2009-02-25 07:20:53Z" handle="5">
+    <Output name="value" ref="73" created="2009-02-25 07:20:53Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Template" name="MillIDColumn" ID="73" created="2009-02-25 07:19:59Z" user="kbhatia" modified="2009-02-25 07:20:53Z" handle="6">
+    <Input name="value" ref="72" created="2009-02-25 07:20:53Z" user="kbhatia" />
+    <Output name="input" ref="68" created="2009-02-25 07:20:03Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Calculation" name="subtitle1" ID="68" created="2009-02-25 07:16:38Z" user="kbhatia" modified="2009-02-25 07:29:30Z" handle="7">
+    <Attribute name="calculation" value="Concat( &quot;MILL:&quot;, MillIDColumn)" created="2009-02-25 07:16:52Z" user="kbhatia" modified="2009-02-25 07:29:30Z" />
+    <Input name="input" ref="73" created="2009-02-25 07:20:03Z" user="kbhatia" />
+    <Output name="value" ref="69" created="2009-02-25 07:17:17Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Template" name="REPORTSUBTITLE1" ID="69" created="2009-02-25 07:17:07Z" user="kbhatia" modified="2009-02-25 07:17:17Z" handle="8">
+    <Input name="value" ref="68" created="2009-02-25 07:17:17Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Calculation" name="subtitle2" ID="70" created="2009-02-25 07:17:40Z" user="msdmgr" modified="2010-12-13 16:35:09Z" handle="9">
+    <Attribute name="calculation" value="TruthToArg(CG=1, TruthToArg(CD=1, TruthToArg(CS=1, &quot;CostReport&quot;,&quot;CostCentersReport&quot;),&quot;CostDriversReport&quot;),&quot;CostGroupsReport&quot;)" created="2009-02-25 07:17:54Z" user="kbhatia" modified="2009-02-25 07:31:58Z" />
+    <Output name="value" ref="71" created="2009-02-25 07:18:11Z" user="kbhatia" />
+    <Input name="input" ref="4" created="2009-02-25 07:23:34Z" user="kbhatia" />
+    <Input name="input" ref="7" created="2009-02-25 07:23:34Z" user="kbhatia" />
+    <Input name="input" ref="8" created="2009-02-25 07:23:34Z" user="kbhatia" />
+    <Input name="input" ref="74" created="2009-02-25 07:23:34Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Template" name="REPORTSUBTITLE2" ID="71" created="2009-02-25 07:17:57Z" user="kbhatia" modified="2009-02-25 07:18:18Z" handle="10">
+    <Input name="value" ref="70" created="2009-02-25 07:18:11Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Form" name="ActiveWhere" ID="5" created="2009-02-17 10:10:45Z" user="msdmgr" modified="2009-02-17 11:28:14Z" handle="11">
+    <Widget type="GroupForm" ID="30" handle="1" name="ActiveWhereY" grid_width="8" grid_height="1" created="2009-02-17 11:28:11Z" user="msdmgr" modified="2010-12-14 09:34:28Z">
+      <Widget type="RadioButton" ID="31" handle="1" name="AllButton" created="2009-02-17 11:28:11Z" user="msdmgr">
+        <Attribute name="prefix.STD" value="&quot;ALL&quot;" modified="2008-12-03 13:52:36Z" user="msdmgr" />
+        <Attribute name="prefix.ENG" value="&quot;ALL&quot;" modified="2008-12-03 13:52:31Z" user="msdmgr" />
+        <Output name="input" ref="34" />
+      </Widget>
+      <Widget type="RadioButton" ID="32" handle="2" name="YesButton" created="2009-02-17 11:28:11Z" user="msdmgr">
+        <Attribute name="prefix.STD" value="&quot;ACTIVE&quot;" modified="2008-12-03 13:52:59Z" user="msdmgr" />
+        <Attribute name="prefix.ENG" value="&quot;ACTIVE&quot;" modified="2008-12-03 13:52:42Z" user="msdmgr" />
+        <Attribute name="default" value="1" created="2008-12-03 13:52:22Z" user="msdmgr" />
+        <Output name="input" ref="34" />
+      </Widget>
+      <Widget type="RadioButton" ID="33" handle="3" name="NoButton" created="2009-02-17 11:28:11Z" user="msdmgr">
+        <Attribute name="prefix.STD" value="&quot;INACTIVE&quot;" modified="2008-12-03 13:52:48Z" user="msdmgr" />
+        <Attribute name="prefix.ENG" value="&quot;INACTIVE&quot;" modified="2008-12-03 13:52:52Z" user="msdmgr" />
+        <Output name="input" ref="34" />
+      </Widget>
+      <Widget type="Calculation" ID="34" handle="4" name="WhatDidTheyChoose" created="2009-02-17 11:28:11Z" user="msdmgr">
+        <Attribute name="calculation" value="&quot;TruthToArg(YesButton,(TruthToArg(NoButton,'%','N'),'Y')&quot;" />
+        <Input name="input" ref="31" />
+        <Input name="input" ref="32" />
+        <Input name="input" ref="33" />
+        <Output name="value" ref="35" />
+      </Widget>
+      <Widget type="Calculation" name="WhichName" ID="53" created="2009-02-18 04:38:56Z" user="msdmgr" modified="2010-12-13 16:40:54Z" handle="5">
+        <Attribute name="calculation" value="TruthToArg(CG=1, TruthToArg(CD=1,  TruthToArg(CD=1, &quot;acs_acct_grp.active_flag&quot;,&quot;acs_struc_view.active_flag&quot; ), &quot;acs_cost_driver.active_flag&quot;), &quot;acs_cost_group.active_flag&quot;)" created="2009-02-18 04:41:37Z" user="msdmgr" modified="2010-12-13 16:40:54Z" />
+        <Output name="name" ref="35" created="2009-02-18 04:41:46Z" user="kbhatia" />
+        <Input name="input" ref="4" created="2009-02-18 04:39:10Z" user="kbhatia" />
+        <Input name="input" ref="7" created="2009-02-18 04:39:10Z" user="kbhatia" />
+        <Input name="input" ref="8" created="2009-02-18 04:39:10Z" user="kbhatia" />
+        <Input name="input" ref="74" created="2009-02-18 04:39:10Z" user="kbhatia" />
+      </Widget>
+      <Widget type="InternalField" ID="35" handle="6" name="ActiveFlag" created="2009-02-17 11:28:11Z" user="kbhatia" modified="2009-02-18 04:41:46Z">
+        <Attribute name="default" value="&quot;%&quot;" />
+        <Attribute name="whereOperator" value="like" />
+        <Input name="value" ref="34" />
+        <Input name="name" ref="53" created="2009-02-18 04:41:46Z" user="kbhatia" />
+        <Output name="where" ref="36" />
+        <Output name="value" ref="37" />
+      </Widget>
+      <Widget type="Connector" ID="36" handle="7" name="where" created="2009-02-17 11:28:11Z" user="msdmgr">
+        <Input name="where" ref="35" />
+      </Widget>
+      <Widget type="Connector" ID="37" handle="8" name="value" created="2009-02-17 11:28:11Z" user="msdmgr">
+        <Input name="value" ref="35" />
+      </Widget>
+      <Output name="where" ref="10" created="2009-02-17 11:28:52Z" user="msdmgr" />
+      <Output name="where" ref="38" created="2009-02-18 06:48:55Z" user="kbhatia" />
+      <Output name="where" ref="55" created="2009-02-18 06:49:03Z" user="kbhatia" />
+    </Widget>
+    <Input name="below" ref="6" created="2009-02-17 10:17:27Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Form" name="RadioButtons" ID="6" created="2009-02-17 10:11:34Z" user="msdmgr" modified="2010-12-13 16:35:09Z" handle="12">
+    <Widget type="RadioButton" name="CG:CostGroupRadio" ID="4" created="2009-02-17 10:08:20Z" user="kbhatia" handle="1" modified="2009-02-25 07:23:34Z">
+      <Output name="input" ref="70" created="2009-02-25 07:23:34Z" user="kbhatia" />
+      <Output name="input" ref="53" created="2009-02-18 04:39:10Z" user="kbhatia" />
+      <Output name="input" ref="20" created="2009-02-17 10:27:07Z" user="kbhatia" />
+    </Widget>
+    <Widget type="RadioButton" name="CD:CostDriversRadio" ID="7" created="2009-02-17 10:11:55Z" user="kbhatia" handle="2" modified="2009-02-25 07:23:34Z">
+      <Output name="input" ref="70" created="2009-02-25 07:23:34Z" user="kbhatia" />
+      <Output name="input" ref="53" created="2009-02-18 04:39:10Z" user="kbhatia" />
+      <Output name="input" ref="40" created="2009-02-17 11:40:22Z" user="msdmgr" />
+    </Widget>
+    <Widget type="RadioButton" name="CS:CostCentersRadio" ID="8" created="2009-02-17 10:12:26Z" user="kbhatia" handle="3" modified="2009-02-25 07:23:34Z">
+      <Output name="input" ref="70" created="2009-02-25 07:23:34Z" user="kbhatia" />
+      <Output name="input" ref="53" created="2009-02-18 04:39:10Z" user="kbhatia" />
+      <Output name="input" ref="54" created="2009-02-18 04:42:23Z" user="kbhatia" />
+    </Widget>
+    <Widget type="RadioButton" name="CT:CostStructureRadio" ID="74" created="2010-12-13 16:35:09Z" user="msdmgr" handle="4" modified="2010-12-13 17:00:03Z">
+      <Output name="input" ref="70" created="2009-02-25 07:23:34Z" user="kbhatia" />
+      <Output name="input" ref="53" created="2009-02-18 04:39:10Z" user="kbhatia" />
+      <Output name="input" ref="40" created="2009-02-17 11:40:22Z" user="msdmgr" />
+      <Output name="input" ref="75" created="2010-12-13 17:00:03Z" user="msdmgr" />
+    </Widget>
+    <Attribute name="orientation" value="vertical" created="2009-02-17 10:19:19Z" user="kbhatia" />
+    <Output name="below" ref="5" created="2009-02-17 10:17:27Z" user="kbhatia" />
+    <Input name="right" ref="9" created="2009-02-17 10:17:50Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Form" name="ButtonForm" ID="9" created="2009-02-17 10:14:25Z" user="msdmgr" modified="2009-02-17 11:39:26Z" handle="13">
+    <Widget type="Template" name="DisplayButton" ID="11" created="2009-02-17 10:15:47Z" user="msdmgr" handle="1" modified="2010-12-13 17:01:51Z">
+      <Output name="displayed" ref="10" created="2009-02-17 10:23:30Z" user="kbhatia" />
+      <Output name="displayed" ref="38" created="2009-02-17 12:13:45Z" user="msdmgr" />
+      <Output name="displayed" ref="55" created="2009-02-18 04:42:41Z" user="kbhatia" />
+      <Output name="displayed" ref="76" created="2010-12-13 17:01:51Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Template" name="PrintButton" ID="12" created="2009-02-17 10:22:36Z" user="msdmgr" handle="2" modified="2010-12-13 16:46:13Z">
+      <Output name="print" ref="14" created="2009-02-17 10:24:26Z" user="kbhatia" />
+      <Output name="print" ref="39" created="2009-02-17 11:41:53Z" user="msdmgr" />
+      <Output name="print" ref="56" created="2009-02-18 06:46:24Z" user="kbhatia" />
+      <Output name="print" ref="77" created="2010-12-13 16:46:13Z" user="msdmgr" />
+    </Widget>
+    <Output name="right" ref="6" created="2009-02-17 10:17:50Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Calculation" name="WhichRadio" ID="20" created="2009-02-17 10:26:56Z" user="kbhatia" modified="2009-02-17 10:27:51Z" handle="14">
+    <Attribute name="calculation" value="CG=1" created="2009-02-17 10:27:40Z" user="kbhatia" />
+    <Input name="input" ref="4" created="2009-02-17 10:27:07Z" user="kbhatia" />
+    <Output name="activate" ref="10" created="2009-02-17 10:27:51Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Cursor" name="Group" ID="10" created="2009-02-17 10:14:38Z" user="msdmgr" handle="15" modified="2009-02-17 11:40:37Z">
+    <Attribute name="from" value="acs_cost_group, acs_cost_type" created="2009-02-17 10:54:33Z" user="kbhatia" />
+    <Attribute name="joinWhere" value="acs_cost_group.cost_group_id=acs_cost_type.cost_group_id" created="2009-02-17 10:55:03Z" user="kbhatia" />
+    <Input name="where" ref="30" created="2009-02-17 11:28:52Z" user="msdmgr" />
+    <Input name="displayed" ref="11" created="2009-02-17 10:23:30Z" user="kbhatia" />
+    <Input name="activate" ref="20" created="2009-02-17 10:27:51Z" user="kbhatia" />
+    <Output name="dataCursor" ref="14" created="2009-02-17 10:24:14Z" user="kbhatia" />
+    <Output name="select" ref="15" created="2009-02-17 10:26:40Z" user="kbhatia" />
+    <Output name="select" ref="16" created="2009-02-17 10:26:40Z" user="kbhatia" />
+    <Output name="select" ref="27" created="2009-02-17 11:10:57Z" user="msdmgr" />
+    <Output name="select" ref="28" created="2009-02-17 11:11:04Z" user="msdmgr" />
+    <Output name="select" ref="18" created="2009-02-17 10:26:40Z" user="kbhatia" />
+    <Output name="select" ref="19" created="2009-02-17 10:26:40Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Template" name="ReportCursor" ID="14" created="2009-02-17 10:24:00Z" user="kbhatia" modified="2009-02-17 10:24:26Z" handle="16">
+    <Input name="print" ref="12" created="2009-02-17 10:24:26Z" user="kbhatia" />
+    <Input name="dataCursor" ref="10" created="2009-02-17 10:24:14Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Diagram" name="ReportForm" ID="13" created="2009-02-17 10:23:03Z" user="msdmgr" modified="2009-02-17 11:42:25Z" handle="17">
+    <Widget type="Template" name="SubBreakFlag" ID="26" created="2009-02-17 10:46:30Z" user="kbhatia" modified="2009-02-17 10:46:39Z" handle="1">
+      <Output name="aggregate" ref="15" created="2009-02-17 10:46:39Z" user="kbhatia" />
+    </Widget>
+    <Widget type="Template" name="CostGroupIDColumn" ID="15" created="2009-02-17 10:25:15Z" user="msdmgr" handle="2" modified="2009-02-17 11:12:53Z">
+      <Attribute name="name" value="acs_cost_group.cost_group_id" created="2009-02-17 11:12:53Z" user="msdmgr" />
+      <Input name="select" ref="10" created="2009-02-17 10:26:40Z" user="kbhatia" />
+      <Input name="aggregate" ref="26" created="2009-02-17 10:46:39Z" user="kbhatia" />
+    </Widget>
+    <Widget type="Template" name="CostGroupNameColumn" ID="16" created="2009-02-17 10:25:28Z" user="kbhatia" modified="2009-02-17 10:26:40Z" handle="3">
+      <Input name="select" ref="10" created="2009-02-17 10:26:40Z" user="kbhatia" />
+    </Widget>
+    <Widget type="Template" name="CostTypeIDColumn" ID="27" created="2009-02-17 11:10:37Z" user="msdmgr" modified="2009-02-17 11:10:57Z" handle="4">
+      <Input name="select" ref="10" created="2009-02-17 11:10:57Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Template" name="CostTypeNameColumn" ID="28" created="2009-02-17 11:10:49Z" user="msdmgr" modified="2009-02-17 11:11:04Z" handle="5">
+      <Input name="select" ref="10" created="2009-02-17 11:11:04Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Template" name="ActiveColumn" ID="18" created="2009-02-17 10:26:03Z" user="msdmgr" handle="6" modified="2009-02-17 11:21:45Z">
+      <Attribute name="name" value="acs_cost_type.active_flag" created="2009-02-17 11:09:17Z" user="msdmgr" modified="2009-02-17 11:21:45Z" />
+      <Input name="select" ref="10" created="2009-02-17 10:26:40Z" user="kbhatia" />
+    </Widget>
+    <Widget type="Template" name="TimeCreatedColumn" ID="19" created="2009-02-17 10:26:14Z" user="msdmgr" handle="7" modified="2009-02-17 11:22:01Z">
+      <Attribute name="name" value="acs_cost_type.ts_create" created="2009-02-17 11:09:37Z" user="msdmgr" modified="2009-02-17 11:22:01Z" />
+      <Input name="select" ref="10" created="2009-02-17 10:26:40Z" user="kbhatia" />
+    </Widget>
+  </Widget>
+  <Widget type="Calculation" name="WhichRadio" ID="40" created="2009-02-17 11:39:36Z" user="msdmgr" handle="18" modified="2010-12-13 16:35:09Z">
+    <Attribute name="calculation" value="CD=1" created="2009-02-17 10:27:40Z" user="msdmgr" modified="2009-02-17 11:40:33Z" />
+    <Input name="input" ref="7" created="2009-02-17 11:40:22Z" user="msdmgr" />
+    <Input name="input" ref="74" created="2009-02-17 11:40:22Z" user="msdmgr" />
+    <Output name="activate" ref="38" created="2009-02-17 11:40:52Z" user="msdmgr" />
+  </Widget>
+  <Widget type="Cursor" name="Driver" ID="38" created="2009-02-17 11:30:51Z" user="kbhatia" modified="2009-02-18 06:48:55Z" handle="19">
+    <Attribute name="joinWhere" value="acs_cost_driver.cost_driver_id=acs_cost_alloc.cost_driver_id" created="2009-02-17 11:37:26Z" user="msdmgr" />
+    <Attribute name="from" value="acs_cost_driver, acs_cost_alloc" created="2009-02-17 11:37:47Z" user="msdmgr" />
+    <Input name="where" ref="30" created="2009-02-18 06:48:55Z" user="kbhatia" />
+    <Input name="displayed" ref="11" created="2009-02-17 12:13:45Z" user="msdmgr" />
+    <Input name="activate" ref="40" created="2009-02-17 11:40:52Z" user="msdmgr" />
+    <Output name="dataCursor" ref="39" created="2009-02-17 11:48:53Z" user="msdmgr" />
+    <Output name="select" ref="42" created="2009-02-17 11:48:41Z" user="msdmgr" />
+    <Output name="select" ref="43" created="2009-02-17 11:48:41Z" user="msdmgr" />
+    <Output name="select" ref="44" created="2009-02-17 11:48:41Z" user="msdmgr" />
+    <Output name="select" ref="45" created="2009-02-17 11:48:41Z" user="msdmgr" />
+    <Output name="select" ref="46" created="2009-02-17 11:48:41Z" user="msdmgr" />
+    <Output name="select" ref="47" created="2009-02-17 11:48:41Z" user="msdmgr" />
+    <Output name="select" ref="48" created="2009-02-17 11:48:41Z" user="msdmgr" />
+    <Output name="select" ref="49" created="2009-02-17 11:48:41Z" user="msdmgr" />
+    <Output name="select" ref="50" created="2009-02-17 11:48:41Z" user="msdmgr" />
+    <Output name="select" ref="52" created="2009-02-18 04:29:32Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Template" name="ReportCursor" ID="39" created="2009-02-17 11:38:22Z" user="kbhatia" modified="2009-02-18 05:34:51Z" handle="20">
+    <Input name="print" ref="12" created="2009-02-17 11:41:53Z" user="msdmgr" />
+    <Input name="dataCursor" ref="38" created="2009-02-17 11:48:53Z" user="msdmgr" />
+  </Widget>
+  <Widget type="Diagram" name="ReportForm" ID="41" created="2009-02-17 11:42:04Z" user="msdmgr" modified="2009-02-17 13:08:42Z" handle="21">
+    <Widget type="Template" name="SubBreakFlag" ID="51" created="2009-02-17 11:47:39Z" user="msdmgr" modified="2009-02-17 11:47:52Z" handle="1">
+      <Output name="aggregate" ref="42" created="2009-02-17 11:47:52Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Template" name="CostDriverIDColumn" ID="42" created="2009-02-17 11:43:16Z" user="kbhatia" handle="2" modified="2009-02-18 05:34:26Z">
+      <Attribute name="name" value="acs_cost_driver.cost_driver_id" created="2009-02-17 12:59:52Z" user="msdmgr" />
+      <Input name="select" ref="38" created="2009-02-17 11:48:41Z" user="msdmgr" />
+      <Input name="aggregate" ref="51" created="2009-02-17 11:47:52Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Template" name="CostDriverNameColumn" ID="43" created="2009-02-17 11:43:27Z" user="kbhatia" handle="3" modified="2009-02-18 05:34:28Z">
+      <Input name="select" ref="38" created="2009-02-17 11:48:41Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Template" name="ClassColumn" ID="44" created="2009-02-17 11:43:41Z" user="kbhatia" handle="4" modified="2009-02-18 05:34:29Z">
+      <Input name="select" ref="38" created="2009-02-17 11:48:41Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Template" name="TypeCodeColumn" ID="45" created="2009-02-17 11:43:50Z" user="kbhatia" handle="5" modified="2009-02-18 05:34:30Z">
+      <Attribute name="name" value="acs_cost_driver.type_code" created="2009-02-17 11:47:09Z" user="msdmgr" />
+      <Input name="select" ref="38" created="2009-02-17 11:48:41Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Template" name="MillIDColumn" ID="46" created="2009-02-17 11:45:26Z" user="kbhatia" handle="6" modified="2009-02-18 05:34:31Z">
+      <Input name="select" ref="38" created="2009-02-17 11:48:41Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Template" name="MachTypeColumn" ID="47" created="2009-02-17 11:45:37Z" user="kbhatia" handle="7" modified="2009-02-18 05:34:31Z">
+      <Input name="select" ref="38" created="2009-02-17 11:48:41Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Template" name="MachIDColumn" ID="48" created="2009-02-17 11:45:48Z" user="kbhatia" handle="8" modified="2009-02-18 05:34:32Z">
+      <Input name="select" ref="38" created="2009-02-17 11:48:41Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Template" name="TypeCodeColumn" ID="49" created="2009-02-17 11:46:11Z" user="kbhatia" modified="2009-02-18 05:34:33Z" handle="9">
+      <Attribute name="name" value="acs_cost_alloc.type_code" created="2009-02-17 11:46:53Z" user="msdmgr" />
+      <Input name="select" ref="38" created="2009-02-17 11:48:41Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Template" name="FactorColumn" ID="50" created="2009-02-17 11:46:20Z" user="kbhatia" handle="10" modified="2009-02-18 05:34:34Z">
+      <Input name="select" ref="38" created="2009-02-17 11:48:41Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Template" name="ActiveColumn" ID="52" created="2009-02-17 13:08:42Z" user="kbhatia" handle="11" modified="2009-02-18 05:34:35Z">
+      <Input name="select" ref="38" created="2009-02-18 04:29:32Z" user="kbhatia" />
+    </Widget>
+  </Widget>
+  <Widget type="Calculation" name="WhichRadio" ID="54" created="2009-02-18 04:42:08Z" user="kbhatia" handle="22" modified="2009-02-18 05:35:18Z">
+    <Attribute name="calculation" value="CS=1" created="2009-02-17 10:27:40Z" user="kbhatia" modified="2009-02-18 04:42:31Z" />
+    <Input name="input" ref="8" created="2009-02-18 04:42:23Z" user="kbhatia" />
+    <Output name="activate" ref="55" created="2009-02-18 05:35:18Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Cursor" name="CostCenter" ID="55" created="2009-02-18 04:42:41Z" user="kbhatia" handle="23" modified="2009-02-18 06:49:03Z">
+    <Attribute name="joinWhere" value="acs_acct_grp.acct_grp_id=acs_acct_seg.acct_grp_id" created="2009-02-17 11:37:26Z" user="kbhatia" modified="2009-02-18 05:34:02Z" />
+    <Attribute name="from" value="acs_acct_grp, acs_acct_seg" created="2009-02-17 11:37:47Z" user="kbhatia" modified="2009-02-18 04:43:12Z" />
+    <Input name="where" ref="30" created="2009-02-18 06:49:03Z" user="kbhatia" />
+    <Input name="displayed" ref="11" created="2009-02-18 04:42:41Z" user="kbhatia" />
+    <Input name="activate" ref="54" created="2009-02-18 05:35:18Z" user="kbhatia" />
+    <Output name="dataCursor" ref="56" created="2009-02-18 05:35:01Z" user="kbhatia" />
+    <Output name="select" ref="58" created="2009-02-18 06:45:56Z" user="kbhatia" />
+    <Output name="select" ref="59" created="2009-02-18 06:45:56Z" user="kbhatia" />
+    <Output name="select" ref="60" created="2009-02-18 06:45:56Z" user="kbhatia" />
+    <Output name="select" ref="61" created="2009-02-18 06:45:56Z" user="kbhatia" />
+    <Output name="select" ref="62" created="2009-02-18 06:45:56Z" user="kbhatia" />
+    <Output name="select" ref="63" created="2009-02-18 06:45:56Z" user="kbhatia" />
+    <Output name="select" ref="64" created="2009-02-18 06:45:56Z" user="kbhatia" />
+    <Output name="select" ref="65" created="2009-02-18 06:48:21Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Template" name="ReportCursor" ID="56" created="2009-02-18 05:34:47Z" user="kbhatia" modified="2009-02-18 06:46:24Z" handle="24">
+    <Input name="print" ref="12" created="2009-02-18 06:46:24Z" user="kbhatia" />
+    <Input name="dataCursor" ref="55" created="2009-02-18 05:35:01Z" user="kbhatia" />
+  </Widget>
+  <Widget type="Diagram" name="ReportForm" ID="57" created="2009-02-18 06:13:20Z" user="kbhatia" modified="2009-02-18 06:49:13Z" handle="25">
+    <Widget type="Template" name="SubBreakFlag" ID="66" created="2009-02-18 06:49:13Z" user="kbhatia" modified="2009-02-18 06:49:32Z" handle="1">
+      <Output name="aggregate" ref="58" created="2009-02-18 06:49:32Z" user="kbhatia" />
+    </Widget>
+    <Widget type="Template" name="AcctGrpIDColumn" ID="58" created="2009-02-18 06:13:41Z" user="kbhatia" handle="2" modified="2009-02-18 06:49:32Z">
+      <Attribute name="name" value="acs_acct_grp.acct_grp_id" created="2009-02-18 06:47:09Z" user="kbhatia" />
+      <Input name="select" ref="55" created="2009-02-18 06:45:56Z" user="kbhatia" />
+      <Input name="aggregate" ref="66" created="2009-02-18 06:49:32Z" user="kbhatia" />
+    </Widget>
+    <Widget type="Template" name="AcctGrpNameColumn" ID="59" created="2009-02-18 06:25:16Z" user="kbhatia" handle="3" modified="2009-02-18 06:45:56Z">
+      <Input name="select" ref="55" created="2009-02-18 06:45:56Z" user="kbhatia" />
+    </Widget>
+    <Widget type="Template" name="AcctSegIDColumn" ID="60" created="2009-02-18 06:25:36Z" user="kbhatia" modified="2009-02-18 06:45:56Z" handle="4">
+      <Input name="select" ref="55" created="2009-02-18 06:45:56Z" user="kbhatia" />
+    </Widget>
+    <Widget type="Template" name="AcctSegNameColumn" ID="61" created="2009-02-18 06:26:02Z" user="kbhatia" modified="2009-02-18 06:45:56Z" handle="5">
+      <Input name="select" ref="55" created="2009-02-18 06:45:56Z" user="kbhatia" />
+    </Widget>
+    <Widget type="Template" name="CostTypeColumn" ID="62" created="2009-02-18 06:44:36Z" user="kbhatia" handle="6" modified="2009-02-18 06:45:56Z">
+      <Input name="select" ref="55" created="2009-02-18 06:45:56Z" user="kbhatia" />
+    </Widget>
+    <Widget type="Template" name="CostTypeIDColumn" ID="63" created="2009-02-18 06:44:53Z" user="kbhatia" handle="7" modified="2009-02-18 06:45:56Z">
+      <Input name="select" ref="55" created="2009-02-18 06:45:56Z" user="kbhatia" />
+    </Widget>
+    <Widget type="Template" name="CostDriverIDColumn" ID="64" created="2009-02-18 06:45:14Z" user="kbhatia" modified="2009-02-18 06:45:56Z" handle="8">
+      <Input name="select" ref="55" created="2009-02-18 06:45:56Z" user="kbhatia" />
+    </Widget>
+    <Widget type="Template" name="ActiveColumn" ID="65" created="2009-02-18 06:47:31Z" user="kbhatia" modified="2009-02-18 06:48:21Z" handle="9">
+      <Attribute name="name" value="acs_acct_seg.active_flag" created="2009-02-18 06:48:08Z" user="kbhatia" />
+      <Input name="select" ref="55" created="2009-02-18 06:48:21Z" user="kbhatia" />
+    </Widget>
+  </Widget>
+  <Widget type="Calculation" name="WhichRadio" ID="75" created="2010-12-13 16:42:22Z" user="msdmgr" modified="2010-12-13 17:02:08Z" handle="26">
+    <Attribute name="calculation" value="CT=1" created="2010-12-13 16:42:34Z" user="msdmgr" />
+    <Input name="input" ref="74" created="2010-12-13 17:00:03Z" user="msdmgr" />
+    <Output name="activate" ref="76" created="2010-12-13 17:02:08Z" user="msdmgr" />
+  </Widget>
+  <Widget type="Cursor" name="acs_cost_struct" ID="76" created="2010-12-13 16:42:53Z" user="msdmgr" modified="2010-12-14 09:45:39Z" handle="27">
+    <Input name="displayed" ref="11" created="2010-12-13 17:01:51Z" user="msdmgr" />
+    <Input name="activate" ref="75" created="2010-12-13 17:02:08Z" user="msdmgr" />
+    <Output name="dataCursor" ref="77" created="2010-12-13 16:45:46Z" user="msdmgr" />
+    <Output name="select" ref="79" created="2010-12-13 16:45:05Z" user="msdmgr" />
+    <Output name="select" ref="81" created="2010-12-14 09:42:30Z" user="msdmgr" />
+    <Output name="select" ref="82" created="2010-12-14 09:43:16Z" user="msdmgr" />
+    <Output name="select" ref="80" created="2010-12-14 09:36:33Z" user="msdmgr" />
+    <Input name="order" ref="83" created="2010-12-14 09:45:23Z" user="msdmgr" />
+    <Input name="order" ref="84" created="2010-12-14 09:45:39Z" user="msdmgr" />
+  </Widget>
+  <Widget type="Template" name="FlowSeqColumn" ID="83" created="2010-12-14 09:45:15Z" user="msdmgr" modified="2010-12-14 09:45:23Z" handle="28">
+    <Output name="order" ref="76" created="2010-12-14 09:45:23Z" user="msdmgr" />
+  </Widget>
+  <Widget type="Template" name="SeqNumColumn" ID="84" created="2010-12-14 09:45:34Z" user="msdmgr" modified="2010-12-14 09:45:39Z" handle="29">
+    <Output name="order" ref="76" created="2010-12-14 09:45:39Z" user="msdmgr" />
+  </Widget>
+  <Widget type="Template" name="ReportCursor" ID="77" created="2010-12-13 16:43:26Z" user="msdmgr" modified="2010-12-13 16:46:13Z" handle="30">
+    <Input name="print" ref="12" created="2010-12-13 16:46:13Z" user="msdmgr" />
+    <Input name="dataCursor" ref="76" created="2010-12-13 16:45:46Z" user="msdmgr" />
+  </Widget>
+  <Widget type="Diagram" name="ReportForm" ID="78" created="2010-12-13 16:44:02Z" user="msdmgr" modified="2010-12-14 09:43:16Z" handle="31">
+    <Widget type="Template" name="CostGroupNameColumn" ID="79" created="2010-12-13 16:44:28Z" user="msdmgr" modified="2010-12-14 09:36:07Z" handle="1">
+      <Input name="select" ref="76" created="2010-12-13 16:45:05Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Template" name="CostTypeNameColumn" ID="81" created="2010-12-14 09:42:30Z" user="msdmgr" handle="2">
+      <Input name="select" ref="76" created="2010-12-14 09:42:30Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Template" name="CostDriverNameColumn" ID="82" created="2010-12-14 09:43:16Z" user="msdmgr" handle="3">
+      <Input name="select" ref="76" created="2010-12-14 09:43:16Z" user="msdmgr" />
+    </Widget>
+    <Widget type="Template" name="AcctSegNameColumn" ID="80" created="2010-12-14 09:36:33Z" user="msdmgr" handle="4" modified="2010-12-14 09:43:52Z">
+      <Input name="select" ref="76" created="2010-12-14 09:36:33Z" user="msdmgr" />
+    </Widget>
+  </Widget>
+  <History>(C) Copyright 1990-97, Honeywell-Measurex Corporation. This document contains
+    proprietary information and trade secrets which are the property of 
+    Honeywell-Measurex Corporation.
+
+  Date     Who   Description of change
+--------   ----  --------------------------------------------------------------
+02/20/08   KB   Initial release
+</History>
+</Application>

@@ -1,0 +1,1424 @@
+#============================================================================
+# MxUpdate rules for RM Manual application.
+#
+# NOTE: This rules file is for managing records modified in acs_manual_rm_entry
+#
+#============================================================================
+# Rev.  Date:     Who   Description
+# ---  --------   ----  -----------------------------------------------------
+# 01   20/01/09   RCR   Initial release
+# 02   15/04/09   BRN   Update the RM inventory stock when complete and uncomplete
+# 03   19/06/09   BRN   Show all the materials for the department
+# 04   08/07/09   BRN   Include the new columns seq_num into acs_rm_manual_item
+# 05   08/14/09   BRN	Replace MMMprod with MMMplan for acs_unit_route, acs_cost
+# 06   08/25/09   BRN   Add the MMM and LeadTime in acs_rm_manual_item and acs_cost
+# 07   12/14/09   JTR   Add batch production (type_code B) logic
+# 08   12/18/09   JTR   Insert into acs_opti_opc_intf for type code b
+# 09   01/07/10   BRN   Adjust the machine of consumption for the intermediate
+# 10   01/18/10   BRN   Add MMM in the where for the update of cost_id on complete
+# 11   01/21/10   BRN	Add cons_mmm into acs_cost
+# 12   01/27/10   PHH   Update cost audit on consumption and uncomplete
+# 13   04-Feb-10  PHH   in case of type_code R or M  display only raw matl for departmant 
+#				and for the grade spec for the give machine
+# 14   02/17/10   BRN   Fix rounding issue on complete
+# 15   02/20/10   PHH   Add fmmlogstock update 
+# 16   03/05/10   PHH   Set negative cost and weight if Consumption
+# 17   03/07/10   PHH   add a Remark for uncomplete
+# 18   03/22/10   PHH   get the cost from acs_cost for uncomplete
+# 19   23-Mar-10  BRN   Implement the AvgCostPerTon
+# 20   25-Mar-10  PHH   Use the units_act from the values of the screen 
+# 21   29-Mar-10  PHH   check the department_id NULL if ($rm_dept=$department_id or department_id=" " or department_id="" ) 
+#							and $prod_station_rm="0" then
+# 22   06-Apr-10  PHH   fix a problme while calculating units_act and quantity 
+# 23   27-Apr-10  BRN   In the complete, Fix get actual weight when manual add
+# 24   28-Apr-10  BRN   On Complete, duplicate the ConsGrp for being the next default
+# 25   29-Apr-10  BRN   Init Records based upon the active production recipe
+# 26   29-Apr-10  BRN   Add the MANNEW * DATE
+# 27   04-May-10  BRN   Add acs_rm_manual_item.prod_route_id in order to manage correctly the intermediate RM
+# 27   04-May-10  BRN   Add acs_rm_manual_item.units_act_dec to manage consumption of half units
+#============================================================================
+DEFINE  ACS       	ENV;
+DEFINE  USEMETRIC		ENV;
+DEFINE  USER		ENV;
+DEFINE  ACS_DEPTID 	ENV;
+DEFINE  get_curr_time	long;
+DEFINE  LengthToWidthFactor long;
+DEFINE  ACS_MOISTURE	ENV;
+DEFINE  ACS_MOISTURE_VAL ENV;
+DEFINE  product_nb_units double;
+DEFINE  wgt_dry		double;
+DEFINE  error		long;
+DEFINE  serial_key_id	string;
+DEFINE  serial_mill_id	string;
+DEFINE  serial_informat string;
+DEFINE  serial_prefix 	string;
+DEFINE  serial_cost_id  string;
+DEFINE  serial_found	long;
+DEFINE  init_flag		long;
+DEFINE  rm_mill_id	string;
+DEFINE  rm_machine_type	string;
+DEFINE  rm_machine_id	string;
+DEFINE  tot_quantity    double;
+DEFINE  tot_cost 		double;
+DEFINE  n_batches		long;
+DEFINE  tot_wgt     	double;
+DEFINE  tot_wgtcost 	double;
+DEFINE  TonsFactor 	long;
+DEFINE  prod_station_rm    string;
+DEFINE  ts_end_prev 	long;
+DEFINE  qty_to_use    string;
+
+#Rev 12 PHH 
+DEFINE sum_active_wgt DOUBLE;
+DEFINE new_cost DOUBLE;
+DEFINE total_cost_before DOUBLE;
+DEFINE new_active_wgt DOUBLE;
+DEFINE  TonsFactor 	long;
+DEFINE AVG_COST_USED ENV ;
+
+NO * EXECUTE
+#       Run selects in this rule to prepare the variables only
+        select * from act_cost;
+        select * from invent;
+        select * from jumbo;
+        select * from acs_rm_manual_mast;
+        select * from acs_rm_manual_item;
+        select * from acs_rm_unit_cons;
+        select * from unit_convert;
+        select * from acs_product_code;
+        select * from acs_unit_route;
+        select * from acs_cost;
+        select * from raw_matl_invent;
+        select * from raw_matl_trans;
+	  select * from acs_product_mill_a;
+
+MX * ST
+	echo Startup rule;
+	LET mode = "Single";
+	LET type = "STD";
+
+* * *
+
+
+	echo ------------> $mx_action_code;
+# Set the metric and imperial factor
+	if  ($USEMETRIC = "Y") then
+		let LengthToWidthFactor = 100;
+		let TonsFactor = 1000;
+	else
+		let LengthToWidthFactor = 12;
+		let TonsFactor = 2000;
+	end if
+
+
+#################################### Calc defaults dates		###################################################
+MANNEW * DATE
+
+	if ($ACS_HOURS = " " or $ACS_HOURS = "") then
+## Use the the crew time
+		LET ts_begin = {start of prod crew};
+		LET ts_end = {end of prod crew};
+	else
+
+
+	end if
+
+
+#################################### Called from acs_manual_rm_entry   	###################################################
+#################################### Generate a new Master Data		###################################################
+MANMAST * ADD
+	echo Adding $cons_grp_id;
+
+      LET get_curr_time   = {time of day};
+
+	let cons_grp_id	= $cons_grp_id;
+    	let cons_grp_name	= $cons_grp_name;
+    	let type_code	= $type_code;
+    	let stat		= $stat;
+    	let mill_id		= $mill_id;
+    	let machine_type	= $machine_type;
+    	let machine_id	= $machine_id;
+    	let department_id	= $department_id;
+    	let user_id		= $user_id;
+    	let ts_modified   = $ts_modified;
+    	let ts_create     = $ts_create;
+    	let mill_id_plan	= $mill_id_plan;
+    	let mach_type_plan= $mach_type_plan;
+    	let mach_id_plan	= $mach_id_plan;
+    	let run_num		= $run_num;
+    	let ts_begin	= $ts_begin;
+    	let ts_end		= $ts_end;
+
+### Set Default values:
+
+	let stat 		= "N";
+	let user_id 		= $USER;   
+	let ts_modified 	= 0;
+	let ts_create		= $get_curr_time;
+
+	if ($type_code = "R") then
+	    	let ts_begin	= 0;
+	    	let ts_end		= 0;
+	else
+		if ($type_code = "D") then
+		    	let mill_id_plan		= " ";
+			let mach_type_plan	= " ";
+			let mach_id_plan		= " ";
+			let run_num			= 0;
+            else
+               if ($type_code = "B") then
+                  let cost_per_ton        = 0;       
+		    	let mill_id_plan		= " ";
+			let mach_type_plan	= " ";
+			let mach_id_plan		= " ";
+			let run_num			= 0;
+                  let air_dry_perc        = (100 - $moisture)/100;
+               end if
+		end if
+	end if
+
+## Insert master datas
+	insert into acs_rm_manual_mast
+	( cons_grp_id, cons_grp_name, type_code, stat, mill_id, machine_type, machine_id,
+		mill_id_plan, mach_type_plan, mach_id_plan,  run_num,
+		ts_begin, ts_end, department_id, user_id, ts_modified, ts_create,
+            wgt_net, air_dry_perc, wgt_airdry, cost_per_ton, grade_spec)
+	values
+    	( $cons_grp_id, $cons_grp_name, $type_code, $stat, $mill_id, $machine_type, $machine_id,
+    		$mill_id_plan, $mach_type_plan, $mach_id_plan, $run_num,
+		$ts_begin, $ts_end, $department_id, $user_id, $ts_modified, $ts_create,
+            $wgt_net, $air_dry_perc, $wgt_airdry, $cost_per_ton, $grade_spec);
+
+# Rev 03: Create all the records
+	call CREATE_RECORDS();
+		
+###### Look for item default values.
+## Look for jumbos
+	if ($type_code = "R") then
+		foreach
+			select unit_id, ts_transaction, wgt_net 
+				from acs_unit_route
+				where mx_action_code='TURNUP' and type_code='J' 
+					and mill_id=$mill_id and machine_type = $machine_type and machine_id=$machine_id 
+					and mill_id_plan=$mill_id_plan and mach_type_plan = $mach_type_plan and mach_id_plan=$mach_id_plan 
+					and run_num = $run_num;
+
+		    	let ts_begin	= 0;
+		    	let ts_end		= 0;
+
+			call FINDMANUALITEMS();
+				
+		end foreach
+	
+	else
+		if ($type_code = "D") then
+	
+			foreach
+				select unit_id, ts_transaction, wgt_net 
+					from acs_unit_route
+					where mx_action_code='TURNUP' and type_code='J'
+						and mill_id=$mill_id and machine_type = $machine_type and machine_id=$machine_id 
+						and ts_transaction > $ts_begin and (ts_transaction < $ts_end or ts_transaction = $ts_end);
+
+			    	let mill_id_plan		= " ";
+    				let mach_type_plan	= " ";
+    				let mach_id_plan		= " ";
+    				let run_num			= " ";
+
+				call FINDMANUALITEMS();
+		
+			end foreach
+		else
+                  if ($type_code = "B") then
+                        let unit_id        = $cons_grp_id;
+	                  let ts_transaction = {time};
+				call FINDMANUALITEMS();
+                  else
+ 				foreach
+ 					select unit_id, ts_transaction, wgt_net 
+						from acs_unit_route
+						where mx_action_code='TURNUP' and type_code='J'
+							and mill_id=$mill_id and machine_type = $machine_type and machine_id=$machine_id 
+							and mill_id_plan=$mill_id_plan and mach_type_plan = $mach_type_plan and mach_id_plan=$mach_id_plan
+							and run_num = $run_num 
+							and ts_transaction > $ts_begin and (ts_transaction < $ts_end or ts_transaction = $ts_end);
+					call FINDMANUALITEMS();
+		
+				end foreach	
+			end if
+		end if
+	end if
+
+## Put logic in a subroutine to not duplicate the code, even if there can be several foreach selects.
+
+SUBROUTINE FINDMANUALITEMS();
+
+	echo ts_transaction:$ts_transaction $ts_transaction:"dd-mm-yyyy HH:MM:SS";
+      if ($type_code = "B") then
+		let grade_spec_made  = $grade_spec;
+	else
+		echo jumbo_id = $unit_id;
+
+		select grade_spec_made 
+			from jumbo where jumbo_id=$unit_id;
+	end if
+	
+# Create the active recipe view complete
+      if ($type_code = "B") then
+#Type Code B doesn't have a fixed ts_transaction to clean out acs_recact_all records, so delete here w/o ts_transaction
+
+		delete from acs_recact_all
+			where user_id = $user_id
+			and prod_mill_id = $mill_id
+			and prod_mach_type = $machine_type
+			and prod_mach_id = $machine_id
+			and grade_spec = $grade_spec;
+	end if
+
+	let save_department_id = $department_id;
+	call ACSBuildRecipeActView();
+	let department_id = $save_department_id;
+	
+
+## Get the dry weight.
+      if ($type_code = "B") then    
+		let wgt_dry = $wgt_airdry;
+	else
+		let wgt_act = $wgt_net;
+		CALL ACSGetJumboDryWeight();
+		let wgt_dry = $dry_wgt_act;
+      end if
+
+	foreach
+		select product_code_id, quantity, raw_matl_grp_id, raw_matl_id,
+			warehouse_id, whse_zone_id, bay_id, recipe_prod_id, department_id rm_dept,
+			class rm_class, mill_id rm_mill_id, machine_type rm_machine_type,
+			machine_id rm_machine_id, grade_spec_made rm_grade_spec_made, recipe_prod_id rm_recipe_prod_id, ts_begin rm_ts_begin,
+			seq_num rm_seq_num, flow_seq rm_flow_seq, flowseq_desc rm_flowseq_desc, prod_route_id
+		from acs_recact_all
+		where user_id = $user_id
+			and prod_mill_id = $mill_id
+			and prod_mach_type = $machine_type
+			and prod_mach_id = $machine_id
+			and grade_spec = $grade_spec_made
+			and ts_transaction = $ts_transaction
+			and type_code = 'M'
+			order by raw_matl_grp_id, raw_matl_id, seq_num;
+
+# 09 For intermediate, machine of consumption calculated with machine of the recipe parent and prod_route_id
+	if ($rm_class = "I" and $rm_flow_seq > 1) then
+		select mach_type_dest rm_machine_type, mach_id_dest rm_machine_id
+			from acs_prod_route
+			where prod_route_id = $prod_route_id;
+	end if
+
+#Skip IRM from class W machines to prevent double counting consumptions
+		call CheckProdStationRM();		
+
+		if ($rm_dept=$department_id or department_id=" " or department_id="" ) and $prod_station_rm="0" then
+
+			select unit_meas, percent_active, wgt_net product_wgt_net
+				from acs_product_code
+				where 	product_code_id = $product_code_id;		
+			
+			select conv_rate, base_units
+				from unit_convert
+				where unit_meas=$unit_meas;
+			
+			let quantity_active= ($wgt_dry /$TonsFactor) * $quantity;
+
+# Delete the initial record since it's only for reference
+			delete from acs_rm_manual_item
+				where 	cons_grp_id		= $cons_grp_id
+					and mill_id 		= $rm_mill_id
+					and machine_type 		= $rm_machine_type
+					and machine_id 		= $rm_machine_id
+					and raw_matl_grp_id	= $raw_matl_grp_id
+					and raw_matl_id		= $raw_matl_id
+					and seq_num = 0;
+					
+## Check if the product already has the reference record inserted in the detail table.
+			select count(*) cnt 
+				from acs_rm_manual_item
+				where 	cons_grp_id		= $cons_grp_id
+					and mill_id 		= $rm_mill_id
+					and machine_type 		= $rm_machine_type
+					and machine_id 		= $rm_machine_id
+					and raw_matl_grp_id	= $raw_matl_grp_id
+					and raw_matl_id		= $raw_matl_id
+					and product_code_id	= $product_code_id
+					and warehouse_id		= $warehouse_id
+					and whse_zone_id		= $whse_zone_id
+					and bay_id			= $bay_id;
+			if ( $cnt=0) then
+				let quantity = 0;
+				let quantity_act = 0;
+				let units_act = 0;
+				let units_act_dec = 0;
+				let grade_spec_parent = " ";
+				call MANUALITEMINSERT();
+			else
+				update acs_rm_manual_item
+					set	quantity_active	= quantity_active + $quantity_active,
+						unit_meas = $unit_meas, product_code_id  = $product_code_id, base_units = $base_units,
+						warehouse_id = $warehouse_id, whse_zone_id = $whse_zone_id, bay_id = $bay_id
+					where 	cons_grp_id	= $cons_grp_id
+					and mill_id 		= $rm_mill_id
+					and machine_type 		= $rm_machine_type
+					and machine_id 		= $rm_machine_id
+					and raw_matl_grp_id	= $raw_matl_grp_id
+					and raw_matl_id		= $raw_matl_id
+					and product_code_id	= $product_code_id
+					and warehouse_id		= $warehouse_id
+					and whse_zone_id		= $whse_zone_id
+					and bay_id			= $bay_id;
+			end if
+
+##  Store consommations by jumbo into a dedicated table.
+
+			insert into acs_rm_unit_cons
+				(cons_grp_id, unit_id,	product_code_id, raw_matl_grp_id, raw_matl_id, seq_num, quantity_active, 
+				class, mill_id, machine_type, machine_id, grade_spec_made, recipe_prod_id, ts_begin)
+				values
+				($cons_grp_id, $unit_id, $product_code_id, $raw_matl_grp_id, $raw_matl_id, $rm_seq_num, $quantity_active, 
+				$rm_class, $rm_mill_id, $rm_machine_type, $rm_machine_id, $rm_grade_spec_made, $rm_recipe_prod_id, $rm_ts_begin);
+
+		
+		else
+			if ($prod_station_rm="1") then
+#Delete the initial record since rm for IRM at production station
+			   delete from acs_rm_manual_item
+				where 	cons_grp_id		= $cons_grp_id
+					and mill_id 		= $rm_mill_id
+					and machine_type 		= $rm_machine_type
+					and machine_id 		= $rm_machine_id
+					and raw_matl_grp_id	= $raw_matl_grp_id
+					and raw_matl_id		= $raw_matl_id
+					and seq_num = 0;
+			end if
+		end if
+	end foreach
+
+END SUBROUTINE
+
+## Insert in acs_rm_manual_item one record by recipe seq_num.
+SUBROUTINE MANUALITEMINSERT();
+
+# Get the seq_num value
+	if ($init_flag = 1) then
+		let init_flag = 0;
+		select seq_num
+			from acs_rm_manual_item
+			where	cons_grp_id			= $cons_grp_id
+				and mill_id			= $rm_mill_id
+				and machine_type		= $rm_machine_type
+				and machine_id		= $rm_machine_id
+				and raw_matl_grp_id	= $raw_matl_grp_id
+				and raw_matl_id		= $raw_matl_id
+			order by seq_num desc;
+		if ($success = 1) then
+			let seq_num = $seq_num + 1;
+		else
+			let seq_num = 0;
+		end if
+	else
+		select seq_num
+			from acs_rm_manual_item
+			where	cons_grp_id			= $cons_grp_id
+				and mill_id			= $rm_mill_id
+				and machine_type		= $rm_machine_type
+				and machine_id		= $rm_machine_id
+				and raw_matl_grp_id	= $raw_matl_grp_id
+				and raw_matl_id		= $raw_matl_id
+			order by seq_num desc;
+		if ($success = 1) then
+			let seq_num = $seq_num + 1;
+		else
+			let seq_num = 1;
+		end if
+	end if
+
+	insert into acs_rm_manual_item
+		( cons_grp_id, mill_id, machine_type, machine_id,raw_matl_grp_id, raw_matl_id, sec_lead_time, seq_num,
+			grade_spec_parent, prod_route_id, quantity_active, base_units, product_code_id, 
+			unit_meas, quantity, quantity_act, warehouse_id, whse_zone_id, bay_id, cost_id, ts_modified, ts_create, units_act, units_act_dec)
+		values
+		( $cons_grp_id, $rm_mill_id, $rm_machine_type, $rm_machine_id,$raw_matl_grp_id, $raw_matl_id, $sec_lead_time, $seq_num,
+			$grade_spec_parent, $prod_route_id, $quantity_active, $base_units, $product_code_id, 
+			$unit_meas, $quantity, $quantity_act, $warehouse_id, $whse_zone_id, $bay_id, $cost_id, $ts_modified, $ts_create, $units_act, $units_act_dec);
+			
+END SUBROUTINE
+
+
+#################################### Called from acs_manual_rm_entry   	###################################################
+#################################### Modify an existing Master Data	###################################################
+
+MANMAST * MODIFY
+	echo Modify $cons_grp_id;
+      LET get_curr_time   = {time of day};
+
+	let cons_grp_id		= $cons_grp_id;
+    	let cons_grp_name	= $cons_grp_name;
+    	let type_code		= $type_code;
+    	let stat		= $stat;
+    	let mill_id		= $mill_id;
+    	let machine_type	= $machine_type;
+    	let machine_id		= $machine_id;
+    	let run_num		= $run_num;
+    	let ts_begin		= $ts_begin;
+    	let ts_end		= $ts_end;
+    	let department_id	= $department_id;
+    	let user_id		= $user_id;
+    	let ts_modified        	= $ts_modified;
+    	let ts_create          	= $ts_create;
+
+	update acs_rm_manual_mast
+		set cons_grp_name = $cons_grp_name
+		where cons_grp_id = $cons_grp_id;
+		
+#################################### Called from acs_manual_rm_entry   	###################################################
+#################################### Delete an existing Master Data	###################################################
+
+MANMAST * DELETE
+	echo Deleting $cons_grp_id;
+
+      LET get_curr_time   = {time of day};
+
+	let cons_grp_id		= $cons_grp_id;
+    	let cons_grp_name	= $cons_grp_name;
+    	let type_code		= $type_code;
+    	let stat		= $stat;
+    	let mill_id		= $mill_id;
+    	let machine_type	= $machine_type;
+    	let machine_id		= $machine_id;
+    	let run_num		= $run_num;
+    	let ts_begin		= $ts_begin;
+    	let ts_end		= $ts_end;
+    	let department_id	= $department_id;
+    	let user_id		= $user_id;
+    	let ts_modified        	= $ts_modified;
+    	let ts_create          	= $ts_create;
+
+	delete from  acs_rm_manual_mast
+		where cons_grp_id = $cons_grp_id;
+		
+	delete from  acs_rm_manual_item
+		where cons_grp_id = $cons_grp_id;	
+
+	delete from  acs_rm_unit_cons
+		where cons_grp_id = $cons_grp_id;	
+	
+#################################### Called from acs_manual_rm_entry   	###################################################
+#################################### Complete an existing Master Data	###################################################
+
+MANMAST * COMPLETE
+
+
+      LET get_curr_time   = {time of day};
+
+	let cons_grp_id		= $cons_grp_id;
+    	let cons_grp_name	= $cons_grp_name;
+    	let type_code_input	= $type_code;
+    	let stat		= $stat;
+    	let mill_id		= $mill_id;
+    	let machine_type	= $machine_type;
+    	let machine_id		= $machine_id;
+    	let run_num		= $run_num;
+    	let ts_begin		= $ts_begin;
+    	let ts_end		= $ts_end;
+    	let department_id	= $department_id;
+    	let user_id		= $user_id;
+    	let ts_modified        	= $ts_modified;
+    	let ts_create          	= $ts_create;
+
+	let user_id = $USER;
+    	
+    	select mill_id_plan, mach_id_plan, mach_type_plan
+    		from acs_rm_manual_mast
+    		where cons_grp_id=$cons_grp_id;
+    	
+    	let error = 0;
+    	
+## Find the cost_driver_id
+
+	if ($type_code_input = "R") then
+		let cost_driver_id = "RUN";
+	else
+		if ($type_code_input = "D") then
+			let cost_driver_id = "TIME";
+		else
+			if ($type_code_input = "B") then
+ 				let cost_driver_id = "UNIT";
+			else
+				let cost_driver_id = "RUN&TIME";
+			end if
+		end if
+	end if
+    	
+	foreach
+		select mill_id rm_mill_id, machine_type rm_machine_type, machine_id rm_machine_id,
+			raw_matl_grp_id, raw_matl_id, sec_lead_time, seq_num, product_code_id, warehouse_id, whse_zone_id, bay_id,
+			units_act, units_act_dec, quantity, quantity_act, prod_route_id
+			from acs_rm_manual_item
+			where cons_grp_id=$cons_grp_id
+			and grade_spec_parent = ' '
+			and (quantity > 0 or units_act_dec > 0)
+			order by prod_route_id;
+
+# Get the quantity form the units or the units from the quantity using the average weight of the bay or using the master if the bay is empty
+		select cons_in_base_unit
+			from acs_product_code
+			where product_code_id = $product_code_id; 
+
+		select units_act in_bay_units_act , active_wgt in_bay_active_wgt, quantity in_bay_quantity 
+			from raw_matl_invent 
+			where warehouse_id = $warehouse_id and 
+				whse_zone_id = $whse_zone_id and 
+				bay_id       = $bay_id and 
+				product_code_id = $product_code_id ;
+
+		select percent_active , wgt_net pc_wgt_net , unit_meas 
+			from acs_product_code
+			where product_code_id = $product_code_id;
+
+		select conv_rate, base_units 
+			from unit_convert
+			where unit_meas = $unit_meas;
+
+		if ( $in_bay_units_act > 0 and $percent_active > 0 ) then 
+ 			let convert_in_net = $in_bay_active_wgt*100/$percent_active;
+			let avg_wgt_net = $convert_in_net / $in_bay_units_act ;
+		else 
+			let avg_wgt_net = $conv_rate;
+		end if 
+
+		if ( $cons_in_base_unit = 1 ) then 
+# 			Get the units_act_dec from the quantity 			
+			let units_act_dec = $quantity_act / $avg_wgt_net ;
+		else 
+# 			Get the quantity from the units_act_dec 	
+			let quantity_act =  $units_act_dec * $avg_wgt_net ;
+			if ($base_units = "LIT" ) then 
+				let quantity =  $units_act_dec * $pc_wgt_net * $percent_active / 100;
+			else 
+				let quantity =  $units_act_dec * $avg_wgt_net * $percent_active / 100;
+			end if 
+		end if 		
+
+# 28 Set units_act
+		call SetUnitsAct();	
+
+# quantity = active/dry quantity, quantity_act = actual quantity
+		if (cost_driver_id = "TIME") then
+			let sec_lead_time = 0;
+		end if
+
+		select class rm_class
+			from raw_matl
+			where raw_matl_grp_id = $raw_matl_grp_id
+			and raw_matl_id = $raw_matl_id;
+
+		if ($rm_class = "P") then
+			let qty_to_use = "ActualQTY";
+			call  SubRMInventory();
+			let qty_to_use = "";
+			call	CreateACSCost();
+		else
+
+#If avg rolling batch cost exists for IRM then use it and insert cost record
+			select cost_per_ton 
+				from acs_raw_matl_mach
+				where mill_id = $rm_mill_id
+					and machine_type = $rm_machine_type 
+					and machine_id = $rm_machine_id
+            	         	and raw_matl_grp_id = $raw_matl_grp_id 
+					and raw_matl_id = $raw_matl_id;
+			if ($cost_per_ton>0) then
+# Case intermediate RM as a production machine	
+				call  SubRMInventory();
+				call	CreateACSCost();
+			else
+# -------- Case intermediate RM as not production machine = standard case
+# Calculate the consumption of the standard RM from the intermediate RM
+# Update the acs_rm_manual_item record here since no acs_cost creation for intermediate
+			update acs_rm_manual_item
+				set units_act = $units_act , units_act_dec = $units_act_dec , quantity = $quantity , quantity_act = $quantity_act
+				where cons_grp_id 		= $cons_grp_id
+					and mill_id 		= $rm_mill_id
+					and machine_type 		= $rm_machine_type
+					and machine_id 		= $rm_machine_id
+					and raw_matl_grp_id	= $raw_matl_grp_id
+					and raw_matl_id		= $raw_matl_id
+					and seq_num			= $seq_num;
+
+# ----- Set the data for getting active production recipe of the intermediate RM
+# Set the date
+ 		    	select ts_begin, ts_create
+    				from acs_rm_manual_mast
+		    		where cons_grp_id=$cons_grp_id;
+			if ($ts_begin = 0) then
+				let ts_transaction = $ts_create;
+			else
+				let ts_transaction = $ts_begin;
+			end if
+
+# Set the grade_spec_made
+			select grade_spec grade_spec_made
+				from raw_matl
+				where raw_matl_grp_id = $raw_matl_grp_id
+				and   raw_matl_id	= $raw_matl_id;
+
+# Set the production machine (machine of the recipe)
+			select machine_type, machine_id
+				from acs_prod_route
+				where prod_route_id = $prod_route_id;
+
+# Save the intermediate dry quantity for further RM calculations
+			let int_quantity = $quantity;
+			let int_grade_spec_made = $grade_spec_made;
+
+			let save_ts_begin = $ts_begin;
+			let save_ts_end = $ts_end;
+			let save_department_id = $department_id;
+			call ACSBuildRecipeActView();	
+			let ts_begin = $save_ts_begin;
+			let ts_end = $save_ts_end;
+			let department_id = $save_department_id;
+
+# Look for the STD purchase RM of the intermediate RM recipe
+			foreach
+				select machine_type rm_machine_type, machine_id rm_machine_id, raw_matl_grp_id, raw_matl_id, 
+					product_code_id, warehouse_id, whse_zone_id, bay_id, grade_spec_made, quantity rm_quantity
+				from acs_recact_all
+				where user_id = $user_id
+					and prod_mill_id = $mill_id
+					and prod_mach_type = $machine_type
+					and prod_mach_id = $machine_id
+					and grade_spec = $int_grade_spec_made
+					and ts_transaction = $ts_transaction
+					and type_code = 'S'
+					and class = 'P';
+
+# Create the record into acs_rm_manual_item for tracking the cost_id
+				let quantity = $rm_quantity * ($int_quantity /$TonsFactor);
+
+				select percent_active , wgt_net, unit_meas 
+					from acs_product_code
+					where product_code_id = $product_code_id;
+
+				select conv_rate, base_units 
+					from unit_convert
+					where unit_meas = $unit_meas;
+
+				let quantity_act = ($quantity * $conv_rate) / ($wgt_net * $percent_active / 100);
+				let units_act_dec = $quantity / ($wgt_net * $percent_active / 100);
+
+# 28 Set units_act
+				call SetUnitsAct();	
+
+				let cost_id = " ";
+				let ts_modified = 0;
+				let ts_create = 0;
+				let grade_spec_parent = $grade_spec_made;
+
+				call MANUALITEMINSERT();
+
+				let qty_to_use = "ActualQTY";
+				call  SubRMInventory();
+				let qty_to_use = "";
+				call	CreateACSCost();
+
+			end foreach
+
+			call DelRecipeActView();
+			end if
+
+		end if
+
+	end foreach
+
+	if ($error=0) then
+	
+		LET get_curr_time   = {time of day};
+		update acs_rm_manual_mast
+			set stat = 'C', ts_modified = $get_curr_time
+			where cons_grp_id = $cons_grp_id;
+
+		if ($type_code_input = "B") then
+			call BatchCost();
+                  call InsertOPC_INTF();
+		end if
+	
+	else
+		
+		delete from acs_cost where cost_id_group = $cons_grp_id;
+		
+	end if
+
+###### Create the next default consumption group in automatic mode 
+	if ($AutoMode = 1) then
+		let new_cons_grp_id = $new_cons_grp_id;
+		call DuplicateCurrent();
+	else
+		let new_cons_grp_id = $cons_grp_id;
+	end if
+
+
+#################################### Called from acs_manual_rm_entry   	###################################################
+#################################### Modify item				###################################################
+MANITEM * MODIFY
+
+# Check if the raw matl not changed
+
+	if (	$mill_id = $orig_mill_id and $machine_type = $orig_machine_type and $machine_id = $orig_machine_id and 
+		$raw_matl_id = $orig_raw_matl_id and $raw_matl_grp_id = $orig_raw_matl_grp_id and $seq_num = $orig_seq_num) then
+# Just update
+		LET get_curr_time   = {time of day};
+		let ts_modified = $get_curr_time;
+
+		update acs_rm_manual_item
+			set	quantity_act	= $quantity_act,
+				quantity		= $quantity,
+				product_code_id	= $product_code_id,
+				unit_meas		= $unit_meas,
+				base_units		= $base_units,
+				warehouse_id	= $warehouse_id,
+				whse_zone_id	= $whse_zone_id,
+				bay_id		= $bay_id,
+				ts_modified		= $ts_modified,
+				sec_lead_time	= $sec_lead_time,
+				units_act		= $units_act,  
+				units_act_dec	= $units_act_dec  
+			where cons_grp_id	= $cons_grp_id
+			and mill_id			= $orig_mill_id
+			and machine_type		= $orig_machine_type
+			and machine_id		= $orig_machine_id
+			and raw_matl_grp_id	= $orig_raw_matl_grp_id
+			and raw_matl_id		= $orig_raw_matl_id
+			and seq_num			= $orig_seq_num;
+	else
+
+# Insert since it's a new record
+			let quantity_active = 0;
+			LET get_curr_time   = {time of day};
+			let ts_create = $get_curr_time;
+			let ts_modified = 0;
+			let rm_mill_id = $mill_id;
+			let rm_machine_type = $machine_type;
+			let rm_machine_id = $machine_id;
+
+			call MANUALITEMINSERT();
+
+	end if
+
+
+#################################### Called from acs_manual_rm_entry   	###################################################
+#################################### Delete item				###################################################
+MANITEM * DELETE
+
+      LET get_curr_time   = {time of day};
+
+# Check if the raw matl not changed
+	if (	$mill_id = $orig_mill_id and $machine_type = $orig_machine_type and $machine_id = $orig_machine_id and
+		$raw_matl_id = $orig_raw_matl_id and $raw_matl_grp_id = $orig_raw_matl_grp_id and $seq_num = $orig_seq_num) then
+# Delete
+		delete from acs_rm_manual_item
+			where cons_grp_id	= $cons_grp_id
+			and mill_id			= $orig_mill_id
+			and machine_type		= $orig_machine_type
+			and machine_id		= $orig_machine_id
+			and raw_matl_grp_id	= $orig_raw_matl_grp_id
+			and raw_matl_id		= $orig_raw_matl_id
+			and seq_num			= $orig_seq_num;
+	else
+# Don't do anything
+	end if
+
+#################################### Called from acs_manual_rm_entry   	###################################################
+#################################### UnComplete an existing Master Data	###################################################
+
+MANMAST * UNCOMPLETE
+
+      LET get_curr_time   = {time of day};
+
+	let sav_cons_grp_id		= $cons_grp_id;
+    	let cons_grp_name	= $cons_grp_name;
+    	let type_code_input	= $type_code;
+    	let stat		= $stat;
+    	let mill_id		= $mill_id;
+    	let machine_type	= $machine_type;
+    	let machine_id		= $machine_id;
+    	let run_num		= $run_num;
+    	let ts_begin		= $ts_begin;
+    	let ts_end		= $ts_end;
+    	let department_id	= $department_id;
+    	let user_id		= $user_id;
+    	let ts_modified        	= $ts_modified;
+    	let ts_create          	= $ts_create;
+	let user_id = $USER;    	  	
+ 
+	let remarks = "RM Manual Uncons:",$cons_grp_id," Run:",$run_num;
+
+### Check that no cost is closed
+    	let close_error = 0;    				
+	foreach select cost_id
+			from acs_rm_manual_item
+			where cons_grp_id = $cons_grp_id
+			and cost_id <> ' ';
+				
+		select closure_flag
+			from acs_cost
+			where cost_id = $cost_id;
+
+		if ($closure_flag = "Y") then 
+			let close_error = 1;
+		end if
+
+	end foreach
+
+	if ($close_error = 0) then
+		foreach select cost_id
+			from acs_rm_manual_item
+			where cons_grp_id = $cons_grp_id
+			and cost_id <> ' ';
+
+			call AddRMInventory();
+			CALL ACSDeleteCosts();
+	
+		end foreach
+	end if
+ 
+	if ($close_error = 0) then
+
+##### Remove the std calculation from the parent
+		delete from acs_rm_manual_item
+			where cons_grp_id = $cons_grp_id
+				and grade_spec_parent <> ' ';
+		select count(*) cnt 
+			from acs_rm_manual_item
+			where cons_grp_id = $cons_grp_id;
+		if ($cnt > 1) then
+			update acs_rm_manual_item
+				set cost_id = ' '
+				where cons_grp_id = $cons_grp_id;
+		end if	
+
+		update acs_rm_manual_mast
+			set stat = 'N', cost_per_ton =0 
+			where cons_grp_id = $cons_grp_id;
+         
+            if ($type_code_input = "B") then
+#Calc RM Rolling Average Cost
+			call BatchRollingAvg();
+
+#Delete acs_opt_opc_intf
+			delete from acs_opti_opc_intf where unit_id = $cons_grp_id;
+
+#Backout ts_last_used on acs_opti_tag_mast
+			select max(ts_end) ts_end_prev from acs_rm_manual_mast
+				where mill_id =$mill_id and machine_type = $machine_type and machine_id=$machine_id
+				and stat = 'C' and type_code='B';
+
+				select server_name from acs_opc_tag_mast
+				  where mill_id = $mill_id
+				  and machine_type = $machine_type
+				  and machine_id = $machine_id
+				  and active_flag = 'Y';
+				if ($success = 1) then
+					update acs_opc_tag_mast
+					   set ts_last_used = $ts_end_prev
+					 where mill_id = $mill_id
+					  and machine_type = $machine_type
+					  and machine_id = $machine_id
+					  and active_flag = 'Y';
+				end if
+    		end if
+
+	end if
+	let error = $close_error;
+
+
+SUBROUTINE CreateACSCost()
+		let serial_key_id = "RAWMATL";
+		let serial_mill_id = $mill_id;
+		let serial_informat = "&&&&&&&&";
+		let serial_prefix = "RM-M-",$type_code_input:"U","-";
+	
+		call GET_COST_ID();
+		
+		let serial_cost_id =$serial_cost_id;
+		let serial_found = $serial_found;
+
+		if ($serial_found=1 and $error=0) then
+
+## Set values for insert into acs_cost
+		
+			let cost_id 		= $serial_cost_id;
+			let cost_id_group 	= $cons_grp_id;
+			let cost_type 		= "R";
+			let mill_id 		= $mill_id;
+			let machine_type 	= $machine_type;
+			let machine_id 		= $machine_id;
+			let warehouse_id 	= $warehouse_id;
+			let whse_zone_id 	= $whse_zone_id;
+			let bay_id 		= $bay_id;
+			let ts_begin 		= $ts_begin; 	
+			let ts_end 		= $ts_end; 
+			let mill_id_plan 	= $mill_id_plan;
+			let mach_type_plan = $mach_type_plan;  
+			let mach_id_plan 	= $mach_id_plan;
+			let run_num 		= $run_num;  
+			let pat_num 		= 0;
+                  if ($type_code_input = "B") then
+				let unit_id   	= $cons_grp_id;
+			else
+				let unit_id 	= " ";
+			end if
+			let type_code 		= "J";
+			let product_code_id 	= $product_code_id;
+			let raw_matl_grp_id 	= $raw_matl_grp_id; 
+			let raw_matl_id 	= $raw_matl_id;	  
+			let fin_matl_grp_id 	= " ";
+			let fin_matl_id 	= " "; 
+			let quantity 		= $quantity;
+			if  ($USEMETRIC = "Y") then
+				let unit_meas 		= "KGS";
+			else
+				let unit_meas 		= "LBS";
+			end if
+			let cost 		= $cost;
+			select string_value 
+				from constants
+				where key_value ='MILL_CURRENCY';
+			let currency_id = $string_value;
+			let acct_seg_id 	= " ";
+			let order_id 		= " ";
+			let item_num 		= 0;
+			let load_id 		= " ";
+			let cost_driver_id	= $cost_driver_id;
+			let cost_type_id 	= " ";
+			let allocated_flag 	= "N";
+			let ts_allocated 	= 0;
+			let reason_id 		= " ";
+			let user_id 		= $USER;
+			let appl_name 		= "ACS_MANUAL_RM_ENTRY";
+			let closure_flag 	= "N";
+			let ts_closed 		= 0;
+			let ts_modified 	= 0;
+			let ts_create 		= $get_curr_time;		
+		
+# rev 11
+			let cons_mill_id = $rm_mill_id;
+			let cons_mach_type = $rm_machine_type;
+			let cons_mach_id = $rm_machine_id;
+
+			call INSERT_ACS_COST();
+#Rev PHH
+			update acs_rm_manual_item
+				set cost_id = $serial_cost_id, units_act = $units_act , units_act_dec = $units_act_dec , quantity = $quantity ,
+					 quantity_act = $quantity_act
+				where cons_grp_id=$cons_grp_id
+					and mill_id 		= $rm_mill_id
+					and machine_type 		= $rm_machine_type
+					and machine_id 		= $rm_machine_id
+					and raw_matl_grp_id	= $raw_matl_grp_id
+					and raw_matl_id		= $raw_matl_id
+					and seq_num			= $seq_num;
+		else
+			let error = $error + 1;
+		end if
+			
+END SUBROUTINE
+
+# DO all related action for decreasing the RM inventory
+SUBROUTINE SubRMInventory()
+
+# Get Product Code data
+	select raw_matl_grp_id, raw_matl_id, unit_meas, percent_active, wgt_net
+		from acs_product_code
+		where product_code_id = $product_code_id;
+
+# Calculate the cost
+	if ($cost_per_ton>0) then
+# Cost for Int RM
+		let cost = ($cost_per_ton / $TonsFactor) * $quantity;
+	else
+		Call GetProductCodeAvgCost();
+		let active_wgt = $quantity;
+
+		Call GetNewCost();
+		let cost = $new_cost;
+	end if
+
+#Rev 12 PHH Add Audit 
+	let new_cost = $cost;
+	let new_active_wgt = $quantity;
+
+
+	let save_type_code = $type_code;
+	let type_code = "C";
+      
+      select sum(active_wgt) sum_active_wgt
+		from  raw_matl_invent
+		where mill_id = $mill_id
+		and product_code_id = $product_code_id;
+
+	call GetTotalCostBefore();
+
+	let remarks = "RM Manual Sub:",$cons_grp_id," Run:",$run_num;
+
+# Put negative since it's a decrease
+	let new_cost = $new_cost * (-1);
+	let new_active_wgt = $new_active_wgt * (-1);
+
+	call AuditProductAvgCost();
+	let type_code = $save_type_code ;
+#Rev 12 PHH end Audit
+
+# Update RM inventory
+	let save_quantity = $quantity;
+	select conv_rate
+		from unit_convert
+		where unit_meas = $unit_meas;
+
+	let active_wgt = $quantity;
+	let quantity = $quantity_act;
+
+	Call SubRawMatlInvent();
+	let ts_create = $get_curr_time;
+# Reverse the sign
+	let units_act = $units_act * (-1);
+	let units_act_dec = $units_act_dec * (-1);
+	let quantity = $quantity * (-1);
+	let active_wgt = $active_wgt * (-1);
+	let cost = $cost * (-1); 
+	let ts_adj 		= $get_curr_time;		
+	Call InsertRawMatlTrans();
+# Reverse the sign
+	let units_act = $units_act * (-1);
+	let units_act_dec = $units_act_dec * (-1);
+	let quantity = $quantity * (-1);
+	let active_wgt = $active_wgt * (-1);
+	let cost = $cost * (-1); 
+
+	let quantity = $save_quantity;
+
+	call SubFMMLogStock();
+
+END SUBROUTINE
+
+# Do all related action for increasing the RM inventory
+SUBROUTINE AddRMInventory()
+
+# Get the RM Manual consumption data
+	select  raw_matl_grp_id, raw_matl_id, product_code_id, warehouse_id, whse_zone_id, bay_id, quantity, units_act, units_act_dec, quantity_act
+		from acs_rm_manual_item
+		where cons_grp_id = $cons_grp_id
+			and cost_id = $cost_id;
+
+	if ($success = 1) then	
+# Get the average weight for one unit 
+		let avg_wgt_net = $quantity / $units_act; 
+
+# Get Product Code data
+		select raw_matl_grp_id, raw_matl_id, unit_meas, percent_active, wgt_net
+			from acs_product_code
+			where product_code_id = $product_code_id;
+		select conv_rate
+			from unit_convert
+			where unit_meas = $unit_meas;
+
+# Calculate the cost
+		select cost from acs_cost where cost_id = $cost_id;
+		if ( $success = 0 ) then 
+			echo ****** ERROR **** getting cost for cost_id = <$cost_id>; 
+		end if 
+		
+
+#Rev 12 PHH Add Audit 
+
+	      let new_cost = $cost;
+	      let new_active_wgt = $quantity;
+
+	      let save_type_code = $type_code;
+	      let type_code = "U";
+
+		Call UpdateProductAvgCost();
+
+		let type_code = $save_type_code ;
+#Rev 12 PHH end Audit
+
+# Update RM inventory
+		let save_quantity = $quantity;
+		let active_wgt = $quantity ;
+		let quantity = $quantity_act;
+
+		Call AddRawMatlInvent();
+		let ts_create = $get_curr_time;
+		let remarks = "RM Manual Add:",$cons_grp_id;
+		let ts_adj 		= $get_curr_time;		
+		Call InsertRawMatlTrans();
+
+		let quantity = $save_quantity;
+
+		call AddFMMLogStock();
+
+	end if
+
+END SUBROUTINE
+
+
+SUBROUTINE CREATE_RECORDS();
+
+# Init Records based upon the active production recipe
+	if ($type_code = "R" or $type_code = "M") then
+
+# Create the active recipe view complete
+		let ts_transaction = $ts_create;
+		select grade_spec grade_spec_made
+			from run_mast
+			where mill_id  = $mill_id_plan
+			and machine_type = $mach_type_plan
+			and machine_id = $mach_id_plan
+			and run_num = $run_num;
+
+		let save_ts_begin = $ts_begin;
+		let save_ts_end = $ts_end;
+		let save_department_id = $department_id;
+		call ACSBuildRecipeActView();
+		let ts_begin = $save_ts_begin;
+		let ts_end = $save_ts_end;
+		let department_id = $save_department_id;
+
+		foreach
+			select mill_id rm_mill_id, machine_type rm_machine_type, machine_id rm_machine_id, class rm_class, raw_matl_grp_id, raw_matl_id,
+				 product_code_id, warehouse_id, whse_zone_id, bay_id, prod_route_id
+			from acs_recact_all
+			where user_id = $user_id
+				and prod_mill_id = $mill_id
+				and prod_mach_type = $machine_type
+				and prod_mach_id = $machine_id
+				and grade_spec = $grade_spec_made
+				and ts_transaction = $ts_transaction
+				and type_code = 'M'
+				and (department_id = $department_id or department_id = ' ');
+			
+			if ($rm_class = "I") then
+# Get the consumption machine with the prod_route_id and the recipe machine
+				select mach_type_dest rm_machine_type, mach_id_dest rm_machine_id
+					from acs_prod_route
+					where prod_route_id = $prod_route_id;
+			end if
+
+			select unit_meas
+				from acs_product_code
+				where product_code_id = $product_code_id;
+			if ($unit_meas = "") then
+				let unit_meas = " ";
+			end if		
+
+			select base_units 
+				from unit_convert
+				where unit_meas = $unit_meas;
+			if ($base_units = "") then
+				let base_units = " ";
+			end if		
+
+			let grade_spec_parent = " ";
+			let quantity_active = 0;
+			let quantity = 0;
+			let quantity_act = 0;
+			let units_act = 0;
+			let units_act_dec = 0;
+			let cost_id = " ";
+			let ts_modified = 0;
+			let init_flag = 1;
+
+			call MANUALITEMINSERT();
+
+		end foreach
+
+		call DelRecipeActView();
+
+	else
+
+ 		foreach select mill_id rm_mill_id, machine_type rm_machine_type, machine_id rm_machine_id, raw_matl_grp_id, raw_matl_id, sec_lead_time
+			from acs_raw_matl_mach
+			where mill_id = $mill_id
+				and type_code = 'M'
+				and (department_id = $department_id or department_id = ' ');
+
+			let grade_spec_parent = " ";
+			let quantity_active = 0;
+			let base_units = " ";
+			let product_code_id = " ";
+			let unit_meas = " ";
+			let quantity = 0;
+			let quantity_act = 0;
+			let units_act = 0;
+			let units_act_dec = 0;
+			let warehouse_id = " ";
+			let whse_zone_id = " ";
+			let bay_id = " ";
+			let cost_id = " ";
+			let ts_modified = 0;
+			let init_flag = 1;
+			prod_route_id = "000"
+
+			call MANUALITEMINSERT();
+
+		end foreach
+
+	end if
+
+END SUBROUTINE
+
+SUBROUTINE CheckProdStationRM()
+#Check if IRM at class W machine - production station
+	let prod_station_rm = "0";
+
+	select grade_spec gsspec
+		from acs_mill_mach_view
+		where mill_id = $rm_mill_id and machine_type = $rm_machine_type and machine_id = $rm_machine_id 
+			and raw_matl_grp_id =$raw_matl_grp_id and raw_matl_id=$raw_matl_id
+			and class <> 'I' and active_flag='Y';
+		   if ($success=1) then
+			select machine_desc from machine
+			where mill_id=$rm_mill_id and machine_type = $rm_machine_type and machine_id = $rm_machine_id and class='W';
+			if ($success=1) then
+				if ($grade_spec_made <> $rm_grade_spec_made) then
+					let prod_station_rm = "1";
+				end if
+			end if
+		   end if
+
+END SUBROUTINE
+
+SUBROUTINE InsertOPC_INTF();
+
+	foreach
+		select server_name, prog_id, tag_name,
+			 ts_last_used, sec_lead_time, speed_ref, type_code
+		  from acs_opc_tag_mast
+		 where mill_id = $mill_id
+		  and machine_type = $machine_type
+		  and machine_id = $machine_id
+		  and active_flag = 'Y';
+
+
+		select ts_begin, ts_end from acs_rm_manual_mast where cons_grp_id=$cons_grp_id;
+		
+		if ($ts_last_used = 0) then
+			LET ts_last_used = $ts_begin;
+		end if 
+
+		insert into acs_opti_opc_intf
+				(unit_id, tag_name, ts_turned_up, stat,
+				ts_begin, ts_end, value_act, quantity_act, prog_id, server_name,
+				quality, ts_approved, ts_modified, ts_create)
+		values ($cons_grp_id, $tag_name, $ts_end, 'N',
+				$ts_last_used, $ts_end, 0, 0, $prog_id, $server_name,
+				' ', 0, 0, $get_curr_time);
+
+		update acs_opc_tag_mast
+			   set ts_last_used = $ts_end
+			 where tag_name = $tag_name
+	  		  and mill_id = $mill_id
+			  and machine_type = $machine_type
+			  and machine_id = $machine_id
+			  and active_flag = 'Y';
+
+	end foreach
+
+
+END SUBROUTINE
+
+###### Create the next default consumption group in automatic mode 
+SUBROUTINE	DuplicateCurrent()
+
+	LET get_curr_time   = {time of day};
+	let ts_create = $get_curr_time;
+
+########## Duplicate acs_rm_manual_mast
+	select cons_grp_name, type_code, mill_id, machine_type, machine_id,
+			mill_id_plan, mach_type_plan, mach_id_plan,  run_num,
+			ts_begin, ts_end, department_id, wgt_net, air_dry_perc, wgt_airdry, grade_spec
+#			cons_grp_id, user_id, ts_modified, ts_create, stat, cost_per_ton
+		from acs_rm_manual_mast
+		where cons_grp_id = $cons_grp_id;
+
+	let stat = "N";
+	let cost_per_ton = 0;
+
+	insert into acs_rm_manual_mast
+	( cons_grp_id, cons_grp_name, type_code, stat, mill_id, machine_type, machine_id,
+		mill_id_plan, mach_type_plan, mach_id_plan,  run_num,
+		ts_begin, ts_end, department_id, user_id, ts_modified, ts_create,
+            wgt_net, air_dry_perc, wgt_airdry, cost_per_ton, grade_spec)
+	values
+    	( $new_cons_grp_id, $cons_grp_name, $type_code, $stat, $mill_id, $machine_type, $machine_id,
+    		$mill_id_plan, $mach_type_plan, $mach_id_plan, $run_num,
+		$ts_begin, $ts_end, $department_id, $user_id, 0, $ts_create,
+            $wgt_net, $air_dry_perc, $wgt_airdry, $cost_per_ton, $grade_spec);
+
+
+########## Duplicate acs_rm_manual_item
+	foreach select mill_id, machine_type, machine_id,raw_matl_grp_id, raw_matl_id, sec_lead_time, seq_num,
+			grade_spec_parent, prod_route_id, quantity_active, base_units, product_code_id, 
+			unit_meas, quantity, quantity_act, warehouse_id, whse_zone_id, bay_id,  units_act, units_act_dec
+# 			cons_grp_id, cost_id, ts_modified, ts_create
+		from acs_rm_manual_item
+		where cons_grp_id = $cons_grp_id
+			and grade_spec_parent = ' ';
+	
+		let cost_id = " ";
+		
+		insert into acs_rm_manual_item
+			( cons_grp_id, mill_id, machine_type, machine_id,raw_matl_grp_id, raw_matl_id, sec_lead_time, seq_num,
+				grade_spec_parent, prod_route_id, quantity_active, base_units, product_code_id, 
+				unit_meas, quantity, quantity_act, warehouse_id, whse_zone_id, bay_id, cost_id, ts_modified, ts_create, units_act, units_act_dec)
+			values
+			( $new_cons_grp_id, $mill_id, $machine_type, $machine_id,$raw_matl_grp_id, $raw_matl_id, $sec_lead_time, $seq_num,
+				$grade_spec_parent, $prod_route_id, $quantity_active, $base_units, $product_code_id, 
+				$unit_meas, $quantity, $quantity_act, $warehouse_id, $whse_zone_id, $bay_id, $cost_id, 0, $ts_create, $units_act, $units_act_dec);
+
+	end foreach
+
+END SUBROUTINE
+
+# Adjust units_act depending of raw_matl_invent
+SUBROUTINE SetUnitsAct()
+
+# Get the info from raw_matl_invent
+	select units_act cur_units_act, units_act_dec cur_units_act_dec  
+		from raw_matl_invent 
+		where warehouse_id = $warehouse_id and 
+			whse_zone_id = $whse_zone_id and 
+			bay_id       = $bay_id and 
+			product_code_id = $product_code_id ;
+
+	if ($cur_units_act > 0 or $cur_units_act = 0) then
+		if ($cur_units_act < cur_units_act_dec or $cur_units_act = cur_units_act_dec) then
+			let units_act = $units_act_dec;
+		else
+			let units_act = $units_act_dec;
+			let units_act = $units_act + 1;
+		end if
+	else 
+		if ($cur_units_act < cur_units_act_dec or $cur_units_act = cur_units_act_dec) then
+			let units_act = $units_act_dec;
+			let units_act = $units_act + 1;
+		else
+			let units_act = $units_act_dec;
+		end if
+	end if
+
+END SUBROUTINE
+
+###===============================================================================
+## Included Routines
+###===============================================================================
+	INCLUDE "acs_subroutines";
+	INCLUDE "acs_viewrecipe_all";
+	INCLUDE "raw_matl_inv_update";
+	INCLUDE "fmm_log_stock_sub";

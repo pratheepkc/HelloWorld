@@ -1,0 +1,339 @@
+#============================================================================
+# MxUpdate rules for cost allocation
+#
+# NOTE: This rules file is for releasing expense in creating acs_cost record
+#
+#============================================================================
+# Rev.  Date:     Who   Description
+# ---  --------   ----  -----------------------------------------------------
+# 01   12/12/08   BRN   Initial release
+# 02   2/20/2009  KB    Modified MANUAL * RELEASE for new criteria of Allocation from Application
+# 03   2/23/2009  KB    Added MANUAL * UNRELEASE for UnAllocation
+# 04   02/26/09   KB    Modified to release other records for an acc seg when one record has zero cost
+# 05   08/14/09   BRN	Replace MMMprod with MMMplan for acs_cost
+# 06   08/24/09   BRN   Add the LeadTime to the table acs_cost
+# 07   01/21/10   BRN	Add cons_mmm into acs_cost
+# 08   01/10/10   PHH   Define ts_end as long identical to acs_subroutine
+# 09   01/10/10   PHH   Do not reset the cost while unrealsing the expense line
+# 10   03/17/11   PHH   in CreateACSCost(); select sum cost for reason_id = ' ' instaed of reason_id <> ' '
+#============================================================================
+DEFINE  ACS       	ENV;
+DEFINE  CORPMILL 		ENV;
+DEFINE  tmp_string	string;
+DEFINE  tmp_date		long "yyyymmdd";
+DEFINE timestamp long;
+DEFINE ts_end		long;
+
+
+NO * EXECUTE
+#       Run selects in this rule to prepare the variables only
+        select * from act_cost;
+        select * from act_acct_expense;
+		
+
+MX * ST
+	echo Startup rule;
+	LET mode = "Single";
+	LET type = "STD";
+
+#################################### Called from the ACSExpenseRelease schedule ###################################################
+#################################### Select the acs_acct_expense records to release ###################################################
+* * *
+
+      LET get_curr_time   = {time of day};
+
+	if ($mx_station <> "MANUAL") then
+		foreach select distinct acct_seg_id, year_num, acct_period 
+		        	from acs_acct_expense
+	      	  	where stat = 'N'
+				and reason_id = ' ';
+			call ReleaseExpense();
+		end foreach
+	end if
+
+#################################### Called from Manual Expense Management Appl    ###################################################
+#################################### Select the acs_acct_expense records to release ###################################################
+MANUAL * RELEASE
+
+      LET get_curr_time   = {time of day};
+	
+	LET acct_seg_id = $acct_seg_id;
+	LET acct_period = $acct_period;
+	LET year_num = $year_num;
+	if ($acct_seg_id = "" or $acct_seg_id = " ") then 
+	foreach select distinct acct_seg_id, year_num, acct_period
+	        	from acs_acct_expense
+      	  	where stat = 'N'
+#		      and  acct_seg_id not in (' ')
+			and year_num = $year_num
+			and acct_period = $acct_period;
+#		Let currency_id = $currency_id;
+		call ReleaseExpenses();
+	end foreach
+	else
+	foreach select distinct acct_seg_id, year_num, acct_period, currency_id 
+	        	from acs_acct_expense
+      	  	where stat = 'N'
+			and acct_seg_id = $acct_seg_id
+			and year_num = $year_num
+			and acct_period = $acct_period;
+		Let currency_id = $currency_id;
+		call ReleaseExpenses();
+	end foreach
+	end if
+
+#################################### Select the acs_acct_expense records to release ###################################################
+MANUAL * UNRELEASE
+      LET get_curr_time   = {time of day};
+
+	foreach select acct_expense_id, acct_seg_id, year_num, acct_period, currency_id
+		from acs_acct_expense
+		where cost_id = $cost_id;
+		let success = $success;
+		if ($success=1) then
+		update acs_acct_expense
+# Rev 9.0   set stat = 'N',cost = 0.00,cost_id = 0,ts_modified = $get_curr_time
+		set stat = 'N',cost_id = 0,ts_modified = $get_curr_time
+		where acct_expense_id = $acct_expense_id;
+		end if
+		select mill_id from acs_cost where cost_id = $cost_id;
+		let cost_success = $success;
+		if ($cost_success=1) then
+		delete from acs_cost where cost_id = $cost_id;
+		end if
+	end foreach
+	
+####################################### Release the expenses
+SUBROUTINE ReleaseExpenses();
+
+		echo Release $acct_seg_id, $year_num, $acct_period;
+		let lv_go_on = 1;
+
+########### Check data consistency
+#		if ($lv_go_on = 1) then
+			call CheckDataConsistency();
+#		end if
+########### Create the acs_cost record for allocation
+#		if ($lv_go_on = 1) then
+			call CreateACSCost();
+#		end if
+
+########### Set the expenses as released
+#		if ($lv_go_on = 1) then
+			call SetExpensesReleased();
+#		end if
+
+END SUBROUTINE
+
+####################################### Check data consistency for the release
+SUBROUTINE CheckDataConsistency();
+
+
+	echo in CheckDataConsistency for acct_seg_id : $acct_seg_id ;
+
+	if ($acct_seg_id = "" or $acct_seg_id = " ") then 
+		foreach select acct_expense_id, cost, currency_id , acct_seg_id currrent_acct_seg_id
+	        	from acs_acct_expense
+      	  	where 
+			stat = 'N'
+#			and acct_seg_id = $acct_seg_id
+#			and acct_seg_id not in (' ')
+			and year_num = $year_num
+			and acct_period = $acct_period;
+
+		echo A1 is $acct_expense_id;
+		echo COST is $cost;
+		echo currrent_acct_seg_id : $currrent_acct_seg_id ;
+
+
+			if ( $currrent_acct_seg_id = " " or $currrent_acct_seg_id = "" ) then 
+				let reason_id = "INV SEG";
+			else 
+				if ($currency_id <> " " or $currency_id <> "") then
+					let save_curr_id = $currency_id;
+				end if
+				if ($cost = 0) then
+					let lv_go_on = 0;
+					let reason_id = "COST_0";
+				else
+					select currency_id
+					from currency
+					where currency_id = $currency_id;
+					if ($success = 0) then
+						let lv_go_on = 0;
+						let reason_id = "CURRENCY";
+					else 
+						Let lv_go_on = 1;
+						let reason_id = " " ;
+					end if
+				end if
+			end if 
+#			if ($lv_go_on = 0) then
+			call UpdateReason();
+#			end if
+		end foreach
+	else
+
+
+
+
+		foreach select acct_expense_id, cost, currency_id , acct_seg_id currrent_acct_seg_id
+	        	from acs_acct_expense
+   	  	where 
+			stat = 'N'
+			and acct_seg_id = $acct_seg_id
+			and year_num = $year_num
+			and acct_period = $acct_period;
+
+		echo A2 is $acct_expense_id;
+		echo COST is $cost;
+		echo currrent_acct_seg_id : $currrent_acct_seg_id ;
+			if ( $currrent_acct_seg_id = " " or $currrent_acct_seg_id = "" ) then 
+				let reason_id = "INV SEG";
+			else 
+				if ($currency_id <> " " or $currency_id <> "") then
+					let save_curr_id = $currency_id;
+				end if
+				if ($cost = 0) then
+	 		  		let lv_go_on = 0;
+			  		let reason_id = "COST_0";
+				else
+			 		select currency_id curr_id
+					from currency
+					where currency_id = $currency_id;
+					if ($success = 0) then
+			 	 		let lv_go_on = 0;
+						 let reason_id = "CURRENCY";
+					else
+						 Let lv_go_on = 1;
+					 let reason_id = " " ;
+					end if
+				end if
+			end if 
+#			if ($lv_go_on = 0) then
+				call UpdateReason();
+#			end if
+		end foreach
+	end if
+	Let currency_id = $save_curr_id;
+END SUBROUTINE
+
+####################################### Create the ACS Cost record in aggregating all the expenses
+SUBROUTINE CreateACSCost();
+
+# Get the total cost
+
+
+
+
+	select sum(cost) cost
+	      from acs_acct_expense
+      	where stat = 'N'
+		and acct_seg_id = $acct_seg_id 
+		and year_num = $year_num
+		and acct_period = $acct_period
+		and reason_id = ' ';
+
+# Get a cost_id number
+
+	let serial_key_id = "OVERHEAD";
+	let serial_mill_id = $CORPMILL;
+	let serial_informat = "&&&&&&&&";
+	let serial_prefix = "O-";
+	call GET_COST_ID();
+	let cost_id =$serial_cost_id;
+
+# Set the time limit based upon the production month
+#		let tmp_string = $year_num:"&&&&",$acct_period,"15";
+#		let tmp_date = $tmp_string;
+#		let timestamp = $tmp_date;
+#		let ts_begin = {start of production month};
+#		let ts_end = {end of production month};
+		let ts_begin = $ts_begin;
+		let ts_end = $ts_end;
+# Set Default values
+	let cost_id_group = " ";
+	let cost_type = "O";
+	let mill_id = " ";
+	let machine_type = " ";
+	let machine_id = " ";
+	let warehouse_id = " ";
+	let whse_zone_id = " ";
+	let bay_id = " ";
+	let mill_id_plan = " ";
+	let mach_type_plan = " ";
+	let mach_id_plan = " ";
+	let run_num = 0;
+	let pat_num = 0;
+	let unit_id = " ";
+	let type_code = " ";
+	let product_code_id = " ";
+	let raw_matl_grp_id = " ";
+	let raw_matl_id = " ";
+	let fin_matl_grp_id = " ";
+	let fin_matl_id = " ";
+	let quantity = 0;
+	let unit_meas = " ";
+	let order_id = " ";
+	let item_num = 0;
+	let load_id = "00000";
+	let cost_driver_id = " ";
+	let cost_type_id = " ";
+	let allocated_flag = "N";
+	let ts_allocated = 0;
+	let reason_id = " ";
+	let user_id = $USER;
+	let appl_name = $mx_station,"-release expense";
+	let closure_flag = "N";
+	let ts_closed = 0;
+	let ts_modified = 0;
+	let ts_create = $get_curr_time;
+	let sec_lead_time = 0;
+
+# rev 07
+	let cons_mill_id = " ";
+	let cons_mach_type = " ";
+	let cons_mach_id = " ";
+
+# Insert ACS Cost record
+	call INSERT_ACS_COST();
+
+END SUBROUTINE
+
+######################################### Update acs_cost reason
+SUBROUTINE UpdateReason();
+
+	update acs_acct_expense
+		set reason_id = $reason_id
+		where acct_expense_id = $acct_expense_id;
+
+END SUBROUTINE
+
+######################################### Mark the expenses as released
+SUBROUTINE SetExpensesReleased();
+
+
+	select count(*) cnt from acs_acct_expense
+	where stat = 'N'
+		and acct_seg_id = $acct_seg_id
+		and year_num = $year_num
+		and acct_period = $acct_period
+		and cost <> 0
+		and reason_id = ' ';
+	echo $cnt to release ; 
+	if ( $cnt > 0 ) then 
+		update acs_acct_expense
+		set stat = 'R', ts_modified = $get_curr_time, cost_id = $cost_id
+     	  	where stat = 'N'
+		and acct_seg_id = $acct_seg_id
+		and year_num = $year_num
+		and acct_period = $acct_period
+		and cost <> 0
+		and reason_id = ' ';
+	end if 
+END SUBROUTINE
+
+###===============================================================================
+## Included Routines
+###===============================================================================
+	INCLUDE "acs_subroutines";

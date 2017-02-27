@@ -1,0 +1,403 @@
+DEFINE curr_time long;
+DEFINE get_curr_time long;
+DEFINE start_prod_day long;
+DEFINE end_prod_day long;
+DEFINE AUTOAPPROVECONS env;
+DEFINE FIBERMGT env;
+DEFINE ACSAUTOQTYTOLERANCE env;
+DEFINE approve_stat string;
+DEFINE MXLANG env;
+
+#  MxUpdate Rules for the automatic consumptions at the jumbo turnup time, Process automatic consumptions recorded from OPC
+#
+#  REV     DATE     WHO      DESCRIPTION
+# -----  --------  -----    ------------------------------------------------
+#   1.0  08/22/09   NJN     Initial Release
+#   2.0  10/01/09   NJN     Update the Raw Matl Inventory
+#   3.0  11/23/09   NJN     Add AutoValidate 
+#   4.0  12/16/09   NJN     If Batch instead of Jumbo, update status to P
+#   5.0  01/21/10   BRN	    Add cons_mmm into acs_cost
+#==============================================================================================
+# ERROR RULE, DO EVERY TIME AN ERROR OCCURS
+#==============================================================================================
+
+NO * EXECUTE
+#       Run selects in this rule to prepare the variables only
+        select * from acs_cost;
+        select * from invent;
+        select * from jumbo;
+        select * from acs_direct_cost;
+        select * from acs_product_code;
+        select * from acs_cost_trans_log;
+        select * from acs_raw_matl_mach;
+
+MX * ER 
+	echo "Rule error";
+#
+
+MX * ST
+	echo Startup rule;
+	LET mode = "Multi";
+	LET type = "STD";
+      select format activeformat from dict_columns where language_id = $MXLANG and
+           column_code = 'ActiveWgt';
+
+
+################################ MAIN FLOW BEGIN ###########################
+
+	let get_curr_time = {time};
+
+	call ACSAutoValidateRealCons();
+
+	call ACSAllocRealCons();
+
+################################ MAIN FLOW END ###########################
+
+SUBROUTINE ACSAllocRealCons()
+
+# Process Approved & Validated Consumption records
+	foreach
+		select unit_id, tag_name, ts_turned_up, stat,
+				ts_begin, ts_end, value_act, quantity_act, prog_id, server_name,
+				quality, ts_modified, ts_create
+		 from acs_opti_opc_intf
+		where stat in ('A','V');
+
+
+		LET fmm = $FIBERMGT;
+		if ($fmm = "Y") then
+			select product_code_id, type_code, mill_id, machine_type, machine_id, warehouse_id, whse_zone_id, bay_id
+			  from acs_opc_tag_mast
+			 where prog_id = $prog_id
+			   and tag_name = $tag_name;
+		else
+
+			select product_code_id, type_code, mill_id, machine_type, machine_id
+			  from acs_opc_tag_mast
+			 where prog_id = $prog_id
+			   and tag_name = $tag_name;
+
+			LET warehouse_id 	= " ";
+			LET whse_zone_id 	= " ";
+			LET bay_id 		= " ";
+
+		end if
+
+# Check Dry or Gross
+
+			LET jumbo_id = $unit_id;
+
+			select run_num
+			  from jumbo
+			 where mill_id = $mill_id
+			   and jumbo_id = $jumbo_id;
+
+# Call Dry Weight Calculations. Use quantity_act consistently for V & A status
+
+			if ($type_code = "G") then
+				LET wgt_act = $quantity_act;
+				LET quantity = $quantity_act;
+				CALL ACSGetJumboDryWeight();
+			else 
+				LET dry_wgt_act = $quantity_act;
+				LET quantity = $quantity_act;
+			end if
+
+# Get cost
+			call ACSGetRMActiveQuantity();
+
+# Is dry_wgt_act the right one or quantity_active?
+#			LET quantity_active = $dry_wgt_act;
+
+			LET quantity_active = $quantity_active;
+
+#		echo $value_act, $quantity_act,  $wgt_act, $quantity_active, $dry_wgt_act, $quantity -- $active_wgt, $percent_active, $wgt_net, $avg_cost_per_unit $serial_cost_id, $serial_found $error $auto_cons_cost, $auto_cons_qty;
+
+			Call GetProductCodeAvgCost();
+				
+			LET active_wgt = $quantity_active:"--------&";
+
+# Get Product Code data
+			select unit_meas, percent_active, wgt_net, raw_matl_grp_id, raw_matl_id
+			  from acs_product_code
+			 where product_code_id = $product_code_id;
+			Call GetProductCodeQuantity();
+			LET get_curr_time = $ts_turned_up;
+			LET ts_adj = $ts_turned_up;
+
+			LET warehouse_id 	= $warehouse_id ;
+			LET whse_zone_id 	= $whse_zone_id ;
+			LET bay_id 		= $bay_id ;
+
+######################## Update the raw material inventory
+
+			if ($fmm = "Y") then
+
+				LET units_act = 0;				
+				Call SubRawMatlInvent();
+
+			end if
+
+######################## Update the raw material inventory
+
+			LET prdt = $percent_active*$wgt_net;
+			if ($prdt > 0) then
+				LET cost = $avg_cost_per_unit * ( $active_wgt /($percent_active*$wgt_net/100));
+			else
+				LET cost = 0;
+			end if
+			LET ts_create = $get_curr_time;
+			LET units_act = $units_act * (-1);
+			LET quantity = $quantity * (-1);
+			LET active_wgt = $active_wgt * (-1);
+			LET cost = $cost * (-1); 
+			LET remarks = "Turnup: ",$unit_id;
+
+
+######################## Update the raw material inventory
+			if ($fmm = "Y") then
+				LET units_act = 0;	
+				Call InsertRawMatlTrans();
+			end if
+######################## Update the raw material inventory
+
+
+			let serial_key_id = "RAWMATL";
+			let serial_mill_id = $mill_id;
+			let serial_informat = "&&&&&&&&";
+			let serial_prefix = "RM-A-",$type_code_input:"U","-";
+		
+			call GET_COST_ID();
+		
+			let serial_cost_id = $serial_cost_id;
+			let serial_found = $serial_found;
+
+#Get acct_seg_id and cost_type_id
+
+			select acct_seg_id
+			  from raw_matl_mill
+			 where mill_id = $mill_id
+			   and raw_matl_grp_id = $raw_matl_grp_id
+			   and raw_matl_id = $raw_matl_id;
+			
+			select cost_type_id
+			  from acs_acct_seg
+			 where acct_seg_id = $acct_seg_id;
+
+#			if ($serial_found=1 and $error=0) then
+			if ($serial_found=1) then
+
+
+## Set values for insert into acs_cost
+		
+				let cost_id 		= $serial_cost_id;
+				let cost_id_group 	= $unit_id;
+				let cost_type 		= "R";
+				let mill_id 		= $mill_id;
+				let machine_type 		= $machine_type;
+				let machine_id 		= $machine_id;
+				let warehouse_id 		= $warehouse_id;
+				let whse_zone_id 		= $whse_zone_id;
+				let bay_id 			= $bay_id;
+				let ts_begin 		= $ts_begin; 	
+				let ts_end 			= $ts_end; 
+				let mill_id_plan 		= $mill_id;
+				let mach_type_plan 	= $machine_type;  
+				let mach_id_plan 		= $machine_id;
+				let run_num 		= 0;  
+				let pat_num 		= 0;
+#				let unit_id 		= " ";
+				let type_code 		= "J";
+				let product_code_id 	= $product_code_id;
+				let raw_matl_grp_id 	= $raw_matl_grp_id; 
+				let raw_matl_id 		= $raw_matl_id;	  
+				let fin_matl_grp_id 	= " ";
+				let fin_matl_id 		= " "; 
+				let quantity 		= $quantity_active;
+				let unit_meas 		= "KGS";
+				let cost 			= $cost*(-1);
+				select string_value 
+				  from constants
+				 where key_value ='MILL_CURRENCY';
+				let currency_id 		= $string_value;
+				let acct_seg_id 		= $acct_seg_id;
+				let order_id 		= " ";
+				let item_num 		= 0;
+				let load_id 		= " ";
+				let cost_driver_id	= "UNIT";
+				let cost_type_id 		= $cost_type_id;
+				let allocated_flag 	= "N";
+				let ts_allocated 		= 0;
+				let reason_id 		= " ";
+				let user_id 		= $USER;
+				let appl_name 		= "ACS_LOG_JUMBO AUTO RM";
+				let closure_flag 		= "N";
+				let ts_closed 		= 0;
+				let ts_modified 		= 0;
+				let ts_create 		= $get_curr_time;		
+		
+
+#		echo CALCULATION PARAMS $cost = $unit_id, $tag_name $mill_id, $machine_type $run_num $product_code_id, $value_act, $avg_cost_per_unit * ( $active_wgt /($percent_active*$wgt_net/100)) --- $quantity, $quantity_active, $cost;
+
+# rev 5.0
+			let cons_mill_id = $mill_id;
+			let cons_mach_type = $machine_type;
+			let cons_mach_id = $machine_id;
+
+				call INSERT_ACS_COST();
+			
+				update acs_opti_opc_intf
+				   set stat = 'P'
+				 where unit_id = $unit_id
+				   and tag_name = $tag_name;
+
+			else
+			
+				let error = $error + 1;
+			end if
+
+	end foreach
+
+END SUBROUTINE
+
+SUBROUTINE ACSAutoValidateRealCons()
+
+	LET auto_approve = "N";
+	LET auto_qty_tol = 0;
+	LET curr_time = {time};
+
+	LET auto_approve = $ACSAUTOAPPROVECONS;
+	LET auto_qty_tol = $ACSAUTOQTYTOLERANCE;
+
+# Run auto Validation for Updated records
+	foreach
+		select unit_id, tag_name, ts_turned_up, stat,
+				ts_begin, ts_end, value_act, quantity_act, prog_id, server_name,
+				quality, ts_modified, ts_create
+		 from acs_opti_opc_intf
+		where stat in ('U');
+
+# Check for Batch (not a valid Jumbo) and set Status to P
+		select run_num
+		  from jumbo
+		 where jumbo_id = $unit_id;
+
+		if($success = 0) then
+			update acs_opti_opc_intf
+			   set stat = 'P',
+				 quantity_act = $value_act,
+			  	 ts_modified = $curr_time 
+			 where unit_id = $unit_id
+			   and tag_name = $tag_name;
+		else
+
+# Precipitate records with Quality (confidence value from OPC provider for the tag) not "Good" 
+
+			if ($quality <> "Good")  then
+				LET qual_stat = "R";	
+			else
+	
+# Check Dry or Gross
+				select product_code_id, grade_spec, type_code, mill_id, machine_type, machine_id
+				  from acs_opc_tag_mast
+				 where prog_id = $prog_id
+				   and tag_name = $tag_name;
+
+
+# Call Dry Weight Calculations
+
+				if ($type_code = "G") then
+					LET wgt_act = $value_act;
+					LET quantity = $value_act;
+					CALL ACSGetJumboDryWeight();
+				else 
+					LET dry_wgt_act = $value_act;
+					LET quantity = $value_act;
+				end if
+
+# Get Active Qty
+				call ACSGetRMActiveQuantity();
+				LET quantity_active = $quantity_active;
+
+# Get Standard quantity from acs_jumbo_recipe for comparision
+	
+				select raw_matl_grp_id, raw_matl_id, wgt_net, unit_meas, percent_active
+				  from acs_product_code
+				 where product_code_id = $product_code_id
+				   and mill_id = $mill_id;
+
+				select conv_rate 
+				  from unit_convert
+				 where unit_meas = $unit_meas;
+
+# Either use dry_wgt_act or quantity_active here to get comparable quantity
+				if ($conv_rate > 0) then
+					LET qty_act = $dry_wgt_act*$wgt_net*$percent_active/100/$conv_rate;
+				else
+					LET conv_rate = 1;
+					LET qty_act = $dry_wgt_act*$wgt_net*$percent_active/100/$conv_rate;
+				end if
+
+				select quantity std_qty
+				  from acs_jumbo_recipe
+				 where jumbo_id = $unit_id
+				   and raw_matl_grp_id = $raw_matl_grp_id
+				   and raw_matl_id = $raw_matl_id
+				   and product_code_id = $product_code_id
+				   and grade_spec_parent = $grade_spec;
+
+				if ($success = 1) then
+					let dev_perc = ($qty_act - $std_qty)/$std_qty*100;
+				else
+					let dev_perc = 100;
+				end if
+
+
+# 	echo 	QUANTITY ACTIVE $dry_wgt_act $quantity_active $qty_act = $dry_wgt_act*$wgt_net*$percent_active/100/$conv_rate let $dev_perc = ($quantity_active - $std_qty)/$std_qty*100;
+
+# Make deviation percentage a positive number
+
+				if ($dev_perc < 0) then
+					let dev_perc = $dev_perc*-1;
+				end if
+
+# Auto Validate if deviation is less than percentage specified by ACSAUTOQTYTOLERANCE
+
+				if($dev_perc < $auto_qty_tol) then
+					update acs_opti_opc_intf
+				 	  set stat = 'V',
+						quantity_act = $value_act,
+			  			ts_modified = $curr_time 
+				 	where unit_id = $unit_id
+					  and tag_name = $tag_name;	
+				else	
+					update acs_opti_opc_intf
+				 	  set stat = 'R',
+					  	ts_modified = $curr_time 
+				 	where unit_id = $unit_id
+					  and tag_name = $tag_name;		
+				end if
+
+			end if
+
+# Treat Updated as Approved if ACSAUTOAPPROVECONS = Y
+			if ($auto_approve = "Y") then
+				update acs_opti_opc_intf
+				   set stat = 'A',
+					 quantity_act = $value_act,
+				   	 ts_modified = $curr_time 
+				 where stat = 'U';
+			end if
+
+		end if
+
+	end foreach
+END SUBROUTINE
+
+###===============================================================================
+## Included Routines
+###===============================================================================
+	INCLUDE "acs_subroutines";
+	INCLUDE "acs_viewrecipe_all";
+	INCLUDE "raw_matl_inv_update";
+	INCLUDE "acs_rm_standard";

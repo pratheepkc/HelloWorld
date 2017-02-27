@@ -1,0 +1,1152 @@
+#============================================================================
+# MxUpdate rules for acs_log_jumbo
+#
+# This file describes all the background processing, for filling the ACS data,
+#     necessary using MxUpdate
+#	whenever a unit is processed.  Typically the actions performed on
+#	a unit are Turnup, Unturnup, Consume, and Modification.  The results
+#	of these actions are:
+#
+# TURNUP:	Production (Units and Weight) and Run Time are updated.
+# UNTURNUP:	Production and Run Time are backed out.
+# MODIFY:	Production (units and Weight) is adjusted.
+# SLABOFF:	Some of the paper in the unit is discarded.
+# CONSUME:	Paper Remaining in the unit is recorded as LengthLoss.
+# 
+#
+#  REV     DATE     WHO      DESCRIPTION
+# -----  --------  -----    ------------------------------------------------
+#  1.0   08/12/08   BRN     Initial release
+#  2.0   15/01/08	  PKC	    Add calls to calculate geneology
+#  3.0   23/01/09   GVG     Add call to delete genealogy on unconsume
+#  4.0   28/01/09   GVG     Insert into acs_cost_trans_log on consume and unconsume
+#  5.0   13/02/09   GVG     Create splices records when units are turned up from the sheeter - used to create acs_genealogy records
+#  6.0   16/02/09   GVG     Get width from run_pos rather than from invent for child pallets
+#  7.0   18/02/09   GVG     Added routines for trimmer, pallet reprocess, modifications to sheeter routine
+#  8.0   19/02/09   KB      Added logic for Palletize Turnup
+#  9.0   20/02/09   GVG     Make ts_wound on sheeting splices records different for each unit
+#  10.0  23/02/09   GVG     Only rebuild acs genealogy if the unit has been consumed previously
+#  11.0  24/02/09   GVG     Removed unit_factor field from length calculations on splices table
+#  12.0  07/04/09   GVG     If parent is consumed without turning up children, insert one slab record to acs_genealogy
+#  13.0  04/14/09   PKC	    Added calls for std unit costs
+#  14.0  05/05/09   NJN     Changed acs_log_invent_hist to acs_log_inv_hist
+#  15.0  05/28/09   GVG     Update avg_cost_per_unit on unbeater
+#  16.0  06/04/09   BRN     For turnup, add record into the acs_cost_trans_log to trigger the calculation of the unit std cost
+#  17.0  08/14/09   BRN	    Replace MMMprod with MMMplan for acs_unit_route, acs_cost
+#  18.0  08/24/09   BRN	    Add the LeadTime to the table acs_cost
+#  19.0  09/07/09   BRN	    Add the logic to update the Warehouse time per units
+#  20.0  10/11/09   BRN	    Fix some issues with the acs_type_code not set
+#  21.0  10/20/09   BRN	    Fix wrong area_net calculation for the sheets
+#  22.0  10/29/09   GVG     UC 18: Finishing material cost
+#  23.0  11/06/09   GVG     Splice time needs to be same as wound time
+#  24.0  01/21/10   BRN     Add cons_mmm into acs_cost
+#  25.0  01/25/10   GVG     Reopen cost closure flag when units are returned
+#  26.0 23-Mar-10   BRN     Implement the AvgCostPerTon
+#  27.0 16-Sep-10   PHH     Added select * from acs_cost in NO * ExECUTE 
+#  28.0 01-Oct-10   BRN     Initiate timestamp in  * * * 
+#  29.0 01-Oct-10   BRN     Add missing select in  NO * EXECUTE
+#  30.0 23-Nov-10   BRN     Use the variable FINMATL_COST_TYPE for the finishing cost
+#  31.0 24-Nov-10   PHH     Manage Bundle BUNDLE and UNBUNDLE Action code
+#=============================================================================================
+DEFINE USEMETRIC ENV;
+DEFINE USER ENV;
+DEFINE stop_search long;
+DEFINE used_length long;
+DEFINE FIBERMGT ENV;
+DEFINE length_begin long;
+DEFINE time_spliced long;
+DEFINE new_cost double;
+DEFINE new_active_wgt double;
+DEFINE TonsFactor 	long;
+DEFINE ts_adj LONG ;
+DEFINE AVG_COST_USED ENV ;
+DEFINE LOGLEADONLY  ENV;
+#============================================================================
+# ERROR RULE, DO EVERY TIME AN ERROR OCCURS
+#============================================================================
+MX * ER 
+	echo "Rule error";
+#
+NO * EXECUTE
+#       This rule is here so MxUpdate see's the types of the
+#       fields being inserted. It will never be executed.
+	select * from invent;
+      select * from acs_unit_route;
+	select * from acs_log_invent;
+	select * from acs_log_inv_hist;
+	select * from splices;
+	select * from acs_unit_wh_time;
+	select * from acs_cost;
+	select * from acs_cost_trans_log;
+	select * from acs_unit_route_std;
+	select * from raw_matl_invent;
+	select * from raw_matl_trans;
+	select * from acs_product_mill_a;
+
+#============================================================================
+# Start up rules.  Any variable which needs to be initialized ONLY once will
+#	be done here.
+#============================================================================
+MX * ST 
+	echo "MxUpdate Started for acs_log_invent";
+#
+#============================================================================
+# COMMON RULE, DO EVERY TIME
+#============================================================================
+* * *
+
+# 28
+	let timestamp = 0;
+
+	echo $mx_station, $mx_action_code, $mx_station_id;
+
+	if  ($USEMETRIC = "Y") then
+		let LengthToWidthFactor = 100;
+	      let TonsFactor = 1000;
+	else
+		let LengthToWidthFactor = 12;
+	      let TonsFactor = 2000;
+	end if
+
+# Rev 20
+	let acs_type_code = $type_code;
+
+# Save the processed record into the history when it has been used.
+	if ($mx_station = "WINDER"	and	$mx_action_code = "TURNUP")
+	or (						$mx_action_code = "UNTURNUP")
+	or (						$mx_action_code = "BUNDLE")
+	or (						$mx_action_code = "UNBUNDLE")
+	or ($mx_station = "WRAPPER"	and	$mx_action_code = "ACCEPT")
+	or ($mx_station = "BAYTRANS"	and	$mx_action_code = "TRANSAFTER")
+	or (						$mx_action_code = "CONSUME")
+	or ($mx_station = "VEHICLERET" and	$mx_action_code = "STATAFTER")
+	or ($mx_station = "SHIPPING"	and	$mx_action_code = "SHIPPED")
+	or ($mx_station = "INPROCESS"	and	$mx_action_code = "PALLETIZE")
+	or ($mx_station = "FINISH"	and	$mx_action_code = "PALLETIZE")
+		then
+		call ACSInsertLogInventHist();	
+	end if
+#
+
+################ Turnup of a unit ################################################################
+WINDER * TURNUP 
+
+	let ts_transaction = $ts_wound;
+
+	let wgt_net = $wgt_est;
+	let area_net = (($width_act / $LengthToWidthFactor) * $length_lineal ) / 1000 ;
+
+# Get the machine of the run
+	let mill_id_plan = $mill_id;
+	let mach_type_plan = $machine_type;
+	let mach_id_plan = $machine_id;
+
+	call ACSInsertUnitRoute();
+	call ACSInsertCostClosure();
+	call ACSInsertStdRouteUnit();
+	call ACSInsertTransLog();
+
+REWINDER * TURNUP
+	
+	let ts_transaction = $ts_wound;
+
+	let wgt_net = $wgt_est;
+	let area_net = (($width_act / $LengthToWidthFactor) * $length_lineal ) / 1000 ;
+
+# Get the machine of the run
+	let mill_id_plan = $mill_id;
+	let mach_type_plan = $machine_type;
+	let mach_id_plan = $machine_id;
+
+	call ACSInsertUnitRoute();
+	call ACSInsertCostClosure();
+	call ACSInsertStdRouteUnit();
+	call ACSInsertTransLog();
+
+################ Unturnup of a Unit ################################################################
+* * UNTURNUP
+
+	call ACSDeleteUnitRouteAll();
+	call ACSDeleteCostClosure();
+	call ACSDeleteStdRouteUnit();
+	call ACSInsertTransLog();
+
+################ Sheeter Production Inprocess #######################################################
+INPROCESS * PALLETIZE
+	let ts_transaction = $ts_wound;
+	let wgt_net = $wgt_est;
+	let area_net = (($width_act / $LengthToWidthFactor) * $length_lineal ) / 1000 ;
+	let mill_id_plan = $mill_id;
+	let mach_type_plan = $machine_type;
+	let mach_id_plan = $machine_id;
+
+	call ACSInsertUnitRoute();
+	call ACSInsertCostClosure();
+	call ACSInsertStdRouteUnit();
+	call ACSInsertTransLog();
+
+################ Sheeter Production Inprocess #######################################################
+FINISH * PALLETIZE
+	let ts_transaction = $ts_wound;
+	let wgt_net = $wgt_est;
+	let area_net = (($width_act / $LengthToWidthFactor) * $length_lineal ) / 1000 ;
+	let mill_id_plan = $mill_id;
+	let mach_type_plan = $machine_type;
+	let mach_id_plan = $machine_id;
+
+	call ACSInsertUnitRoute();
+	call ACSInsertCostClosure();
+	call ACSInsertStdRouteUnit();
+	call ACSInsertTransLog();
+#22
+	IF ($class = "U" or $class = "W") THEN
+	call ACSBuildFinMatlCost();
+	END IF
+################ Wrap of a unit ################################################################
+WRAPPER * ACCEPT 
+
+	let ts_transaction = $ts_scaled;
+
+	let wgt_net = $wgt_scaled;
+	let area_net = (($width_act / $LengthToWidthFactor) * $length_lineal ) / 1000 ;
+# Get the machine
+	let mill_id_plan = " ";
+	let mach_type_plan = " ";
+	let mach_id_plan = " ";
+	let run_num = 0;
+	let pat_num = 0;
+	let seconds_on_machine = 0;
+
+	call ACSInsertUnitRoute();
+	
+	let ts_begin = $ts_transaction;
+	call ACSInitWhseTime();
+#22
+	IF ($class = "U" or $class = "W") THEN
+	call ACSBuildFinMatlCost();
+	END IF
+################Pallet Scale ##################################################################################
+PALSCALE * ACCEPT
+	let ts_transaction = $ts_scaled;
+	let wgt_net = $wgt_scaled;
+	let area_net = (($width_act / $LengthToWidthFactor) * $length_lineal ) / 1000 ;
+# Get the machine
+	let mill_id_plan = " ";
+	let mach_type_plan = " ";
+	let mach_id_plan = " ";
+	let run_num = 0;
+	let pat_num = 0;
+	let seconds_on_machine = 0;
+
+	call ACSInsertUnitRoute();
+
+	let ts_begin = $ts_transaction;
+	call ACSInitWhseTime();
+#22
+	IF ($class = "W" or $class = "U") THEN
+	call ACSBuildFinMatlCost();
+	END IF
+################ Move of a unit in a warehouse ################################################################
+BAYTRANS * TRANSAFTER
+
+	let ts_transaction = $mx_timestamp;
+
+	let wgt_net = $wgt_scaled;
+	let area_net = (($width_act / $LengthToWidthFactor) * $length_lineal ) / 1000 ;
+# Set the prod machine
+	let mill_id_plan = " ";
+	let mach_type_plan = " ";
+	let mach_id_plan = " ";
+	let run_num = 0;
+	let pat_num = 0;
+	let seconds_on_machine = 0;
+# Get the machine from the acs_warehouse_view
+	select mill_id, machine_type, machine_id
+		from acs_warehouse_view
+		where warehouse_id = $warehouse_id;
+	if ($machine_id = " " or $machine_id ="") then
+	else
+		call ACSInsertUnitRoute();
+	end if
+
+	let ts_begin = $ts_transaction;
+	call ACSInitWhseTime();
+
+PALTBEATER * MODIFY
+
+	call ACSInsertTransLog();
+	call BeaterAcsGenealogyPerc();
+
+	let ts_end = $mx_timestamp;
+	call ACSCloseWhseTime();
+
+PALTUNBEAT * MODIFY
+
+	let save_warehouse_id = $warehouse_id;
+	let parent1 = $unit_id;
+	call ACSInsertTransLog();
+	call DelACSGenealogyPerc();
+	call RemAcsCost();
+	IF ($FIBERMGT="Y") THEN
+		call DecRawMatlInvent();
+		let new_cost = $cost;
+		let new_active_wgt = $active_wgt;
+		call UpdateProductAvgCost();
+	END IF
+
+	let warehouse_id = $save_warehouse_id;
+	let ts_end = $mx_timestamp;
+	call ACSUncloseWhseTime();
+
+ROLLBEATER * MODIFY
+
+	call ACSInsertTransLog();
+	call BeaterAcsGenealogyPerc();
+
+	let ts_end = $mx_timestamp;
+	call ACSCloseWhseTime();
+
+ROLLUNBEAT * MODIFY
+
+	let save_warehouse_id = $warehouse_id;
+	let parent1 = $unit_id;
+	call ACSInsertTransLog();
+	call DelACSGenealogyPerc();
+	call RemAcsCost();
+	IF ($FIBERMGT="Y") THEN
+		call DecRawMatlInvent();
+		let new_cost = $cost;
+		let new_active_wgt = $active_wgt;
+		call UpdateProductAvgCost();
+	END IF
+
+	let warehouse_id = $save_warehouse_id;
+	let ts_end = $mx_timestamp;
+	call ACSUncloseWhseTime();
+
+* * SLABOFF
+
+	IF ($class = "D") THEN
+		call ACSInsertTransLog();
+		Call ACSGenealogyPerc();
+	END IF
+
+* * CONSUME
+	call ACSInsertTransLog();
+
+	select splices.machine_id x
+		from splices, invent
+		where splices.parent_id = $unit_id
+		and splices.unit_id = invent.unit_id;
+
+	IF ($success = 1) THEN
+		Call ACSGenealogyPerc();
+	ELSE
+		call BeaterAcsGenealogyPerc();
+	END IF
+
+	let ts_end = $mx_timestamp;
+	call ACSCloseWhseTime();
+
+	
+
+
+#3
+* * UNCONSUME
+	let parent1 = $unit_id;
+	call ACSInsertTransLog();
+	call DelACSGenealogyPerc();
+
+	let ts_end = $mx_timestamp;
+	call ACSUncloseWhseTime();
+
+* * UNBUNDLE
+	if ( ($LOGLEADONLY = "Y") and ($roll_id_lead = $unit_id) ) then 
+		echo Call ACSUnBundle() for $unit_id ;
+		Call ACSUnBundle() ;
+	end if 
+
+
+* * BUNDLE
+	if ($LOGLEADONLY = "Y") then 
+		Call ACSBundle() ;
+	end if 
+
+################ Ship a load ################################################################
+SHIPPING * SHIPPED
+
+	let ts_end = $ts_shipped;
+	call ACSCloseWhseTime();
+
+# Create the acs_cost if it has not been already created
+	let serial_prefix = "T-",$load_id,"%";
+	select cost_id
+		from acs_cost
+		where load_id = $load_id
+		and cost_id like $serial_prefix
+		and cost_driver_id = 'LOAD';
+	if ($success = 0) then
+# Get a cost id number
+		let serial_key_id = "SHIPMENT";
+		let serial_mill_id = $mill_id;
+		let serial_informat = "&&&&&&&&";
+		let serial_prefix = "T-",$load_id,"-";
+		call GET_COST_ID();
+		let cost_id =$serial_cost_id;
+
+# Set the values for the cost record
+		let cost_id_group = " ";
+		let cost_type = "T";
+		let mill_id = $mill_id;
+		let machine_type = " ";
+		let machine_id = " ";
+		let warehouse_id = " ";
+		let whse_zone_id = " ";
+		let bay_id = " ";
+		let ts_begin = 0;
+		let ts_end = 0;
+		let mill_id_plan = " ";
+		let mach_type_plan = " ";
+		let mach_id_plan = " ";
+		let run_num = 0;
+		let pat_num = 0;
+		let unit_id = " ";
+		let type_code = " ";
+		let product_code_id = " ";
+		let raw_matl_grp_id = " ";
+		let raw_matl_id = " ";
+		let fin_matl_grp_id = " ";
+		let fin_matl_id = " ";
+		let quantity = 0;
+		let unit_meas = " ";
+		select amt_frgt
+			from load_mast
+			where load_id = $load_id;
+		let cost = $amt_frgt;
+		select string_value 
+			from constants
+			where key_value ='MILL_CURRENCY';
+		let currency_id = $string_value;
+		let acct_seg_id = " ";
+		let order_id = " ";
+		let item_num = 0;
+		let load_id = $load_id;
+		let cost_driver_id = "LOAD";
+		let cost_type_id = " ";
+		let allocated_flag = "N";
+		let ts_allocated = 0;
+		let reason_id = " ";
+		let user_id = $USER;
+		let appl_name = $mx_station,"-acs_log_invent";
+		let closure_flag = "N";
+		let ts_closed = 0;
+		let ts_modified = 0;
+		let ts_create = {time};
+		let sec_lead_time = 0;
+
+# rev 24.0
+		let cons_mill_id = " ";
+		let cons_mach_type = " ";
+		let cons_mach_id = " ";
+
+		call INSERT_ACS_COST();
+
+	end if
+
+
+################ Return a load ################################################################
+VEHICLERET * STATAFTER
+#	Delete the acs_cost if it has been created
+	let serial_prefix = "T-",$load_id,"%";
+	select cost_id, closure_flag
+		from acs_cost
+		where load_id = $load_id
+		and cost_id like $serial_prefix
+		and cost_driver_id = 'LOAD';
+	if ($success = 1) then
+		if ($closure_flag = "N") then
+			Delete from acs_cost
+				where cost_id = $cost_id;
+		 	Delete from acs_direct_cost
+				where cost_id = $cost_id;
+		else
+# Abnormal case - set the reason			
+			Update acs_cost
+				set reason_id = 'ABN_LOAD'
+				where cost_id = $cost_id;
+		end if
+	end if
+
+	let ts_begin = $mx_timestamp;
+	call ACSInitWhseTime();
+
+	call reopen_cost_closure();
+
+
+#5 - start
+PALLETIZE * TURNUPON
+
+#	let length_end = $length_lineal;
+
+#	let time_spliced = $mx_timestamp;
+
+#	select ts_create closest_time, count(*) child_cnt
+#		from prod_geneology
+#		where parent_id = $unit_id
+#		and ts_create <= $mx_timestamp
+#		group by ts_create
+#		order by ts_create desc;
+
+#	foreach
+
+#		select unit_id child_unit
+#			from prod_geneology
+#			where parent_id = $unit_id
+#			and ts_create = $closest_time;
+
+#		call build_child_splices_run();
+	
+#	end foreach
+
+	select unit_id x
+		from invent_audit
+		where unit_id = $unit_id
+		and mx_station = 'BSMOUNTFSP'
+		and mx_action_code = 'CONSUME'
+		and mx_timestamp <= $mx_timestamp;
+
+	let audit_success = $success;
+
+	IF ($audit_success = 1) THEN
+		let station = "BSMOUNTFSP";
+		let action_code = "CONSUME";
+		call rebuild_acs_genealogy();
+	END IF
+
+#5 - end
+
+SEALER * TURNUPON
+
+	let length_end = $length_lineal;
+
+	let time_spliced = $mx_timestamp;
+
+	select ts_create closest_time, count(*) child_cnt
+		from prod_geneology
+		where parent_id = $unit_id
+		and ts_create <= $mx_timestamp
+		group by ts_create
+		order by ts_create desc;
+
+
+	foreach
+
+		select unit_id child_unit
+			from prod_geneology
+			where parent_id = $unit_id
+			and ts_create = $closest_time;
+
+		call build_child_splices_norun();
+	
+	end foreach
+
+		select unit_id x
+			from invent_audit
+			where mx_action_code = 'SLABOFF'
+			and unit_id = $unit_id
+			and mx_station = 'SEALER'
+			and mx_timestamp <= $mx_timestamp
+			and class = 'D';
+
+		let audit_success = $success;
+
+		IF ($audit_success = 1) THEN
+			let station = "BSMOUNTFSP";
+			let action_code = "CONSUME";
+			call rebuild_acs_genealogy();
+		END IF
+
+HOLEPUNCH * TURNUPON
+
+	let length_end = $length_lineal;
+	let time_spliced = $mx_timestamp;
+
+	select ts_create closest_time, count(*) child_cnt
+		from prod_geneology
+		where parent_id = $unit_id
+		and ts_create <= $mx_timestamp
+		group by ts_create
+		order by ts_create desc;
+
+
+	foreach
+
+		select unit_id child_unit
+			from prod_geneology
+			where parent_id = $unit_id
+			and ts_create = $closest_time;
+
+		call build_child_splices_norun();
+	
+	end foreach
+
+		select unit_id x
+			from invent_audit
+			where mx_action_code = 'SLABOFF'
+			and unit_id = $unit_id
+			and mx_station = 'HOLEPUNCH'
+			and mx_timestamp <= $mx_timestamp
+			and class = 'D';
+
+		let audit_success = $success;
+
+		IF ($audit_success = 1) THEN
+		
+			let station = "BSMOUNTFSP";
+			let action_code = "CONSUME";
+			call rebuild_acs_genealogy();
+		end if	
+
+PACKAGER * TURNUPON
+
+	let length_end = $length_lineal;
+	let time_spliced = $mx_timestamp;
+	select ts_create closest_time, count(*) child_cnt
+		from prod_geneology
+		where parent_id = $unit_id
+		and ts_create <= $mx_timestamp
+		group by ts_create
+		order by ts_create desc;
+
+
+	foreach
+
+		select unit_id child_unit
+			from prod_geneology
+			where parent_id = $unit_id
+			and ts_create = $closest_time;
+
+		call build_child_splices_norun();
+	
+	end foreach
+
+		select unit_id x
+			from invent_audit
+			where mx_action_code = 'SLABOFF'
+			and unit_id = $unit_id
+			and mx_station = 'PACKAGER'
+			and mx_timestamp <= $mx_timestamp
+			and class = 'D';
+
+		let audit_success = $success;
+
+		IF ($audit_success = 1) THEN
+
+		let station = "BSMOUNTFSP";
+		let action_code = "CONSUME";
+		call rebuild_acs_genealogy();
+		END IF
+
+SORTER * PALLETIZE
+
+	let length_end = $length_lineal;
+	let tu_unit = $unit_id;
+	let time_spliced = $mx_timestamp;
+	foreach
+
+		select parent_id unit_id, ts_create closest_time
+			from prod_geneology
+			where unit_id = $tu_unit
+			and ts_create <= $mx_timestamp
+			order by ts_create desc;
+
+		select count(*) child_cnt
+			from prod_geneology
+			where parent_id = $unit_id
+			and ts_create = $closest_time;
+
+		foreach
+
+			select unit_id child_unit
+				from prod_geneology
+				where parent_id = $unit_id
+				and ts_create = $closest_time;
+
+			call build_child_splices_norun_sorter();
+
+		end foreach
+
+		select unit_id x
+			from invent_audit
+			where mx_action_code = 'SLABOFF'
+			and unit_id = $unit_id
+			and mx_station = 'SORTER'
+			and mx_timestamp <= $mx_timestamp
+			and class = 'D';
+
+
+	let audit_success = $success;
+
+	IF ($audit_success = 1) THEN
+		let class = "D";
+		let station = "TRIMMER";
+		let action_code = "SLABOFF";
+		call rebuild_acs_genealogy();
+	END IF
+
+
+
+	end foreach
+
+TRIMMER * PALLETIZE
+
+	let length_end = $length_lineal;
+	let tu_unit = $unit_id;
+	let time_spliced = $mx_timestamp;
+	foreach
+
+		select parent_id unit_id, ts_create closest_time
+			from prod_geneology
+			where unit_id = $tu_unit
+			and ts_create <= $mx_timestamp
+			order by ts_create desc;
+
+		select count(*) child_cnt
+			from prod_geneology
+			where parent_id = $unit_id
+			and ts_create = $closest_time;
+
+		foreach
+
+			select unit_id child_unit
+				from prod_geneology
+				where parent_id = $unit_id
+				and ts_create = $closest_time;
+
+			call build_child_splices_run_trimmer();
+		end foreach
+
+
+		select unit_id x
+			from invent_audit
+			where mx_action_code = 'SLABOFF'
+			and unit_id = $unit_id
+			and mx_station = 'TRIMMER'
+			and mx_timestamp <= $mx_timestamp
+			and class = 'D';
+
+
+	let audit_success = $success;
+
+	IF ($audit_success = 1) THEN
+		let class = "D";
+		let station= "TRIMMER";
+		let action_code = "SLABOFF";
+		call rebuild_acs_genealogy();
+	END IF
+
+	end foreach
+
+################ Load Receive #################################################################################
+LOAD * RECEIVEAFT
+	let ts_begin = $ts_warehoused;
+	call ACSInitWhseTime();
+
+################ Load Receive #################################################################################
+INVENTRET * STATAFTER
+	let ts_begin = $mx_timestamp;
+	call ACSInitWhseTime();
+
+	call reopen_cost_closure();
+
+################ Manual creation of a unit #################################################################################
+* * ADD
+	let ts_begin = $mx_timestamp;
+	call ACSInitWhseTime();
+
+################ Manual modification of a unit #################################################################################
+* * MODAFTER
+	let ts_begin = $mx_timestamp;
+	call ACSInitWhseTime();
+
+################ Manual remove of a unit #################################################################################
+* * DELETE
+	let ts_end = $mx_timestamp;
+	call ACSCloseWhseTime();
+
+SUBROUTINE build_child_splices_run()
+
+#23		select run_num unit_run, pat_num unit_pat, machine_id unit_machid,
+		select run_num unit_run, pat_num unit_pat, machine_id unit_machid, ts_wound time_spliced,
+			machine_type unit_machtype, mill_id unit_mill, length_lineal unit_length, width_act
+			from invent
+			where unit_id = $child_unit;
+
+		select count(*) num_parents
+			from prod_geneology
+			where unit_id = $child_unit;
+
+		IF ($pos_cnt = 0) THEN
+			let pos_cnt = 1;
+		END IF
+
+		let used_length = ($unit_length / $num_parents);
+
+		let length_begin = $length_end + $used_length;
+
+#23		let time_spliced = $time_spliced + 1;
+
+		select unit_id x
+			from splices
+			where unit_id = $child_unit
+			and ts_wound = $time_spliced
+			and length_begin = $length_begin;
+
+		IF ($success = 0) THEN
+
+			call insert_splices();			
+
+		ELSE
+			let stop_search = 0;
+			while ($stop_search = 0) do
+
+				let length_begin = $length_begin - 1;
+				let length_end = $length_end - 1;
+
+				select unit_id x
+						from splices
+						where unit_id = $child_unit
+						and ts_wound = $time_spliced
+						and length_begin = $length_begin;
+
+				IF ($success = 0) THEN
+					let stop_search = 1;
+				END IF
+			end while
+
+			call insert_splices();
+
+		END IF
+
+END SUBROUTINE
+
+SUBROUTINE build_child_splices_run_trimmer()
+
+		select run_num unit_run, pat_num unit_pat, machine_id unit_machid, 
+			machine_type unit_machtype, mill_id unit_mill, length_lineal unit_length, width_act, ts_wound time_spliced
+			from invent
+			where unit_id = $child_unit;
+
+		select count(*) num_parents
+			from prod_geneology
+			where unit_id = $child_unit;
+
+		let used_length = ($unit_length / $num_parents);
+
+		let length_begin = $length_end + $used_length;
+
+		select unit_id x
+			from splices
+			where unit_id = $child_unit
+			and ts_wound = $time_spliced
+			and length_begin = $length_begin;
+
+		IF ($success = 0) THEN
+			call insert_splices();			
+		END IF
+END SUBROUTINE
+
+SUBROUTINE reopen_cost_closure()
+
+	select closure_flag acs_close_flag
+		from acs_cost_closure
+		where unit_id = $unit_id
+		and type_code = $type_code;
+
+	IF ($acs_close_flag = "Y") THEN
+
+		update acs_cost_closure
+			set closure_flag = 'N',
+			ts_closed = 0,
+			ts_modified = $mx_timestamp
+			where unit_id = $unit_id
+			and type_code = $type_code;
+
+		call ACSInsertTransLog();
+
+	END IF
+
+END SUBROUTINE
+
+SUBROUTINE build_child_splices_norun()
+
+		select length_lineal unit_length,width_act, ts_wound time_spliced
+			from invent
+			where unit_id = $child_unit;
+
+		select count(*) num_parents
+			from prod_geneology
+			where unit_id = $child_unit;
+
+		let used_length = ($unit_length / $num_parents);
+
+		let length_begin = $length_end + $used_length;
+
+#		let time_spliced = $time_spliced + 1;
+
+		select unit_id x
+			from splices
+			where unit_id = $child_unit
+			and ts_wound = $time_spliced
+			and length_begin = $length_begin;
+
+		IF ($success = 0) THEN
+
+			call insert_splices();			
+
+		ELSE
+			let stop_search = 0;
+			while ($stop_search = 0) do
+
+				let length_begin = $length_begin - 1;
+				let length_end = $length_end - 1;
+
+				select unit_id x
+						from splices
+						where unit_id = $child_unit
+						and ts_wound = $time_spliced
+						and length_begin = $length_begin;
+
+				IF ($success = 0) THEN
+					let stop_search = 1;
+				END IF
+			end while
+
+			call insert_splices();
+
+		END IF
+
+END SUBROUTINE
+
+SUBROUTINE build_child_splices_norun_sorter()
+
+		select length_lineal unit_length,width_act, ts_wound time_spliced
+			from invent
+			where unit_id = $child_unit;
+
+		select count(*) num_parents
+			from prod_geneology
+			where unit_id = $child_unit;
+
+		let used_length = ($unit_length / $num_parents);
+
+		let length_begin = $length_end + $used_length;
+
+		select unit_id x
+			from splices
+			where unit_id = $child_unit
+			and ts_wound = $time_spliced
+			and length_begin = $length_begin;
+
+		IF ($success = 0) THEN
+
+			call insert_splices();			
+
+		END IF
+
+END SUBROUTINE
+
+SUBROUTINE rebuild_acs_genealogy()
+
+	let parent1 = $unit_id;
+	call DelACSGenealogyPerc();
+
+	call ACSInsertLogInvent();
+
+END SUBROUTINE
+
+SUBROUTINE insert_splices()
+
+			insert into splices (unit_id, ts_wound, length_slab_end, length_slab_begin, width_end, 
+				width_begin, turned_flag, parent_id, machine_id, length_end, 
+				length_begin, machine_type, edge_of_sheet)
+			values ($child_unit, $time_spliced, 0, 0, $width_act, 0, 'N',$unit_id,$machine_id, $length_end, $length_begin, $machine_type, 0);
+
+END SUBROUTINE
+
+# 19.0
+SUBROUTINE ACSInitWhseTime()
+
+	select count(*) cnt
+		from acs_unit_wh_time
+		where unit_id = $unit_id
+		and ts_end = 0
+		and warehouse_id = $warehouse_id;
+	if ($cnt = 0) then
+# Close the existing open record
+		let ts_end = $ts_begin;
+		call ACSCloseWhseTime();
+# Init a record for the new warehouse
+		call InsertACSUnitWhTime();
+	else
+# keep the record going on since there is no warehouse change
+	end if
+
+END SUBROUTINE
+
+SUBROUTINE ACSCloseWhseTime()
+
+	select  count(*) cnt
+		from acs_unit_wh_time
+		where unit_id = $unit_id
+		and ts_end = 0;
+	if ($cnt > 0) then
+		let time = {time};
+		update acs_unit_wh_time
+			set ts_end = $ts_end, ts_modified = $time
+			where unit_id = $unit_id
+			and ts_end = 0;
+	end if
+
+END SUBROUTINE
+
+SUBROUTINE ACSUncloseWhseTime()
+
+	select ts_begin
+		from acs_unit_wh_time
+		where unit_id = $unit_id
+		and warehouse_id = $warehouse_id
+		order by ts_end desc;
+	if ($success = 1) then
+		let time = {time};
+		update acs_unit_wh_time
+			set ts_end = 0, ts_modified = $time
+			where unit_id = $unit_id
+			and warehouse_id = $warehouse_id
+			and ts_begin = $ts_begin;
+	else
+# Don't do anything, this is a bug
+	end if
+	
+
+END SUBROUTINE
+
+SUBROUTINE InsertACSUnitWhTime()
+
+	let time = {time};
+	insert into acs_unit_wh_time (unit_id, warehouse_id, ts_begin, ts_end, ts_modified, ts_create)
+		values ($unit_id, $warehouse_id, $ts_begin, 0, 0, $time);
+
+END SUBROUTINE
+
+SUBROUTINE ACSBuildFinMatlCost()
+		let serial_key_id = "FINMATL";
+		let serial_mill_id = $mill_id;
+		let serial_informat = "&&&&&&&&";
+		let serial_prefix = "FM-M-",$type_code:"U","-";
+	
+		call GET_COST_ID();
+		
+		let serial_cost_id =$serial_cost_id;
+		let serial_found = $serial_found;
+
+		let cost_type 		= "F";
+
+# Rev 30
+		select string_value cost_type_id
+		  from constants
+		 where key_value = 'FINMATL_COST_TYPE';
+
+#		select acct_seg_id, cost_type_id
+# Take the first finishing material account segment ...
+		select acct_seg_id 
+			from acs_acct_seg
+			where cost_type = $cost_type
+			and cost_type_id = $cost_type_id;
+
+		select cost_group_id cons_grp_id
+			from acs_cost_type
+			where cost_type_id = $cost_type_id;
+
+		if ($acct_seg_id = "") then
+			let acct_seg_id = " ";
+		end if
+		if ($cost_type_id = "") then
+			let cost_type_id = " ";
+		end if
+		if ($cons_grp_id = "") then
+			let cons_grp_id = " ";
+		end if
+
+## Set values for insert into acs_cost
+
+		select cost 
+			from article
+			where article_id = $article_id
+			and revision_num = $revision_num;
+		
+			let cost_id 		= $serial_cost_id;
+			let cost_id_group 	= $cons_grp_id;
+			let mill_id 		= $mill_id;
+			let machine_type 	= $machine_type;
+			let machine_id 		= $machine_id;
+			let warehouse_id 	= $warehouse_id;
+			let whse_zone_id 	= $whse_zone_id;
+			let bay_id 		= $bay_id;
+			let ts_begin 		= $ts_begin; 	
+			let ts_end 		= $ts_end; 
+			let mill_id_plan 	= $mill_id_plan;
+			let mach_type_plan = $mach_type_plan;  
+			let mach_id_plan 	= $mach_id_plan;
+			let run_num 		= $run_num;  
+			let pat_num 		= $pat_num;
+			let unit_id 		= $unit_id;
+			let type_code 		= $type_code;
+			let product_code_id 	= " ";
+			let raw_matl_grp_id 	= " "; 
+			let raw_matl_id 	= " ";	  
+			let fin_matl_grp_id 	= " ";
+			let fin_matl_id 	= " "; 
+			let quantity 		= $wgt_scaled - $wgt_tare;
+			IF ($USEMETRIC = "Y") THEN
+			let unit_meas 		= "KGS";
+			ELSE
+			let unit_meas = "LBS";
+			END IF
+			let cost 		= $cost;
+			select string_value 
+				from constants
+				where key_value ='MILL_CURRENCY';
+			let currency_id = $string_value;
+			let acct_seg_id 	= $acct_seg_id;
+			let order_id 		= $order_id;
+			let item_num 		= $item_num;
+			let load_id 		= $load_id;
+			let cost_driver_id	= "UNIT";
+			let cost_type_id 	=$cost_type_id;
+			let allocated_flag 	= "N";
+			let ts_allocated 	= 0;
+			let reason_id 		= " ";
+			let user_id 		= $USER;
+			let appl_name 		= "FINMATL";
+			let closure_flag 	= "N";
+			let ts_closed 		= 0;
+			let ts_modified 	= 0;
+			let ts_create 		= {time};
+			let sec_lead_time = 0;		
+		
+			call INSERT_ACS_COST();
+			
+
+END SUBROUTINE
+
+#===============================================================================
+# Included Routines
+#===============================================================================
+	INCLUDE "acs_subroutines";
+	INCLUDE "acs_unit_route";
+	INCLUDE "acs_genealogy_perc";
+	INCLUDE "acs_unit_route_std";
+	INCLUDE "acs_bundling";
+
+
